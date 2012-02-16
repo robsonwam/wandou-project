@@ -14,7 +14,7 @@ import cn.edu.thu.log.test.testUI;
  * @author Meng
  * 
  */
-public class LogContent {
+public class LogContentOld {
 	/** content of logHead in one logRecord */
 	String logHeadContent;
 	/** content of logBody logRecord */
@@ -23,7 +23,6 @@ public class LogContent {
 	ArrayList<String> cateList;
 	/** Log's configuration class */
 	LogConfig logConfig;
-	ArrayList<Log> logList;
 
 	/**
 	 * constructor
@@ -31,9 +30,8 @@ public class LogContent {
 	 * @param logConfig
 	 *            Log's configuration
 	 */
-	public LogContent(LogConfig logConfig) {
+	public LogContentOld(LogConfig logConfig) {
 		this.logConfig = logConfig;
-		logList=new ArrayList<Log>();
 	}
 
 	/**
@@ -108,7 +106,6 @@ public class LogContent {
 		try {
 			reader = new BufferedReader(new FileReader(file));
 			while ((record = reader.readLine()) != null) {
-				Log log=new Log();
 
 				// String temprecord = record.concat(logBodyTokenizer);
 				String temprecord = record;
@@ -278,10 +275,7 @@ public class LogContent {
 					params.add(insertIndex, null);
 				}
 				System.out.print("\n params add:" + params);
-			//	logUI.addLog(params);
-				log.setLogContent(params);
-				System.out.print("\nadd log:"+log.getLogContent());
-				logList.add(log);
+				logUI.addLog(params);
 
 			}
 			reader.close();
@@ -311,6 +305,6 @@ public class LogContent {
 			// }
 
 		
-		return logList;
+		return null;
 	}
 }

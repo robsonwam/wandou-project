@@ -24,6 +24,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
+import cn.edu.thu.log.read.Log;
 import cn.edu.thu.log.web.service.impl.LogReadServiceImpl;
 
 /**
@@ -759,6 +760,19 @@ public class testUI extends JFrame {
 			peopleField.setText(book.people);
 		}
 
+	}
+
+	public void setContent(ArrayList<Log> logList) {
+		// TODO Auto-generated method stub
+		//System.out.print("\nthe size of logList in UI:"+logList.size());
+		ArrayList<Log> templogList=logList;
+		for(int i=0;i<templogList.size();i++)
+		{
+			Log log=templogList.get(i);
+			System.out.print("\nog content at UI"+log.getLogContent().toArray());
+			tableModel.addRow(log.getLogContent().toArray());
+		}
+		
 	}
 
 //	public int ifMerge() {

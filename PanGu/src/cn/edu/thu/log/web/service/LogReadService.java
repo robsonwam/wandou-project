@@ -3,6 +3,7 @@ package cn.edu.thu.log.web.service;
 import java.io.File;
 import java.util.ArrayList;
 
+import cn.edu.thu.log.read.Log;
 import cn.edu.thu.log.test.testUI;
 /**
  * Interface of log reading service
@@ -17,5 +18,5 @@ public interface LogReadService {
 	 * @param command command
 	 * @return
 	 */
-	public ArrayList<Object> readLog(File file,testUI logUI);
+	public ArrayList<Log> readLog(File file,testUI logUI);
 }

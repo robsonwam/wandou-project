@@ -11,6 +11,10 @@ public class Log {
 	ArrayList<Object> logHeadContent;
 	ArrayList<Object> logBodyContent;
 	ArrayList<Object> logContent;
+	/** fileName */
+	String logPath;
+	/** fileName */
+	String logName;
 
 	/** get and set functions */
 	public ArrayList<String> getLogHeadTagList() {
@@ -59,6 +63,22 @@ public class Log {
 
 	public void setLogContent(ArrayList<Object> logContent) {
 		this.logContent = logContent;
+	}
+
+	public String getLogPath() {
+		return logPath;
+	}
+
+	public void setLogPath(String logPath) {
+		this.logPath = logPath;
+	}
+
+	public String getLogName() {
+		return logName;
+	}
+
+	public void setLogName(String logName) {
+		this.logName = logName;
 	}
 
 }

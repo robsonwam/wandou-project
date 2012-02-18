@@ -11,6 +11,8 @@ import java.sql.Date;
 import java.util.ArrayList;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -63,11 +65,16 @@ public class testUI extends JFrame {
 	JButton addButton;
 	JButton deleteButton;
 	JButton editButton;
+	JButton viewButton;
 	JButton searchButton;
 	JTextField searchField;
+	JCheckBox caseIDBox;
+	JCheckBoxMenuItem[] caseIDList;
 	JButton sortPriceButton;
 	JButton sortDateButton;
+
 	ArrayList<LogHead> bookList;
+	ArrayList<Log> logList;
 	int selectedRow;
 	String mode;
 	/** chosen file */
@@ -75,7 +82,7 @@ public class testUI extends JFrame {
 	String fileName;
 	File chosenfile;
 	File[] chosenfiles;
-	//Service
+	// Service
 	LogReadServiceImpl reader;
 
 	/**
@@ -97,7 +104,7 @@ public class testUI extends JFrame {
 	 * @throws Exception
 	 */
 	private void start() {
-		 reader = new LogReadServiceImpl();
+		reader = new LogReadServiceImpl();
 		// TODO Auto-generated method stub
 
 		// Book tempBook = new Book("1", "gone with wind", "literature",
@@ -198,7 +205,7 @@ public class testUI extends JFrame {
 			homeMenu.add(addFileItem);
 			homeMenu.add(saveAsItem);
 			homeMenu.add(exitItem);
-			
+
 			// 编辑操作菜单
 
 			editMenu = new JMenu("Edit");
@@ -248,7 +255,7 @@ public class testUI extends JFrame {
 			// String[] tempRow={"1","2"};
 			// �����ı��
 			tableModel = new DefaultTableModel(data, columns);
-			
+
 			// tableModel.addRow(tempRow);
 			// tableModel.removeRow(0);
 			// ArrayList<Object> testList=new ArrayList<Object>();
@@ -264,7 +271,8 @@ public class testUI extends JFrame {
 			logTable = new JTable(tableModel);
 			// logTable.setPreferredSize(new Dimension(800,0));
 			// bookTable.setPreferredSize(new Dimension(600,300));
-			//tableModel.
+			// tableModel.
+
 			container.add(new JScrollPane(logTable), BorderLayout.NORTH);
 			// bookList = new ArrayList<Book>();
 		}
@@ -283,7 +291,7 @@ public class testUI extends JFrame {
 				}
 
 			});
-			controlPanel.add(addButton);
+			// controlPanel.add(addButton);
 			deleteButton = new JButton("delete");
 			deleteButton.addActionListener(new ActionListener() {
 
@@ -291,7 +299,8 @@ public class testUI extends JFrame {
 				public void actionPerformed(ActionEvent e) {
 					// TODO Auto-generated method stub
 					int index = logTable.getSelectedRow();
-					deleteBook(index);
+					// deleteBook(index);
+					deleteLog(index);
 				}
 
 			});
@@ -308,7 +317,22 @@ public class testUI extends JFrame {
 				}
 
 			});
-			controlPanel.add(editButton);
+			// controlPanel.add(editButton);
+
+			viewButton = new JButton("view more detailed");
+			viewButton.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					// TODO Auto-generated method stub
+					mode = "view";
+					selectedRow = logTable.getSelectedRow();
+					viewLog(selectedRow);
+				}
+
+			});
+
+			controlPanel.add(viewButton);
 			searchField = new JTextField("");
 			searchField.setPreferredSize(new Dimension(100, 20));
 
@@ -319,7 +343,8 @@ public class testUI extends JFrame {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					// TODO Auto-generated method stub
-					search();
+					// search();
+					searchLog();
 				}
 
 			});
@@ -336,6 +361,13 @@ public class testUI extends JFrame {
 
 			});
 			controlPanel.add(sortPriceButton);
+
+			caseIDBox = new JCheckBox();
+			caseIDList = new JCheckBoxMenuItem[0];
+
+			controlPanel.add(caseIDBox);
+
+			// caseIDBox.add
 			sortDateButton = new JButton("sort by publishDate");
 			sortDateButton.addActionListener(new ActionListener() {
 
@@ -376,11 +408,13 @@ public class testUI extends JFrame {
 
 		// tableModel.addRow(logRecord.toArray());
 
-		System.out.print("\nthe size of the record in table" + logRecord.size());
+		System.out
+				.print("\nthe size of the record in table" + logRecord.size());
 		System.out.print("\n the content add to table:");
-		for(int i=0;i<logRecord.toArray().length;i++)
-		{System.out.print(","+logRecord.toArray()[i]);}
-		
+		for (int i = 0; i < logRecord.toArray().length; i++) {
+			System.out.print("," + logRecord.toArray()[i]);
+		}
+
 		tableModel.addRow(logRecord.toArray());
 		// ArrayList<String> tempList=new ArrayList<String>();
 		// for(int i=0;i<5;i++){
@@ -401,6 +435,13 @@ public class testUI extends JFrame {
 
 	}
 
+	private void emptyTable() {
+		for (int i = tableModel.getRowCount() - 1; i >= 0; i--) {
+			tableModel.removeRow(i);
+			// System.out.print("\nremove row " + i);
+		}
+	}
+
 	/**
 	 * choose to open new file
 	 * 
@@ -418,16 +459,12 @@ public class testUI extends JFrame {
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			// fileName = chooser.getSelectedFile().getName();
 			// filePath = chooser.getSelectedFile().getPath();
-			//chosenfile = chooser.getSelectedFile();
-			//chosenfiles = chosenfiles[0];
+			// chosenfile = chooser.getSelectedFile();
+			// chosenfiles = chosenfiles[0];
 			chosenfile = chooser.getSelectedFile();
-			for (int i = tableModel.getRowCount() - 1; i >= 0; i--) {
-				tableModel.removeRow(i);
-				System.out.print("\nremove row " + i);
-			}
+			emptyTable();
 			try {
 
-				
 				reader.readLog(chosenfile, this);
 
 				// ArrayList<Object> test=new ArrayList<Object>();
@@ -438,7 +475,18 @@ public class testUI extends JFrame {
 				e.printStackTrace();
 			}
 		}
+		updateCaseIDList();
 
+	}
+
+	private void updateCaseIDList() {
+		caseIDList = new JCheckBoxMenuItem[logList.get(0).getLogTagList()
+				.size()];
+		for (int i = 0; i < caseIDList.length; i++) {
+			caseIDList[i] = new JCheckBoxMenuItem(logList.get(0)
+					.getLogTagList().get(i));
+			caseIDBox.add(caseIDList[i]);
+		}
 	}
 
 	/**
@@ -453,20 +501,20 @@ public class testUI extends JFrame {
 		// chooser.setFileFilter(filter);
 		chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 		chooser.setMultiSelectionEnabled(true);
-		
+
 		int returnVal = chooser.showOpenDialog(this);
 
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			// fileName = chooser.getSelectedFile().getName();
 			// filePath = chooser.getSelectedFile().getPath();
 			chosenfile = chooser.getSelectedFile();
-//			chosenfiles = chooser.getSelectedFiles();
-//			chosenfile=chosenfiles[0];
+			// chosenfiles = chooser.getSelectedFiles();
+			// chosenfile=chosenfiles[0];
 		}
 		try {
-			
+			// reader.addLog(logList,chosenfile, this);
 			reader.readLog(chosenfile, this);
-			
+
 			// ArrayList<Object> test=new ArrayList<Object>();
 			// test.add("test");
 			// addLog(test);
@@ -474,6 +522,7 @@ public class testUI extends JFrame {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		updateCaseIDList();
 
 	}
 
@@ -489,29 +538,68 @@ public class testUI extends JFrame {
 		chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 		chooser.setMultiSelectionEnabled(true);
 		chooser.setCurrentDirectory(chosenfile.getAbsoluteFile());
-		//chooser.setSelectedFile(new File(chosenfile.getName()));
+		// chooser.setSelectedFile(new File(chosenfile.getName()));
 		int returnVal = chooser.showOpenDialog(this);
 
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			if (chooser.getSelectedFile() != null) {
 				File savedFile = new File(chooser.getSelectedFile().getPath());
-				
-				System.out.print("\n file(has selevted)"+savedFile+" has been saved");
+
+				System.out.print("\n file(has selevted)" + savedFile
+						+ " has been saved");
 			} else {
-				File savedFile = new File(chooser.getCurrentDirectory(),chooser.getDialogTitle());
-				System.out.print("\n file(no seected)"+savedFile+" has been saved");
-			//	File savedFile = new File(chooser.getCurrentDirectory()+chooser.get);
+				File savedFile = new File(chooser.getCurrentDirectory(),
+						chooser.getDialogTitle());
+				System.out.print("\n file(no seected)" + savedFile
+						+ " has been saved");
+				// File savedFile = new
+				// File(chooser.getCurrentDirectory()+chooser.get);
 			}
 
 		}
 	}
 
 	/**
-	 * ɾ���鼮
+	 * view more detailed inforamtion about logRecord
+	 * 
+	 * @param index
 	 */
-	private void deleteBook(int index) {
+	private void viewLog(int index) {
+		Log selectedLog = logList.get(index);
+		JOptionPane.showMessageDialog(this, "\nlogName:"
+				+ selectedLog.getLogName() + "\nlogPath"
+				+ selectedLog.getLogPath() + "\nlogContent"
+				+ selectedLog.getLogContent());
+
+		// System.out.print("\nlogName"+selectedLog.getLogName());
+		// System.out.print("\nlogPath"+selectedLog.getLogPath());
+		// System.out.print("\nlogContent"+selectedLog.getLogContent());
+
+		// BookInfo addBookUI = new BookInfo();
+		//
+		// addBookUI.setbookInfo(selectedLog);
+		// addBookUI.setVisible(true);
+
+	}
+
+	/**
+	 * delete log record
+	 */
+	private void deleteLog(int index) {
 		tableModel.removeRow(index);
-		bookList.remove(index);
+
+		logList.remove(index);
+
+	}
+
+	/**
+	 * search by searchKey
+	 */
+	private void searchLog() {
+
+		String searchKey = searchField.getText();
+		reader.searchLog(searchKey, logList, this);
+		// int[] location = new int[2];
 
 	}
 
@@ -762,34 +850,62 @@ public class testUI extends JFrame {
 
 	}
 
-	public void setContent(ArrayList<Log> logList) {
+	public void setContent(ArrayList<Log> newlogList) {
+		emptyTable();
+		// for(){}
 		// TODO Auto-generated method stub
-		//System.out.print("\nthe size of logList in UI:"+logList.size());
-		ArrayList<Log> templogList=logList;
-		for(int i=0;i<templogList.size();i++)
-		{
-			Log log=templogList.get(i);
-			System.out.print("\nog content at UI"+log.getLogContent().toArray());
+		// System.out.print("\nthe size of logList in UI:"+logList.size());
+		// logList=new ArrayList<Log>();
+		logList = newlogList;
+		// ArrayList<Log> templogList = logList;
+		for (int i = 0; i < logList.size(); i++) {
+			Log log = logList.get(i);
+			// System.out.print("\nog content at UI"
+			// + log.getLogContent().toArray());
 			tableModel.addRow(log.getLogContent().toArray());
 		}
-		
+
 	}
 
-//	public int ifMerge() {
-//		// TODO Auto-generated method stub
-//		String question="different log format,merge files?";
-//		int result=JOptionPane.showConfirmDialog(this, question);
-//		
-//		if(result==JOptionPane.YES_OPTION){
-//			return 0;
-//		}
-//		else if(result==JOptionPane.NO_OPTION){
-//			return 1;
-//		}
-//		else if(result==JOptionPane.CANCEL_OPTION){
-//			return 2;
-//		}
-//	return 0;
-//	}
+	public void addContent(ArrayList<Log> newlogList) {
+
+		// TODO Auto-generated method stub
+		// System.out.print("\nthe size of logList in UI:"+logList.size());
+		// logList=new ArrayList<Log>();
+		logList.addAll(newlogList);
+		// ArrayList<Log> templogList = logList;
+		for (int i = 0; i < logList.size(); i++) {
+			Log log = logList.get(i);
+			System.out.print("\nog content at UI"
+					+ log.getLogContent().toArray());
+			tableModel.addRow(log.getLogContent().toArray());
+		}
+
+	}
+
+	public ArrayList<Log> getContent() {
+		// TODO Auto-generated method stub
+		// System.out.print("\nthe size of logList in UI:"+logList.size());
+
+		return logList;
+
+	}
+
+	// public int ifMerge() {
+	// // TODO Auto-generated method stub
+	// String question="different log format,merge files?";
+	// int result=JOptionPane.showConfirmDialog(this, question);
+	//		
+	// if(result==JOptionPane.YES_OPTION){
+	// return 0;
+	// }
+	// else if(result==JOptionPane.NO_OPTION){
+	// return 1;
+	// }
+	// else if(result==JOptionPane.CANCEL_OPTION){
+	// return 2;
+	// }
+	// return 0;
+	// }
 
 }

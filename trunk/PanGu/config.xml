@@ -29,7 +29,7 @@
 <image>
 <!-- actinType:Click -->
 <imageclick>
-<tag1>PageNum</tag1>
+<tag name="PageNum" format="000"/>
 <tag2>Query</tag2>
 <tag3>Rank</tag3>
 <tag4>Url</tag4>

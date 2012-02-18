@@ -11,6 +11,7 @@ import cn.edu.thu.log.test.testUI;
  *
  */
 public interface LogReadService {
+	public ArrayList<Log> addLog(File file,testUI logUI);
 	/**
 	 *  function to read the log
 	 * @param file file/Directory 

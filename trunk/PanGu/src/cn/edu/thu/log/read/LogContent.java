@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import cn.edu.thu.log.test.testUI;
 
 /**
- * reader for content of log file,which contains functions that can read content of log
- * file
+ * reader for content of log file,which contains functions that can read content
+ * of log file
  * 
  * @author Meng
  * 
@@ -33,7 +33,7 @@ public class LogContent {
 	 */
 	public LogContent(LogConfig logConfig) {
 		this.logConfig = logConfig;
-		logList=new ArrayList<Log>();
+		logList = new ArrayList<Log>();
 	}
 
 	/**
@@ -108,8 +108,10 @@ public class LogContent {
 		try {
 			reader = new BufferedReader(new FileReader(file));
 			while ((record = reader.readLine()) != null) {
-				Log log=new Log();
-
+				Log log = new Log();
+				// set up the file path and file name for this log
+				log.setLogName(file.getName());
+				log.setLogPath(file.getPath());
 				// String temprecord = record.concat(logBodyTokenizer);
 				String temprecord = record;
 				// deal with each log record
@@ -278,9 +280,10 @@ public class LogContent {
 					params.add(insertIndex, null);
 				}
 				System.out.print("\n params add:" + params);
-			//	logUI.addLog(params);
+				// logUI.addLog(params);
 				log.setLogContent(params);
-				System.out.print("\nadd log:"+log.getLogContent());
+
+				System.out.print("\nadd log:" + log.getLogContent());
 				logList.add(log);
 
 			}
@@ -293,24 +296,33 @@ public class LogContent {
 
 	}
 
-	public ArrayList<Log> getContent(File readfile,testUI logUI) {
+	/**
+	 * 
+	 * @param readfile
+	 *            file need to be read
+	 * @param logUI
+	 *            GUI for test/ it is not used here
+	 * @return
+	 */
+	public ArrayList<Log> getContent(File readfile, testUI logUI) {
 		// TODO Auto-generated method stub
-	
-			LogFilesReader logfilesReader = new LogFilesReader();
-			cateList = new ArrayList<String>();
-			cateList = logfilesReader.getCateList(readfile);
-			
-			readFile(readfile, logUI);
-			// if(cateList.size()>1)
-			// {
-			//			
-			// readFile(readfile, logUI);
-			// }
-			// else{
-			// readFile(readfile, logUI);
-			// }
+		// the List of log that represent the content that want to be read
+		logList = new ArrayList<Log>();
 
-		
+		LogFilesReader logfilesReader = new LogFilesReader();
+		cateList = new ArrayList<String>();
+		cateList = logfilesReader.getCateList(readfile);
+
+		readFile(readfile, logUI);
+		// if(cateList.size()>1)
+		// {
+		//			
+		// readFile(readfile, logUI);
+		// }
+		// else{
+		// readFile(readfile, logUI);
+		// }
+
 		return logList;
 	}
 }

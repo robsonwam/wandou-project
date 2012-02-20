@@ -414,5 +414,51 @@ public class LogConfig {
 		return logBodyByCate;
 
 	}
+	/**
+	 * get the tags of logbody in one specific product,
+	 * 
+	 * @param cate
+	 *            category,like imageclick
+	 * @return tags of logbody in this category
+	 * 
+	 */
+	 public ArrayList<Object> getLogBodyByProducts(ArrayList<String> products)
+	 {
+	 // TODO Auto-generated method stub
+	 ArrayList<Object> logBodByProduct = new ArrayList<Object>();
+	
+	 try {
+	 File f = new File(CONFIGFILE);
+	 DocumentBuilderFactory factory = DocumentBuilderFactory
+	 .newInstance();
+	 DocumentBuilder builder = factory.newDocumentBuilder();
+	 Document doc = (Document) builder.parse(f);
+	
+	 for (int s = 0; s < products.size(); s++) {
+	 String product = products.get(s);
+	
+	 NodeList cateList = ((org.w3c.dom.Document) doc)
+	 .getElementsByTagName(product);
+	
+	 for (int i = 0; i < cateList.getLength(); i++) {
+	 Node cate=cateList.item(i);
+	 NodeList nodeList1= cate.getChildNodes();
+	 ArrayList<Object> newLogBody = readAttributes(nodeList1);
+	 logBodByProduct.addAll(newLogBody);
+	 }
+	 }
+	
+	 // for(int i=0;i<products.size();i++){
+	 // logBodyNodes= ((org.w3c.dom.Document) doc)
+	 // .getElementsByTagName(products.get(i));}
+	 //
+	 // logBodyByCate.addAll(readAttributes(logBodyNodes));
+	
+	 } catch (Exception e) {
+	 e.printStackTrace();
+	 }
+	 return logBodByProduct;
+	
+	 }
 
 }

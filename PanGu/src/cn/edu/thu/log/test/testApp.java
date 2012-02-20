@@ -7,9 +7,9 @@ package cn.edu.thu.log.test;
  *
  */
 public class testApp {
-	public static void main(String args[]) throws Exception  {
+	public static void main(String args[]) throws Exception{
 		testUI logUI=new testUI();
-		logUI = new testUI();
+		//logUI = new testUI();
 		logUI.setVisible(true);
 		logUI.setSize(600, 600);
 		

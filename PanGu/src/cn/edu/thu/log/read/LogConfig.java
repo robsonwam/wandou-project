@@ -1,12 +1,15 @@
 package cn.edu.thu.log.read;
 
+import java.awt.Component;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 
 import javax.swing.JOptionPane;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import cn.edu.thu.log.test.testUI;
@@ -20,183 +23,359 @@ import cn.edu.thu.log.test.testUI;
  */
 public class LogConfig {
 	/** list of log head tags */
-	private ArrayList<Object> logHead;
+	private ArrayList<String> logHead;
 	/** list of log body tags */
-	private ArrayList<Object> logBody;
+	private ArrayList<String> logBody;
 	/** list of log tags */
-	private ArrayList<Object> logTags;
-	/** configuration file:"config.xml" */
-	private final String CONFIGFILE = "config.xml";
-	/**category of file,lie imageclick*/
+	private ArrayList<String> logTags;
+
+	/** category of file,lie imageclick */
 	private String fileCate;
 	/** symbols in log */
 	private String logHeadTokenizer;
 	private String logBodyTokenizer;
 	private String logHeadBodyTokenizer;
 	private String escapeSymbol;
+	private Document doc;
+	private File configFile;
+	private final String LOGHEAD_INDENTIFIER = "loghead";
+	private final String LOGBODY_INDENTIFIER = "logbody";
+	private final String ACTION_INDENTIFIER = "action";
+	private final String PRODUCT_INDENTIFIER = "product";
+	private final String LOGHEADTOKENIZER_NAME = "logHeadTokenizer";
+	private final String LOGBODYTOKENIZER_NAME = "logBodyTokenizer";
+	private final String LOGHEADBODYTOKENIZER_NAME = "logHeadBodyTokenizer";
+	private final String ESCAPE_NAME = "escapeSymbol";
+	private final String TOKENIZER_INDENTIFIER = "Tokenizer";
 
 	/**
 	 * Constructor
 	 */
 	public LogConfig() {
-		logHead = new ArrayList<Object>();
-		logBody = new ArrayList<Object>();
-		logTags = new ArrayList<Object>();
+		logHead = new ArrayList<String>();
+		logBody = new ArrayList<String>();
+		logTags = new ArrayList<String>();
 		fileCate = new String("");
+		// f=new File(CONFIGFILE);
 	}
 
 	/**
-	 * read the configuration file ,set up the tags for logHead and logBody
+	 * main function :read the confireration file and set up config attribute
 	 * 
-	 * @param fileCate
-	 *            : category of log,like imageclick,pagesearch
+	 * @param configFilePath
+	 *            configFile
 	 */
-	private void readConfig(String newfileCate) {
-
-		if (fileCate.matches(newfileCate)) {
-			// when the file belong to same category,like imageSeach,then the
-			System.out.print("\n belong to same category");
-			// log tags does not change
-
-		} else {// read the configuration file
-			try {
-				File f = new File(CONFIGFILE);
-				DocumentBuilderFactory factory = DocumentBuilderFactory
-						.newInstance();
-				DocumentBuilder builder = factory.newDocumentBuilder();
-				Document doc = (Document) builder.parse(f);
-				// read log head tags
-				readLogHead(doc);
-				// read log Body tags
-				readLogBody(doc, newfileCate);
-				// set up log tags
-				logTags = new ArrayList<Object>();
-				logTags.addAll(logHead);
-				logTags.addAll(logBody);
-				// System.out.print("\n log tags are:" + logTags);
-
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
-		}
-		// update fileCate to newFileCate
-		fileCate = newfileCate;
-
-	}
-
-	/**
-	 * read the configuration file ,set up the tags for logHead and merge
-	 * logBody from logFiles that come from different categories
-	 * 
-	 * @param fileCate
-	 *            : category of log,like imageclick,pagesearch
-	 */
-	private void mergeConfig(ArrayList<String> newFileCateList) {
-
+	public void config(String configFilePath) {
+		// TODO Auto-generated method stub
 		try {
-			File f = new File(CONFIGFILE);
+			configFile = new File(configFilePath);
 			DocumentBuilderFactory factory = DocumentBuilderFactory
 					.newInstance();
 			DocumentBuilder builder = factory.newDocumentBuilder();
-			Document doc = (Document) builder.parse(f);
-			// read log Head
-			readLogHead(doc);
-			// merge log Body
-			// logBody = new ArrayList<Object>();
+			doc = (Document) builder.parse(configFile);
 
-			mergeLogBody(doc, newFileCateList);
+			logHead = new ArrayList<String>();
+			logBody = new ArrayList<String>();
+			logTags = new ArrayList<String>();
 
-			// set up log tags
-			logTags = new ArrayList<Object>();
+			// ArrayList<String> cateList = new ArrayList<String>();
+			// LogFilesReader logFilesReader = new LogFilesReader();
+			// cateList = logFilesReader.getCateList(readfile);
+
+			logHead = readLogHead();
+			System.out.print("\nlogHead:" + logHead);
+			// logBody=readLogBody();
 			logTags.addAll(logHead);
 			logTags.addAll(logBody);
-			// System.out.print("\n log tags are:" + logTags);
+			// readTags("logHead");
+			// if (cateList.size() > 1) {
+			//
+			// System.out.print("\ncate list" + cateList);
+			// mergeConfig(cateList);
+			//
+			// } else {
+			// String newfileCate = cateList.get(0);
+			// readConfig(newfileCate);
+			// }
+
+			// read config to set up the log symbols
+			// readSymbols();
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
 
-	/**
-	 * read log head
-	 */
-	private void readLogHead(Document doc) {
-		NodeList logheadNodes = ((org.w3c.dom.Document) doc)
-				.getElementsByTagName("logHead");
-		logHead = new ArrayList<Object>();
-		logHead.addAll(readAttributes(logheadNodes));
-	}
-
-	/**
-	 * read log body
-	 */
-	private void readLogBody(Document doc, String newfileCate) {
-		NodeList logBodyNodes = ((org.w3c.dom.Document) doc)
-				.getElementsByTagName(newfileCate);
-		logBody = new ArrayList<Object>();
-		logBody.addAll(readAttributes(logBodyNodes));
-		System.out.print("\n new log body tags are:" + logBody);
-	}
-
-	private void mergeLogBody(Document doc, ArrayList<String> newFileCateList) {
-		logBody = new ArrayList<Object>();
-
-		for (int s = 0; s < newFileCateList.size(); s++) {
-			String newfileCate = newFileCateList.get(s);
-
-			NodeList logBodyNodes = ((org.w3c.dom.Document) doc)
-					.getElementsByTagName(newfileCate);
-			ArrayList<Object> newLogBody = readAttributes(logBodyNodes);
-			logBody.addAll(newLogBody);
-		}
-		System.out.print("\n merged log body tags are:" + logBody);
 	}
 
 	/**
 	 * 
-	 * @param attributes
-	 * @return
+	 * @param configFilePath
+	 *            configFile
+	 * @param logFile
+	 *            directory of File of log
 	 */
-	private ArrayList<Object> readAttributes(NodeList attributes) {
+	public void config(String configFilePath, String logFile) {
+		// TODO Auto-generated method stub
+		try {
+			configFile = new File(configFilePath);
+			DocumentBuilderFactory factory = DocumentBuilderFactory
+					.newInstance();
+			DocumentBuilder builder = factory.newDocumentBuilder();
+			doc = (Document) builder.parse(configFile);
 
-		ArrayList<Object> attributeList = new ArrayList<Object>();
-		for (int i = 0; i < attributes.getLength(); i++) {
-			Node logheadItem = attributes.item(i);
-			NodeList logParams = logheadItem.getChildNodes();
-			for (int j = 0; j < logParams.getLength(); j++) {
-				Node temp = logParams.item(j);
-				NodeList tempList = temp.getChildNodes();
+			logHead = new ArrayList<String>();
+			logBody = new ArrayList<String>();
+			logTags = new ArrayList<String>();
 
-				for (int s = 0; s < tempList.getLength(); s++) {
-					// System.out.print("\n" + tempList.item(s).getNodeName());
-					Object value = tempList.item(s).getNodeValue();
-					// System.out.print(":" + value);
-					attributeList.add(value);
+			// ArrayList<String> cateList = new ArrayList<String>();
+			// LogFilesReader logFilesReader = new LogFilesReader();
+			// cateList = logFilesReader.getCateList(readfile);
 
+			logHead = readLogHead();
+			System.out.print("\nlogHead:" + logHead);
+			logBody = readLogBody(logFile);
+			System.out.print("\nlogBody:" + logBody);
+			logTags.addAll(logHead);
+			logTags.addAll(logBody);
+			// readTags("logHead");
+			// if (cateList.size() > 1) {
+			//
+			// System.out.print("\ncate list" + cateList);
+			// mergeConfig(cateList);
+			//
+			// } else {
+			// String newfileCate = cateList.get(0);
+			// readConfig(newfileCate);
+			// }
+			// read config to set up the log symbols
+			readSymbols();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	private void readSymbols() {
+		// TODO Auto-generated method stub
+		NodeList tokenList = doc.getElementsByTagName(TOKENIZER_INDENTIFIER);
+		for (int i = 0; i < tokenList.getLength(); i++) {
+			Node tokenizer = tokenList.item(i);
+			String tokenName = tokenizer.getAttributes().getNamedItem("name")
+					.getNodeValue();
+			if (tokenName.matches(LOGHEADTOKENIZER_NAME)) {
+				logHeadTokenizer = tokenizer.getAttributes().getNamedItem(
+						"value").getNodeValue();
+			} else if (tokenName.matches(LOGBODYTOKENIZER_NAME)) {
+				logBodyTokenizer = tokenizer.getAttributes().getNamedItem(
+						"value").getNodeValue();
+			} else if (tokenName.matches(LOGHEADBODYTOKENIZER_NAME)) {
+				logHeadBodyTokenizer = tokenizer.getAttributes().getNamedItem(
+						"value").getNodeValue();
+			} else if (tokenName.matches(ESCAPE_NAME)) {
+				escapeSymbol = tokenizer.getAttributes().getNamedItem("value")
+						.getNodeValue();
+			}
+
+		}
+
+	}
+
+	/**
+	 * read log Head
+	 * 
+	 * @return Tags of logHead
+	 */
+	public ArrayList<String> readLogHead() {
+
+		ArrayList<String> logheadTagList = readTags(LOGHEAD_INDENTIFIER, null);
+		// ArrayList<String> logheadTagList = new ArrayList<String>();
+		// NodeList nodeList = doc.getElementsByTagName(LOGHEAD_INDENTIFIER);
+		//		
+		// for (int i = 0; i < nodeList.getLength(); i++) {
+		// Node node = nodeList.item(i);
+		//			
+		// NodeList tagNodeList = node.getChildNodes();
+		// for (int t = 0; t < tagNodeList.getLength(); t++) {
+		// Node tagNode = tagNodeList.item(t);
+		// if (tagNode.hasAttributes()) {
+		// // System.out.print("\n tagNode有属性");
+		// String tagName = tagNode.getAttributes().getNamedItem(
+		// "name").getNodeValue();
+		// logheadTagList.add(tagName);
+		// }
+		// }
+		// }
+		return logheadTagList;
+	}
+
+	/**
+	 * read log file
+	 * 
+	 * @param logFile
+	 *            director or file of log
+	 * @return a list of merged tags from all action
+	 */
+	public ArrayList<String> readLogBody(String logFile) {
+
+		LogFilesReader logFilesReader = new LogFilesReader();
+		ArrayList<String> actionList = logFilesReader.getCateList(logFile);
+		ArrayList<String> testLogBodyTagList = new ArrayList<String>();// for
+		// test
+		// List of tagList of each action(like imageclick)
+		ArrayList<ArrayList<String>> tagsList = new ArrayList<ArrayList<String>>();
+
+		ArrayList<String> tempTagList = new ArrayList<String>();
+		tempTagList = readTags(ACTION_INDENTIFIER, actionList);
+		tagsList.add(tempTagList);
+		testLogBodyTagList.addAll(tempTagList);
+		// for (int i = 0; i < actionList.size(); i++) {
+		// ArrayList<String> tempTagList = new ArrayList<String>();
+		// //tempTagList= readTags(actionList.get(i), null);
+		// tempTagList= readTags(ACTION_INDENTIFIER, actionList);
+		// tagsList.add(tempTagList);
+		// testLogBodyTagList.addAll(tempTagList);
+		// }
+		logBody = testLogBodyTagList;
+	//	mergeLogBody(tagsList);
+
+		// mergeConfig(actionList);
+		// ArrayList<String> productList = readTags(LOGBODY_INDENTIFIER, null);
+		// System.out.print("\nProductList:" + productList);
+		// NodeList logBodyNodes = ((org.w3c.dom.Document) doc)
+		// .getElementsByTagName(newfileCate);
+		// logBody = new ArrayList<String>();
+		// logBody.addAll(readAttributes(logBodyNodes));
+		// System.out.print("\n new log body tags are:" + logBody);
+		return testLogBodyTagList;
+	}
+//!!!!!还不太清楚如果tag被merge了，那么记录怎么办
+	private void mergeLogBody(ArrayList<ArrayList<String>> tagsList) {
+	//	ArrayList<String> tag=new ArrayList
+		
+	}
+
+	/**
+	 * read the tags of the element that contains the element. like logHead,
+	 * actionNode
+	 * 
+	 * @param containTagsElement
+	 * @return the list of tagName
+	 */
+	public ArrayList<String> readTags(String nodeLevel,
+			ArrayList<String> matchList) {
+
+		ArrayList<String> tagList = new ArrayList<String>();
+		// the list of foundNode in same level ,like action, loghead
+		NodeList nodeList = doc.getElementsByTagName(nodeLevel);
+		// System.out.print("\nin the level:" + nodeLevel
+		// + " the number of nodes that can be found:"
+		// + nodeList.getLength());
+		for (int i = 0; i < nodeList.getLength(); i++) {
+			Node node = nodeList.item(i);
+
+			if (matchList == null) {
+				// get childList
+				NodeList tagNodeList = node.getChildNodes();
+				for (int t = 0; t < tagNodeList.getLength(); t++) {
+					// get childNode
+					Node tagNode = tagNodeList.item(t);
+					// read value of attribute "name"
+					if (tagNode.hasAttributes()) {
+						String tagName = tagNode.getAttributes().getNamedItem(
+								"name").getNodeValue();
+						tagList.add(tagName);
+					}
+				}
+
+			} else {
+				String name = null;
+				if (node.hasAttributes()) {
+					name = node.getAttributes().getNamedItem("name")
+							.getNodeValue();
+				}
+				// System.out
+				// .print("\n the size of matchList:" + matchList.size());
+				for (int j = 0; j < matchList.size(); j++) {
+					if (name.equals(matchList.get(j))) {
+						// System.out.print("\n name " + name + " matches "
+						// + matchList.get(j) + "in the list");
+						// get childList
+						NodeList tagNodeList = node.getChildNodes();
+						for (int t = 0; t < tagNodeList.getLength(); t++) {
+							// get childNode
+							Node tagNode = tagNodeList.item(t);
+							// read value of attribute "name"
+							if (tagNode.hasAttributes()) {
+								String tagName = tagNode.getAttributes()
+										.getNamedItem("name").getNodeValue();
+								tagList.add(tagName);
+							}
+						}
+					}
 				}
 			}
 		}
-		return attributeList;
+		return tagList;
 	}
 
 	/**
-	 * check if the new file and existed file belong to the same category
 	 * 
-	 * @param newfileCate
-	 *            new category that the file belong to
-	 * @return is belong to same category
+	 * @param matchProductList
+	 *            the list of products like List of image,page
+	 * @return
 	 */
-	public boolean checkFileCate(String newfileCate) {
-		boolean sameCate = true;
-		if (fileCate == null)
-			sameCate = true;
-		else {
-			if (!newfileCate.equals(fileCate)) {
-				sameCate = false;
+	public Collection<String> readTagsByProducts(
+			ArrayList<String> matchProductList) {
+		ArrayList<String> tagList = new ArrayList<String>();
+		NodeList productNodeList = doc
+				.getElementsByTagName(PRODUCT_INDENTIFIER);
+		for (int i = 0; i < productNodeList.getLength(); i++) {
+			Node productNode = productNodeList.item(i);
+
+			String productName = null;
+			if (productNode.hasAttributes()) {
+				productName = productNode.getAttributes().getNamedItem("name")
+						.getNodeValue();
+			}
+			// .print("\n the size of matchList:" + matchList.size());
+			for (int j = 0; j < matchProductList.size(); j++) {
+				if (productName.equals(matchProductList.get(j))) {
+					 System.out.print("\n name " + productName + " matches "
+					 + matchProductList.get(j) + " in the list");
+					// get childList:actionNodeList
+					NodeList actionNodeList = productNode.getChildNodes();
+					for (int t = 0; t < actionNodeList.getLength(); t++) {
+						// get childNode:actionNoce
+						Node actionNode = actionNodeList.item(t);
+						//get tagNodeList
+						NodeList tagNodeList = actionNode.getChildNodes();
+						for (int p = 0; p < tagNodeList.getLength(); p++) {
+							//get tagNode
+							Node tagNode=tagNodeList.item(p);
+							if (tagNode.hasAttributes()) {
+								String tagName = tagNode.getAttributes()
+										.getNamedItem("name").getNodeValue();
+								tagList.add(tagName);
+								
+							}
+						}
+						// read value of attribute "name"
+						
+					}
+				}
 			}
 		}
-		return sameCate;
 
+		return tagList;
+	}
+
+	public ArrayList<String> getLogBodyByCate(String action) {
+		// TODO Auto-generated method stub
+		ArrayList<String> matchList = new ArrayList<String>();
+		matchList.add(action);
+		ArrayList<String> resultList = new ArrayList<String>();
+		resultList.addAll(readTags("action", matchList));
+		return resultList;
 	}
 
 	/**
@@ -204,39 +383,28 @@ public class LogConfig {
 	 * 
 	 * @return the list og tags of logHead
 	 */
-	public ArrayList<Object> getLogHead() {
-		try {
-			File f = new File(CONFIGFILE);
-			DocumentBuilderFactory factory = DocumentBuilderFactory
-					.newInstance();
-
-			DocumentBuilder builder = factory.newDocumentBuilder();
-			Document doc = (Document) builder.parse(f);
-			readLogHead(doc);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	public ArrayList<String> getLogHead() {
 		return logHead;
 	}
 
 	// **get and set*/
-	public void setLogHead(ArrayList<Object> logHead) {
+	public void setLogHead(ArrayList<String> logHead) {
 		this.logHead = logHead;
 	}
 
-	public ArrayList<Object> getLogBody() {
+	public ArrayList<String> getLogBody() {
 		return logBody;
 	}
 
-	public void setLogBody(ArrayList<Object> logBody) {
+	public void setLogBody(ArrayList<String> logBody) {
 		this.logBody = logBody;
 	}
 
-	public ArrayList<Object> getLogTags() {
+	public ArrayList<String> getLogTags() {
 		return logTags;
 	}
 
-	public void setLogTags(ArrayList<Object> logTags) {
+	public void setLogTags(ArrayList<String> logTags) {
 		this.logTags = logTags;
 	}
 
@@ -279,186 +447,5 @@ public class LogConfig {
 	public void setFileCate(String fileCate) {
 		this.fileCate = fileCate;
 	}
-
-	/**
-	 * main function :read the confireration file
-	 * 
-	 * @param readfile
-	 *            absoluth path of chosen file
-	 */
-	public void config(File readfile) {
-		// TODO Auto-generated method stub
-		ArrayList<String> cateList = new ArrayList<String>();
-		LogFilesReader logFilesReader = new LogFilesReader();
-		cateList = logFilesReader.getCateList(readfile);
-
-		if (cateList.size() > 1) {
-
-			System.out.print("\ncate list" + cateList);
-			mergeConfig(cateList);
-
-		} else {
-			String newfileCate = cateList.get(0);
-			readConfig(newfileCate);
-		}
-
-		// read config to set up the log symbols
-		readSymbols();
-
-	}
-
-	/**
-	 * function to read the Symbols from config file
-	 */
-	private void readSymbols() {
-		// try{
-		logHeadTokenizer = getKeyValue("logHeadTokenizer");
-
-		logBodyTokenizer = getKeyValue("logBodyTokenizer");
-		logHeadBodyTokenizer = getKeyValue("logHeadBodyTokenizer");
-		escapeSymbol = getKeyValue("escapeSymbol");
-		System.out.print("\nlogHeadTokenizer:" + logHeadTokenizer);
-		System.out.print("\nlogBodyTokenizer:" + logBodyTokenizer);
-		System.out.print("\nlogHeadBodyTokenizer:" + logHeadBodyTokenizer);
-		System.out.print("\nescapeSymbol:" + escapeSymbol);
-
-		// NodeList logHeadTokenNodes = ((org.w3c.dom.Document) doc)
-		// .getElementsByTagName("logHeadTokenizer");
-		// logHeadTokenizer=logHeadTokenNodes.item(0).getNodeValue();
-		// NodeList logBodyTokenNodes = ((org.w3c.dom.Document) doc)
-		// .getElementsByTagName("logBodyTokenizer");
-		// logBodyTokenizer=logBodyTokenNodes.item(0).getNodeValue();
-		// NodeList logHeadBodyTokenNodes = ((org.w3c.dom.Document) doc)
-		// .getElementsByTagName("logHeadBodyTokenizer");
-		// logHeadBodyTokenizer=logHeadBodyTokenNodes.item(0).getNodeValue();
-		// NodeList escapeSymbolNodes = ((org.w3c.dom.Document) doc)
-		// .getElementsByTagName("escapeSymbol");
-		// escapeSymbol=escapeSymbolNodes.item(0).getNodeValue();
-		// } catch (Exception e) {
-		// e.printStackTrace();
-		// }
-
-	}
-
-	/**
-	 * find the value of key in configuration file
-	 * 
-	 * @param key
-	 *            key of configItem
-	 * @return value of configItem
-	 */
-	private String getKeyValue(String key) {
-		String value = null;
-		File f = new File(CONFIGFILE);
-		DocumentBuilderFactory factory;
-		DocumentBuilder builder;
-		Document doc;
-		try {
-			factory = DocumentBuilderFactory.newInstance();
-			builder = factory.newDocumentBuilder();
-			doc = (Document) builder.parse(f);
-			NodeList nodeList = ((org.w3c.dom.Document) doc)
-					.getElementsByTagName(key);
-
-			ArrayList<Object> attributeList = new ArrayList<Object>();
-			for (int i = 0; i < nodeList.getLength(); i++) {
-				Node logheadItem = nodeList.item(i);
-				NodeList logParams = logheadItem.getChildNodes();
-				// for (int j = 0; j < logParams.getLength(); j++) {
-				value = logParams.item(0).getNodeValue();
-
-				// Node temp = logParams.item(j);
-				// NodeList tempList = temp.getChildNodes();
-				//
-				// for (int s = 0; s < tempList.getLength(); s++) {
-				// // System.out.print("\n" +
-				// tempList.item(s).getNodeName());
-				// Object value = tempList.item(s).getNodeValue();
-				// // System.out.print(":" + value);
-				// attributeList.add(value);
-				//
-				// }
-				// }
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return value;
-	}
-
-	/**
-	 * get the tags of logbody in one specific category
-	 * 
-	 * @param cate
-	 *            category,like imageclick
-	 * @return tags of logbody in this category
-	 * 
-	 */
-	public ArrayList<Object> getLogBodyByCate(String cate) {
-		// TODO Auto-generated method stub
-		ArrayList<Object> logBodyByCate = new ArrayList<Object>();
-		try {
-			File f = new File(CONFIGFILE);
-			DocumentBuilderFactory factory = DocumentBuilderFactory
-					.newInstance();
-			DocumentBuilder builder = factory.newDocumentBuilder();
-			Document doc = (Document) builder.parse(f);
-			NodeList logBodyNodes = ((org.w3c.dom.Document) doc)
-					.getElementsByTagName(cate);
-
-			logBodyByCate.addAll(readAttributes(logBodyNodes));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return logBodyByCate;
-
-	}
-	/**
-	 * get the tags of logbody in one specific product,
-	 * 
-	 * @param cate
-	 *            category,like imageclick
-	 * @return tags of logbody in this category
-	 * 
-	 */
-	 public ArrayList<Object> getLogBodyByProducts(ArrayList<String> products)
-	 {
-	 // TODO Auto-generated method stub
-	 ArrayList<Object> logBodByProduct = new ArrayList<Object>();
-	
-	 try {
-	 File f = new File(CONFIGFILE);
-	 DocumentBuilderFactory factory = DocumentBuilderFactory
-	 .newInstance();
-	 DocumentBuilder builder = factory.newDocumentBuilder();
-	 Document doc = (Document) builder.parse(f);
-	
-	 for (int s = 0; s < products.size(); s++) {
-	 String product = products.get(s);
-	
-	 NodeList cateList = ((org.w3c.dom.Document) doc)
-	 .getElementsByTagName(product);
-	
-	 for (int i = 0; i < cateList.getLength(); i++) {
-	 Node cate=cateList.item(i);
-	 NodeList nodeList1= cate.getChildNodes();
-	 ArrayList<Object> newLogBody = readAttributes(nodeList1);
-	 logBodByProduct.addAll(newLogBody);
-	 }
-	 }
-	
-	 // for(int i=0;i<products.size();i++){
-	 // logBodyNodes= ((org.w3c.dom.Document) doc)
-	 // .getElementsByTagName(products.get(i));}
-	 //
-	 // logBodyByCate.addAll(readAttributes(logBodyNodes));
-	
-	 } catch (Exception e) {
-	 e.printStackTrace();
-	 }
-	 return logBodByProduct;
-	
-	 }
 
 }

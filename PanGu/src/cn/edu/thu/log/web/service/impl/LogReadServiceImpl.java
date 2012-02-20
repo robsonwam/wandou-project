@@ -7,6 +7,7 @@ import javax.swing.JOptionPane;
 
 import cn.edu.thu.log.read.Log;
 import cn.edu.thu.log.read.LogConfig;
+import cn.edu.thu.log.read.LogConfig;
 import cn.edu.thu.log.read.LogContent;
 import cn.edu.thu.log.test.testUI;
 import cn.edu.thu.log.web.service.LogReadService;
@@ -20,6 +21,7 @@ import cn.edu.thu.log.web.service.LogReadService;
 public class LogReadServiceImpl implements LogReadService {
 	LogConfig logConfig;
 	LogContent logContent;
+	private final String CONFIGFILE = "config.xml";
 
 	/**
 	 * Constructor
@@ -64,8 +66,8 @@ public class LogReadServiceImpl implements LogReadService {
 	public ArrayList<Log> readLog(File file, testUI logUI) {
 
 		// File file=files[0];
-		logConfig.config(file);
-		ArrayList<Object> logTags = logConfig.getLogTags();
+		logConfig.config(CONFIGFILE,file.getAbsolutePath());
+		ArrayList<String> logTags = logConfig.getLogTags();
 		// read the logFile and display the information on UI
 		ArrayList<Log> logList = new ArrayList<Log>();
 		logList = logContent.getContent(file, logUI);
@@ -76,21 +78,26 @@ public class LogReadServiceImpl implements LogReadService {
 		}
 		// logContent.readFile(file, logUI);
 		// 界面上测试
+		System.out.print("\nsettableHead:"+logTags);
 		logUI.setTableHead(logTags);
+		
 		logUI.setContent(logList);
 		
 		return logList;
 
 	}
 	@Override
-	public ArrayList<Object> getLogTagsByProducts(ArrayList<String> productList) {
-		ArrayList<Object> logTags=new ArrayList<Object>();
+	public ArrayList<String> getLogTagsByProducts(ArrayList<String> productList) {
+		ArrayList<String> logTags=new ArrayList<String>();
 		
 		if(logConfig.getLogTags().size()==0)
 		{
+			logConfig.config(CONFIGFILE);
 			logTags.addAll(logConfig.getLogHead());
-			//logConfig.readByProducts();
-			logTags.addAll(logConfig.getLogBodyByProducts(productList));
+			
+			//logTags.addAll(logConfig.readTags("action", productList));
+			logTags.addAll(logConfig.readTagsByProducts(productList));
+			//logTags.addAll(logConfig.getLogBodyByProducts(productList));
 		}
 		else{
 			logTags =logConfig.getLogTags();

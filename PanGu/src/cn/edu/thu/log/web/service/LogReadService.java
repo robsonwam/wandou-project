@@ -37,5 +37,5 @@ public interface LogReadService {
 	 *            name of product ,like image,imageclick
 	 * @return logTags of product
 	 */
-	public ArrayList<Object> getLogTagsByProducts(ArrayList<String> productList);
+	public ArrayList<String> getLogTagsByProducts(ArrayList<String> productList);
 }

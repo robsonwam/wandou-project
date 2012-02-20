@@ -22,12 +22,25 @@ public class LogFilesReader {
 	 *            read file/Directory
 	 * @return list of category
 	 */
-	public ArrayList<String> getCateList(File readfile) {
+	public ArrayList<String> getCateList(String filePath) {
+		File readfile=new File(filePath);
 		cateList = new ArrayList<String>();
 		readFile(readfile);
 		return cateList;
 	}
-
+	/**
+	 * get the list of categories that files belong to
+	 * 
+	 * @param readfile
+	 *            read file/Directory
+	 * @return list of category
+	 */
+	public ArrayList<String> getCateList(File readfile) {
+	
+		cateList = new ArrayList<String>();
+		readFile(readfile);
+		return cateList;
+	}
 	/**
 	 * reader for file/Directory
 	 * 

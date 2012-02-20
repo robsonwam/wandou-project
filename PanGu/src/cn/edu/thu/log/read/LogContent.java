@@ -71,9 +71,9 @@ public class LogContent {
 	private void readFile(File readfile, testUI logUI) {
 		if (!readfile.isDirectory()) {
 			readFileContent(readfile, logUI);
-			System.out.println(readfile.getName() + " is not Directory\n");
+		//	System.out.println(readfile.getName() + " is not Directory\n");
 		} else if (readfile.isDirectory()) {
-			System.out.println(readfile.getName() + " is Directory\n");
+			//System.out.println(readfile.getName() + " is Directory\n");
 			File[] fileList = readfile.listFiles();
 			for (int i = 0; i < fileList.length; i++) {
 				File editfile = fileList[i];
@@ -160,8 +160,8 @@ public class LogContent {
 					// System.out.print("\n escapteSymble after is"+escapeSymble);
 					if (String.valueOf(logHeadContent.charAt(i)).matches(
 							escapeSymble)) {
-						System.out.print("\n found escape Symble:"
-								+ logHeadContent.charAt(i));
+//						System.out.print("\n found escape Symble:"
+//								+ logHeadContent.charAt(i));
 						i += 2;
 					}
 				}
@@ -185,8 +185,8 @@ public class LogContent {
 					// System.out.print("\n escapteSymble after is"+escapeSymble);
 					if (String.valueOf(logBodyContent.charAt(i)).matches(
 							escapeSymble)) {
-						System.out.print("\n found escape Symble:"
-								+ logBodyContent.charAt(i));
+//						System.out.print("\n found escape Symble:"
+//								+ logBodyContent.charAt(i));
 						i += 2;
 					}
 
@@ -195,8 +195,8 @@ public class LogContent {
 				// params
 				params.addAll(headparams);
 				params.addAll(bodyparams);
-				System.out.print("\nheadParams" + headparams);
-				System.out.print("\nbodyparams" + bodyparams);
+//				System.out.print("\nheadParams" + headparams);
+//				System.out.print("\nbodyparams" + bodyparams);
 
 				// for (int i = 0; i < temprecord.length(); i++) {
 				// if (String.valueOf(temprecord.charAt(i)).matches(
@@ -262,8 +262,8 @@ public class LogContent {
 				// LogConfig logConfig=new LogConfig();
 				insertIndex += headparams.size();
 				// insertIndex += logConfig.getLogHead().size();
-				System.out.print("\nlog head size:"
-						+ logConfig.getLogHead().size());
+//				System.out.print("\nlog head size:"
+//						+ logConfig.getLogHead().size());
 
 				for (int i = 0; i < indexCate; i++) {
 
@@ -271,7 +271,7 @@ public class LogContent {
 							cateList.get(i)).size();
 					// insertIndex+=tempBodyParamCount;
 					insertParamscount += tempBodyParamCount;
-					System.out.print("\nlog body size:" + tempBodyParamCount);
+//					System.out.print("\nlog body size:" + tempBodyParamCount);
 
 				}
 
@@ -279,11 +279,11 @@ public class LogContent {
 				for (int j = 0; j < insertParamscount; j++) {
 					params.add(insertIndex, null);
 				}
-				System.out.print("\n params add:" + params);
+//				System.out.print("\n params add:" + params);
 				// logUI.addLog(params);
 				log.setLogContent(params);
 
-				System.out.print("\nadd log:" + log.getLogContent());
+//				System.out.print("\nadd log:" + log.getLogContent());
 				logList.add(log);
 
 			}

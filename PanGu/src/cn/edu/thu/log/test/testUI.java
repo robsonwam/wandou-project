@@ -1,29 +1,15 @@
 package cn.edu.thu.log.test;
 
 import java.awt.BorderLayout;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.CardLayout;
+import java.awt.*;
+import java.awt.event.*;
 import java.io.File;
 import java.sql.Date;
 import java.util.ArrayList;
 
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
+import javax.swing.BorderFactory;
+import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
 import cn.edu.thu.log.read.Log;
@@ -61,6 +47,7 @@ public class testUI extends JFrame {
 
 	/** control Panel */
 	JPanel controlPanel;
+	JPanel homePanel;
 	/** control buttons */
 	JButton addButton;
 	JButton deleteButton;
@@ -85,6 +72,22 @@ public class testUI extends JFrame {
 	// Service
 	LogReadServiceImpl reader;
 
+	/** Config miningfile */
+	JMenu miningConfig;
+	JMenuItem logCleanItem;
+	JMenuItem noiseIdentifyItem;
+	JMenuItem activityIdentifyItem;
+	JMenuItem caseIdentifyItem;
+
+	JPanel emptyPanel;
+	JPanel miningConfigPanel;
+	JPanel logCleanPanel;
+	JPanel noiseIdentifyPanel;
+	JPanel activityIdentifyPanel;
+	JPanel caseIdentifyPanel;
+	Container container;
+	CardLayout cardManager;
+
 	/**
 	 * construction function
 	 * 
@@ -94,6 +97,7 @@ public class testUI extends JFrame {
 	public testUI() {
 
 		// initiate the UI
+
 		initComponents();
 		start();
 	}
@@ -113,14 +117,14 @@ public class testUI extends JFrame {
 		//
 		// tableModel.addRow(tempBook.toArrays());
 		// bookList.add(tempBook);
-		//	
+		//
 		// tempBook = new Book("2", "history of china", "history", "chinese",
 		// 100,
 		// "1949/10/1", "china", "2012/2/11", "reinier");
 		//
 		// tableModel.addRow(tempBook.toArrays());
 		// bookList.add(tempBook);
-		//	
+		//
 		// tempBook = new Book("3", "gone with wind", "literature",
 		// "amerian writer", 20, "2010/5/20", "america", "2012.1.11",
 		// "carol");
@@ -137,12 +141,41 @@ public class testUI extends JFrame {
 	}
 
 	/**
-	 *function to draw the UI
+	 * function to draw the UI
 	 */
 	private void initComponents() {
 		// container
-		Container container = this.getContentPane();
+		container = this.getContentPane();
+		cardManager = new CardLayout();
+		container.setLayout(cardManager);
+
+		// 创建几个面板
+		homePanel = new JPanel();
+		logCleanPanel = new JPanel();
+		noiseIdentifyPanel = new JPanel();
+		activityIdentifyPanel = new JPanel();
+		caseIdentifyPanel = new JPanel();
+
 		// 菜单控件的初始化，添加事件监听，并添加到界面中
+		initMenuBar();
+
+		// draw the table to contain log infomation
+		initHomePanel();
+
+		// 初始化挖掘配置文件面板
+		initMiningConfigPanel();
+
+		//在cardLayout布局的frame中添加不同面板
+		container.add(homePanel, "home面板");
+		container.add(logCleanPanel, "日志清洗面板");
+		container.add(noiseIdentifyPanel, "噪音识别面板");
+		container.add(activityIdentifyPanel, "活动识别面板");
+		container.add(caseIdentifyPanel, "案例识别面板");
+
+	}
+
+	//初始化菜单栏
+	private void initMenuBar() {
 		{// 主页菜单
 			homeMenu = new JMenu("Home");
 			openFileItem = new JMenuItem("new file");
@@ -236,45 +269,84 @@ public class testUI extends JFrame {
 				}
 
 			});
+
+			// 挖掘配置文件菜单
+			miningConfig = new JMenu("规则配置");
+			logCleanItem = new JMenuItem("日志清洗规则");
+			noiseIdentifyItem = new JMenuItem("噪声识别规则");
+			activityIdentifyItem = new JMenuItem("活动识别规则");
+			caseIdentifyItem = new JMenuItem("案例识别规则");
+			miningConfig.add(logCleanItem);
+			miningConfig.add(noiseIdentifyItem);
+			miningConfig.add(activityIdentifyItem);
+			miningConfig.add(caseIdentifyItem);
+
+			logCleanItem.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					// TODO Auto-generated method stub
+
+					cardManager.show(container, "日志清洗面板");
+
+				}
+
+			});
+
+			noiseIdentifyItem.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					// TODO Auto-generated method stub
+					cardManager.show(container, "噪音识别面板");
+				}
+			});
+
+			activityIdentifyItem.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					// TODO Auto-generated method stub
+					cardManager.show(container, "活动识别面板");
+				}
+
+			});
+
+			caseIdentifyItem.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					// TODO Auto-generated method stub
+					cardManager.show(container, "案例识别面板");
+				}
+
+			});
+
 			// 对菜单栏初始化
 			menuBar = new JMenuBar();
 			menuBar.add(homeMenu);
 			menuBar.add(editMenu);
 			menuBar.add(aboutMenu);
+			menuBar.add(miningConfig);
+
 			// 添加菜单到界面
 			this.setJMenuBar(menuBar);
 		}
-		// draw the table to contain log infomation
+	}
+
+	//初始化home面板
+	private void initHomePanel() {
 		{
-			// String[] keyNames=(String[]) prop.keySet().toArray();
-			// String[] columns =new String[5];
-			// { "timeStamp", "name", "type", "author", "price",
-			// "publishDate", "publisher", "buyDate", "people" };
+
 			String[] columns = null;
 			String[][] data = null;
-			// String[] tempRow={"1","2"};
-			// �����ı��
+
 			tableModel = new DefaultTableModel(data, columns);
 
-			// tableModel.addRow(tempRow);
-			// tableModel.removeRow(0);
-			// ArrayList<Object> testList=new ArrayList<Object>();
-			// testList.add("a");
-			// testList.add("a");
-			// testList.add("a");
-			// testList.add("a");
-			// testList.add("a");
-			// this.addLog(testList);
-			// tableModel = new DefaultTableModel(data, columns);
-			// tableModel = new DefaultTableModel(data,
-			// prop.keySet().toArray());
 			logTable = new JTable(tableModel);
-			// logTable.setPreferredSize(new Dimension(800,0));
-			// bookTable.setPreferredSize(new Dimension(600,300));
-			// tableModel.
 
-			container.add(new JScrollPane(logTable), BorderLayout.NORTH);
-			// bookList = new ArrayList<Book>();
+			homePanel.add(new JScrollPane(logTable), BorderLayout.NORTH);
+
 		}
 		// draw the control panel
 		{
@@ -380,11 +452,115 @@ public class testUI extends JFrame {
 
 			});
 			controlPanel.add(sortDateButton);
-
-			container.add(controlPanel, BorderLayout.SOUTH);
-
+			homePanel.add(controlPanel, BorderLayout.SOUTH);
 		}
+	}
 
+	//初始化挖掘配置文件面板
+	private void initMiningConfigPanel() {
+		initLogCleanPanel();
+		initNoiseIdentifyPanel();
+		initActivityIdentifyPanel();
+		initCaseIdentifyPanel();
+	}
+
+	//初始化日志清洗面板
+	private void initLogCleanPanel() {
+		//logCleanPanel.setBackground(Color.BLACK);
+		//logCleanPanel.setLayout(new BorderLayout());
+		logCleanPanel.setBorder(BorderFactory.createTitledBorder("日志清洗规则"));
+		JPanel chooseCleanPanel=new JPanel();
+		JPanel resultPanel1=new JPanel();
+		
+		/**  绘制配置字段面板   */
+		//下拉表中放入日志中所有存在的字段，可通过读取日志配置文件
+		JComboBox chooseAttri=new JComboBox();
+		//文本框中让用户写入字段期望的正则表达式
+		JTextField expression=new JTextField(15);
+		//按钮将以上字段和正则表达式规则一同放入下边的table中
+		JButton addButton=new JButton("添加字段规范");
+		
+	    chooseCleanPanel.add(chooseAttri);
+	    chooseCleanPanel.add(expression);
+	    chooseCleanPanel.add(addButton);
+	    
+	    /**绘制配置字段结果战士面板 */
+	    String[] cols = null;
+		String[][] attr = null;
+		DefaultTableModel resultModel = new DefaultTableModel(attr, cols);
+		JTable resultTable = new JTable(resultModel);
+		
+		resultPanel1.add(new JScrollPane(resultTable));		
+		
+		logCleanPanel.add(chooseCleanPanel,BorderLayout.NORTH);
+		logCleanPanel.add(resultPanel1,BorderLayout.CENTER);
+	}
+
+	//初始化噪音识别面板
+	private void initNoiseIdentifyPanel() {		
+		//noiseIdentifyPanel.setBackground(Color.RED);
+		noiseIdentifyPanel.setBorder(BorderFactory.createTitledBorder("噪声识别规则"));		
+		noiseIdentifyPanel.setLayout(new GridLayout(1,2));
+		JPanel chooseNoisePanel=new JPanel();
+		JPanel resultPanel2=new JPanel();		
+		
+		/**  三种噪声识别规则的配置   */
+		chooseNoisePanel.setLayout(new GridLayout(3,1));
+		chooseNoisePanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		//第一行用于配置多个不能出现的正则表达式，如果出现则视为噪声
+		JPanel p1=new JPanel();	
+		p1.setLayout(new FlowLayout(FlowLayout.LEFT));
+		JTextField noiseAttr=new JTextField(15);
+		JButton addNoiseButton=new JButton("添加");
+		p1.add(noiseAttr);
+		p1.add(addNoiseButton);
+		
+		//第二行用于配置连续访问动作间最小时间间隔
+		JPanel p2=new JPanel();	
+		p2.setLayout(new FlowLayout(FlowLayout.LEFT));
+		JLabel minInternalLabel=new JLabel("连续访问动作间最小时间间隔(毫秒)");
+		JTextField minInternalText=new JTextField(6);
+		p2.add(minInternalLabel);
+		p2.add(minInternalText);
+		//第三行用于配置连续访问最长时间
+		JPanel p3=new JPanel();
+		p3.setLayout(new FlowLayout(FlowLayout.LEFT));
+		JLabel maxTimeLabel=new JLabel("连续访问最长时间(小时)");
+		JTextField maxTimeText=new JTextField(6);
+		p3.add(maxTimeLabel);
+		p3.add(maxTimeText);
+		
+		chooseNoisePanel.add(p1);
+		chooseNoisePanel.add(p2);
+		chooseNoisePanel.add(p3);			
+		
+		/**噪声识别规则1中定义的正则表达式结果列表 */		
+		/*DefaultListModel noiseResultModel=new DefaultListModel();		
+		JList noiseResultList=new JList(noiseResultModel);*/
+		JTextArea noiseResultArea=new JTextArea(31,22);
+		JScrollPane scrollNoisePane=new JScrollPane(noiseResultArea);
+		
+		//这里将写入的正则表达式添加进来用noiseResultModel.addElement
+		
+		resultPanel2.add(scrollNoisePane);
+		resultPanel2.setBorder(BorderFactory.createTitledBorder("噪音表达式结果"));
+		
+		noiseIdentifyPanel.add(chooseNoisePanel);
+		noiseIdentifyPanel.add(resultPanel2);
+		
+	}
+
+	//初始化活动识别面板
+	private void initActivityIdentifyPanel() {
+		activityIdentifyPanel.setBackground(Color.YELLOW);
+		activityIdentifyPanel.setBorder(BorderFactory.createTitledBorder("活动识别规则"));
+		
+	}
+
+	//初始化案例识别面板
+	private void initCaseIdentifyPanel() {
+		caseIdentifyPanel.setBackground(Color.GREEN);
+		caseIdentifyPanel.setBorder(BorderFactory.createTitledBorder("案例识别规则"));
 	}
 
 	/**
@@ -566,10 +742,10 @@ public class testUI extends JFrame {
 	 */
 	private void viewLog(int index) {
 		Log selectedLog = logList.get(index);
-		JOptionPane.showMessageDialog(this, "\nlogName:"
-				+ selectedLog.getLogName() + "\nlogPath"
-				+ selectedLog.getLogPath() + "\nlogContent"
-				+ selectedLog.getLogContent());
+		JOptionPane.showMessageDialog(this,
+				"\nlogName:" + selectedLog.getLogName() + "\nlogPath"
+						+ selectedLog.getLogPath() + "\nlogContent"
+						+ selectedLog.getLogContent());
 
 		// System.out.print("\nlogName"+selectedLog.getLogName());
 		// System.out.print("\nlogPath"+selectedLog.getLogPath());
@@ -637,7 +813,7 @@ public class testUI extends JFrame {
 	}
 
 	/**
-	 *��ݼ�Ǯ����
+	 * ��ݼ�Ǯ����
 	 */
 	private void sortByPrice() {
 
@@ -660,7 +836,7 @@ public class testUI extends JFrame {
 	}
 
 	/**
-	 *��ݳ��ʱ������
+	 * ��ݳ��ʱ������
 	 */
 	private void sortByDate() {
 		String timej;
@@ -895,7 +1071,7 @@ public class testUI extends JFrame {
 	// // TODO Auto-generated method stub
 	// String question="different log format,merge files?";
 	// int result=JOptionPane.showConfirmDialog(this, question);
-	//		
+	//
 	// if(result==JOptionPane.YES_OPTION){
 	// return 0;
 	// }

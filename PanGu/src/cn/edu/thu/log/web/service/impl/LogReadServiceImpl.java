@@ -29,11 +29,8 @@ public class LogReadServiceImpl implements LogReadService {
 		logContent = new LogContent(logConfig);
 	}
 
-	@Override
-	public ArrayList<Log> addLog(File file, testUI logUI) {
-		return null;
-	}
 
+	@Override
 	public ArrayList<Log> searchLog(String searchKey, ArrayList<Log> logList,
 			testUI logUI) {
 		System.out.print("\nserachKey:" + searchKey);
@@ -50,24 +47,9 @@ public class LogReadServiceImpl implements LogReadService {
 						foundLogList.add(log);
 					}
 				}
-				// if (infos[j].toString().contains(searchKey)) {
-				// foundLogList.add(logList.get(i));
-				// }
-				// if (searchKey.matches(infos[j])) {
-				//				
-				// int[] location = new int[2];
-				// location[0] = i;
-				// location[1] = j;
-				// locationList.add(location);
-				// }
+				
 			}
 		}
-		// for(int i=0;i<locationList.size();i++)
-		// {int[] location = new int[2];
-		// location=locationList.get(i);
-		//		
-		// }
-		// this.setTitle("the book is at row " + location[0]);
 		if (logList != null) {
 
 			logUI.setContent(foundLogList);
@@ -96,8 +78,33 @@ public class LogReadServiceImpl implements LogReadService {
 		// 界面上测试
 		logUI.setTableHead(logTags);
 		logUI.setContent(logList);
+		
 		return logList;
 
+	}
+	@Override
+	public ArrayList<Object> getLogTagsByProducts(ArrayList<String> productList) {
+		ArrayList<Object> logTags=new ArrayList<Object>();
+		
+		if(logConfig.getLogTags().size()==0)
+		{
+			logTags.addAll(logConfig.getLogHead());
+			//logConfig.readByProducts();
+			logTags.addAll(logConfig.getLogBodyByProducts(productList));
+		}
+		else{
+			logTags =logConfig.getLogTags();
+		}
+			
+	//	System.out.print("\n tags of prodcut"+logTags);
+		return logTags;
+	}
+
+
+	@Override
+	public ArrayList<Log> addLog(File file, testUI logUI) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	// @Override

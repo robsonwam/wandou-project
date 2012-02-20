@@ -583,8 +583,8 @@ public class testUI extends JFrame {
 		up.add(productCombo);
 		up.add(addProductButton);	
 		
-		JList productList=new JList();		
-		productList.setPreferredSize(new Dimension(200,360));
+		JList productList=new JList();	
+		productList.setPreferredSize(new Dimension(120,370));
 		//读取JList中的所有产品，方便后面字段进行筛选
 		
 		productPanel.add(up,BorderLayout.NORTH);
@@ -592,27 +592,45 @@ public class testUI extends JFrame {
 		
 		/** 字段面板包括对应产品的所有字段，有一个JList */
 		JPanel tagPanel=new JPanel();
+		tagPanel.setBorder(BorderFactory.createTitledBorder("产品所有字段"));
 		//用一个Vector接收所有的字段,并建立JList
 		JList tagList=new JList();		
 		JScrollPane tagPane=new JScrollPane(tagList);
 		tagPane.setPreferredSize(new Dimension(200,400));
-		tagList.addListSelectionListener(new ListSelectionListener(){
-
-			@Override
-			public void valueChanged(ListSelectionEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-		});
+	    tagList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+	    //tagList.getSelectedValue()来记录选择的活动字段
 		
 		/** 操作面板包括选择字段作为活动的所有操作，包括两个添加按钮，一个timestamp结果框，一个正则表达式输入框 */
 		JPanel operationPanel=new JPanel();	
-		
+		operationPanel.setBorder(BorderFactory.createTitledBorder("选择活动字段"));
+		Box operationBox=Box.createVerticalBox();
+		JButton addTimestampButton=new JButton("添加时间戳");
+		JButton addActivityButton=new JButton("添加活动");
+		JTextField timestampText=new JTextField(6);
+		timestampText.setEditable(false);
+		JLabel actExpressLabel=new JLabel("活动子串规则");
+		JTextField actExpressText=new JTextField(6);
+		operationBox.add(Box.createVerticalStrut(20));
+		operationBox.add(addTimestampButton);
+		operationBox.add(Box.createVerticalStrut(20));//创建一个不可见的30单位的组件
+		operationBox.add(timestampText);
+		operationBox.add(Box.createVerticalStrut(100));
+		operationBox.add(actExpressLabel);
+		operationBox.add(Box.createVerticalStrut(20));
+		operationBox.add(actExpressText);
+		operationBox.add(Box.createVerticalStrut(100));
+		operationBox.add(addActivityButton);		
+		operationPanel.add(operationBox);		
 		
 		/** 活动结果面板包括对选择的一列或多列字段及子串的结果展示，是一个JList */
 		JPanel activityResultPanel=new JPanel();
+		activityResultPanel.setBorder(BorderFactory.createTitledBorder("活动选择结果"));
+		//获取所选字段和字段子串，有一个逻辑操作		
+		JList activityResultList=new JList();
+		JScrollPane actResultPane=new JScrollPane(activityResultList);
+		actResultPane.setPreferredSize(getPreferredSize());		
 		
+		/** 将所有面板加入其中 */
 		activityIdentifyPanel.add(productPanel);
 		activityIdentifyPanel.add(tagPanel);
 		activityIdentifyPanel.add(operationPanel);

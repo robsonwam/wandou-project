@@ -1,4 +1,4 @@
-package cn.edu.thu.log.miningconfigrule;
+package cn.edu.thu.log.preprocessrule;
 
 public class ActivityIdentifyRule {
 

@@ -1,72 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
 <log>
 <!-- inforamtion about Symbols -->
-<logHeadTokenizer>,</logHeadTokenizer>
-<logBodyTokenizer>,</logBodyTokenizer>
-<logHeadBodyTokenizer>;</logHeadBodyTokenizer>
-<escapeSymbol>\</escapeSymbol>
+
+<Tokenizer name="logHeadTokenizer" value=","/>
+<Tokenizer name="logBodyTokenizer" value=","/>
+<Tokenizer name="logHeadBodyTokenizer" value=";"/>
+<Tokenizer name="escapeSymbol" value="\"/>
 
 <!-- inforamtion about log head -->
-<logHead>
-<tag1>TimeStamp</tag1>
-<tag2>RemoteIP</tag2>
-<tag3>OriginateIP</tag3>
-<tag4>UA</tag4>
-<tag5>SessionID</tag5>
-<tag6>TransactionID</tag6>
-<tag7>MobileNo</tag7>
-<tag8>Source</tag8>
-<tag9>ContentType</tag9>
-<tag10>Ptn</tag10>
-<tag11>Encoding</tag11>
-<tag12>Referer</tag12>
-<tag13>Uid</tag13>
-</logHead>
+<loghead>
+<tag name="TimeStamp" />
+<tag name="RemoteIP" />
+<tag name="OriginateIP" />
+<tag name="UA" />
+<tag name="SessionID" />
+<tag name="TransactionID" />
+<tag name="MobileNo" />
+<tag name="Source" />
+<tag name="ContentType" />
+<tag name="Ptn" />
+<tag name="Encoding" />
+<tag name="Referer" />
+<tag name="Uid" />
+</loghead>
 
-<!-- inforamtion about log body -->
-<logBody>
+<logbody>
 <!-- log body of product:image -->
-<image>
+<product name="image">
 <!-- actinType:Click -->
-<imageclick>
-<tag name="PageNum" format="000"/>
-<tag2>Query</tag2>
-<tag3>Rank</tag3>
-<tag4>Url</tag4>
-</imageclick>
+<action name="imageclick">
+<tag name="PageNum" />
+<tag name="Query" />
+<tag name="Rank" />
+<tag name="Url" />
+</action>
+
 <!-- actinType:Search -->
-<imagesearch>
-<tag1>Hits</tag1>
-<tag2>PageNum</tag2>
-<tag3>Query</tag3>
-<tag4>RespTime</tag4>
-<tag5>Start</tag5>
-</imagesearch>
-</image>
+<action name="imagesearch">
+<tag name="Hits" />
+<tag name="PageNum" />
+<tag name="Query" />
+<tag name="RespTime" />
+<tag name="Start" />
+</action>
+</product>
 
 <!-- log body of product:page -->
-<Page>
-<pageClick>
-<tag1>PageNum </tag1>
-<tag2>Query</tag2>
-<tag3>Rank</tag3>
-<tag4>Url</tag4>
-</pageClick>
-<pageSearch>
-<tag1>Hits </tag1>
-<tag2>PageNum</tag2>
-<tag3>Query</tag3>
-<tag4>RespTime</tag4>
-<tag5>Start</tag5>
-</pageSearch>
-<pageSnapshot>
-<tag1>Hits </tag1>
-<tag2>PageNum</tag2>
-<tag3>Query</tag3>
-<tag4>RespTime</tag4>
-<tag5>Start</tag5>
-</pageSnapshot>
-</Page>
-</logBody>
+<product name="page">
+<!-- actinType:Click -->
+<action name="pageclick">
+<tag name="PageNum" />
+<tag name="Query" />
+<tag name="Rank" />
+<tag name="Url" />
+</action>
+
+<!-- actinType:Search -->
+<action name="pagesearch">
+<tag name="Hits" />
+<tag name="PageNum" />
+<tag name="Query" />
+<tag name="RespTime" />
+<tag name="Start" />
+</action>
+
+<!-- actinType:snapshot -->
+<action name="pagesnapshot">
+<tag name="Hits" />
+<tag name="PageNum" />
+<tag name="Query" />
+<tag name="RespTime" />
+<tag name="Start" />
+</action>
+</product>
+</logbody>
+
 </log>
 

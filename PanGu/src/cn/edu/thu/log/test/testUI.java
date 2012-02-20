@@ -1,15 +1,14 @@
 package cn.edu.thu.log.test;
 
-import java.awt.BorderLayout;
-import java.awt.CardLayout;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.sql.Date;
 import java.util.ArrayList;
 
-import javax.swing.BorderFactory;
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 
 import cn.edu.thu.log.read.Log;
@@ -552,9 +551,72 @@ public class testUI extends JFrame {
 
 	//初始化活动识别面板
 	private void initActivityIdentifyPanel() {
-		activityIdentifyPanel.setBackground(Color.YELLOW);
+		//activityIdentifyPanel.setBackground(Color.YELLOW);
 		activityIdentifyPanel.setBorder(BorderFactory.createTitledBorder("活动识别规则"));
+		activityIdentifyPanel.setLayout(new GridLayout(1,4));
 		
+		/** 产品面板包括一个产品选择下拉框和一个所选产品的JList列表，产品数目固定 */
+		JPanel productPanel=new JPanel();
+		JPanel up=new JPanel();	
+		up.setLayout(new GridLayout(2,1));
+		String[] productName={"新闻","网页","时评","图片","音乐","网址"};
+		JComboBox productCombo=new JComboBox(productName);
+		productCombo.setBorder(BorderFactory.createTitledBorder("所有产品列表"));
+		productCombo.addItemListener(new ItemListener(){
+
+			@Override
+			//读取选中的产品，存储到某个值，点击按钮后添加到所选产品列表中
+			public void itemStateChanged(ItemEvent e) {
+				// TODO Auto-generated method stub
+				
+			}});
+		JButton addProductButton=new JButton("添加产品");
+		addProductButton.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		});
+		up.add(productCombo);
+		up.add(addProductButton);	
+		
+		JList productList=new JList();		
+		productList.setPreferredSize(new Dimension(200,360));
+		//读取JList中的所有产品，方便后面字段进行筛选
+		
+		productPanel.add(up,BorderLayout.NORTH);
+		productPanel.add(productList,BorderLayout.CENTER);	
+		
+		/** 字段面板包括对应产品的所有字段，有一个JList */
+		JPanel tagPanel=new JPanel();
+		//用一个Vector接收所有的字段,并建立JList
+		JList tagList=new JList();		
+		JScrollPane tagPane=new JScrollPane(tagList);
+		tagPane.setPreferredSize(new Dimension(200,400));
+		tagList.addListSelectionListener(new ListSelectionListener(){
+
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		});
+		
+		/** 操作面板包括选择字段作为活动的所有操作，包括两个添加按钮，一个timestamp结果框，一个正则表达式输入框 */
+		JPanel operationPanel=new JPanel();	
+		
+		
+		/** 活动结果面板包括对选择的一列或多列字段及子串的结果展示，是一个JList */
+		JPanel activityResultPanel=new JPanel();
+		
+		activityIdentifyPanel.add(productPanel);
+		activityIdentifyPanel.add(tagPanel);
+		activityIdentifyPanel.add(operationPanel);
+		activityIdentifyPanel.add(activityResultPanel);
 	}
 
 	//初始化案例识别面板

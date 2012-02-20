@@ -3,10 +3,16 @@ package cn.edu.thu.log.web.service.impl;
 import java.util.ArrayList;
 
 import cn.edu.thu.log.miningconfig.MiningConfigFile;
-import cn.edu.thu.log.web.service.MiningConfigReadService;
+import cn.edu.thu.log.web.service.WebConfigReadService;
 
-public class MiningConfigReadServiceImpl implements MiningConfigReadService{
-	public MiningConfigReadServiceImpl(){
+/**
+ * realize reading user config form the web page
+ * @author wan
+ *
+ */
+public class WebConfigReadServiceImpl implements WebConfigReadService{
+	
+	public WebConfigReadServiceImpl(){
 		
 	}
 

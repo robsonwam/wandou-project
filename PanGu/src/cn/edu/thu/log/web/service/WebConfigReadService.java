@@ -4,11 +4,14 @@ import java.util.ArrayList;
 
 import cn.edu.thu.log.miningconfig.MiningConfigFile;
 import cn.edu.thu.log.test.testUI;
+
 /**
- * read web page and save it
+ * read user config form the web page
  * @author wan
  *
  */
-public interface MiningConfigReadService {
+public interface WebConfigReadService {
+	
 	public ArrayList<MiningConfigFile> readWebConfig();
+	
 }

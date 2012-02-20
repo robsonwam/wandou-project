@@ -18,7 +18,7 @@ import cn.edu.thu.log.web.service.impl.LogReadServiceImpl;
 /**
  * applicationUI for test
  * 
- * @author Meng
+ * @author Meng and Wan
  * 
  */
 
@@ -537,7 +537,7 @@ public class testUI extends JFrame {
 		/**噪声识别规则1中定义的正则表达式结果列表 */		
 		/*DefaultListModel noiseResultModel=new DefaultListModel();		
 		JList noiseResultList=new JList(noiseResultModel);*/
-		JTextArea noiseResultArea=new JTextArea(31,22);
+		JTextArea noiseResultArea=new JTextArea(30,22);
 		JScrollPane scrollNoisePane=new JScrollPane(noiseResultArea);
 		
 		//这里将写入的正则表达式添加进来用noiseResultModel.addElement
@@ -651,7 +651,7 @@ public class testUI extends JFrame {
 				e.printStackTrace();
 			}
 		}
-		updateCaseIDList();
+		//updateCaseIDList();
 
 	}
 
@@ -698,7 +698,7 @@ public class testUI extends JFrame {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		updateCaseIDList();
+	//	updateCaseIDList();
 
 	}
 

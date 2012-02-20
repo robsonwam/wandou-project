@@ -2,7 +2,7 @@ package cn.edu.thu.log.web.service;
 
 import java.util.ArrayList;
 
-import cn.edu.thu.log.miningconfigrule.LogCleanRule;
+import cn.edu.thu.log.preprocessrule.LogCleanRule;
 import cn.edu.thu.log.test.testUI;
 
 /**

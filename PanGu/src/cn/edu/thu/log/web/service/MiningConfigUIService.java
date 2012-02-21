@@ -2,7 +2,6 @@ package cn.edu.thu.log.web.service;
 
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.Vector;
 
 /** 
  * serve for the UI to save and get all the configuration rules

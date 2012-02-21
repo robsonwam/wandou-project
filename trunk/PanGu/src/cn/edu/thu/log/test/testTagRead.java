@@ -12,12 +12,12 @@ public class testTagRead {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		//LogReadServiceImpl logRead=new LogReadServiceImpl();
-		//ArrayList<String> productList=new ArrayList<String>();
-		//productList.add("image");
-	//	productList.add("page");
+		LogReadServiceImpl logRead=new LogReadServiceImpl();
+		ArrayList<String> productList=new ArrayList<String>();
+		productList.add("image");
+	    productList.add("page");
 		
-		//System.out.print("\n log tags:"+logRead.getLogTagsByProducts(productList));
+		System.out.print("\n log tags:"+logRead.getLogTagsByProducts(productList));
 		
 		
 //		LogConfig config=new LogConfig();

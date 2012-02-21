@@ -14,9 +14,32 @@ import java.awt.event.ItemListener;
 import java.io.File;
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.ButtonGroup;
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableModel;
 
 import cn.edu.thu.log.read.Log;
@@ -98,10 +121,20 @@ public class testUI extends JFrame {
 	Container container;
 	CardLayout cardManager;
 	
-	LogReadService readlog;
+    //事件处理部分所需变量
+	LogReadService readlogservice;
 	ArrayList<String> allProducts=new ArrayList<String>();
 	MiningConfigUIService miningconfigservice;
 	DefaultTableModel tagModel;
+	DefaultListModel noiseResultModel;	
+	JList noiseResultList;
+	JComboBox productCombo;
+	JList productList;
+	DefaultListModel productResultModel;
+	JList tagList;
+	DefaultTableModel activityResultModel;
+	JTable activityResultTable;
+	Map<String,String> productsname;
 	/**
 	 * construction function
 	 * 
@@ -112,13 +145,20 @@ public class testUI extends JFrame {
 
 		// initiate the UI
 		miningconfigservice=new MiningConfigUIServiceImpl();
-		readlog=new LogReadServiceImpl();
-		allProducts.add("新闻");
-		allProducts.add("网页");
-		allProducts.add("时评");
-		allProducts.add("图片");
-		allProducts.add("音乐");
-		allProducts.add("网址");
+		readlogservice=new LogReadServiceImpl();
+		productsname=new HashMap<String,String>();
+		productsname.put("新闻", "news");
+		productsname.put("网页", "page");
+		productsname.put("时评", "real");
+		productsname.put("图片", "image");
+		productsname.put("音乐", "music");
+		productsname.put("网址", "nav");
+		allProducts.add("news");
+		allProducts.add("page");
+		allProducts.add("real");
+		allProducts.add("image");
+		allProducts.add("music");
+		allProducts.add("nav");
 		initComponents();
 		start();
 	}
@@ -129,9 +169,8 @@ public class testUI extends JFrame {
 	 * @throws Exception
 	 */
 	private void start() {
-		reader = new LogReadServiceImpl();		// TODO Auto-generated method stub
-
-		
+		reader = new LogReadServiceImpl();		
+		// TODO Auto-generated method stub
 	}
 
 	/**
@@ -470,7 +509,8 @@ public class testUI extends JFrame {
 		tagModel = new DefaultTableModel(attr, cols);
 		
 		/**  绘制配置字段面板   */
-		Vector<String> alltags=new Vector<String>(readlog.getLogTagsByProducts(allProducts));		
+		Vector<String> alltags=new Vector<String>(readlogservice.getLogTagsByProducts(allProducts));		
+		System.out.println("\nalltags"+alltags);
 		//下拉表中放入日志中所有存在的字段，可通过读取日志配置文件
 		final JComboBox chooseAttri=new JComboBox(alltags);		
 		//文本框中让用户写入字段期望的正则表达式
@@ -483,9 +523,11 @@ public class testUI extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
 				String tagname=chooseAttri.getSelectedItem().toString();
-				String expression=expressionText.getText();
-				miningconfigservice.addlogCleanRule(tagname, expression);
-				tagModel.addRow(miningconfigservice.getTagFormat().toArray());
+				String expression=expressionText.getText();				
+				if(!miningconfigservice.getallLogCleanRules().containsKey(tagname)){				
+					miningconfigservice.addLogCleanRule(tagname, expression);	
+					tagModel.addRow(miningconfigservice.getTagFormat().toArray());
+				}
 				System.out.println("\ntagname is "+tagname+", expression is"+expression);
 				System.out.println("alllogs "+ miningconfigservice.getallLogCleanRules().toString());
 			}
@@ -509,17 +551,34 @@ public class testUI extends JFrame {
 		//noiseIdentifyPanel.setBackground(Color.RED);
 		noiseIdentifyPanel.setBorder(BorderFactory.createTitledBorder("噪声识别规则"));		
 		noiseIdentifyPanel.setLayout(new GridLayout(1,2));
+		//noiseResultModel=new DefaultListModel();		
+		//noiseResultList.setModel(noiseResultModel);
+		noiseResultList=new JList();
 		JPanel chooseNoisePanel=new JPanel();
-		JPanel resultPanel2=new JPanel();		
+		JPanel resultPanel2=new JPanel(new BorderLayout());		
 		
 		/**  三种噪声识别规则的配置   */
-		chooseNoisePanel.setLayout(new GridLayout(3,1));
-		chooseNoisePanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		chooseNoisePanel.setLayout(new GridLayout(4,1));
+		chooseNoisePanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));		
 		//第一行用于配置多个不能出现的正则表达式，如果出现则视为噪声
 		JPanel p1=new JPanel();	
 		p1.setLayout(new FlowLayout(FlowLayout.LEFT));
-		JTextField noiseAttr=new JTextField(15);
+		final JTextField noiseAttr=new JTextField(15);
 		JButton addNoiseButton=new JButton("添加");
+		addNoiseButton.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				String noiseStr=noiseAttr.getText();
+				miningconfigservice.addNoiseIdentifyRule(noiseStr);
+				//noiseResultModel.addElement(miningconfigservice.getNoiseIdentifyRule());
+				noiseResultList.setListData(miningconfigservice.getAllNoiseIdentifyRules().toArray());
+				System.out.println("\nnoise rule is "+noiseStr);
+				System.out.println("all noise rule are: "+ miningconfigservice.getAllNoiseIdentifyRules());
+			}
+			
+		});
 		p1.add(noiseAttr);
 		p1.add(addNoiseButton);
 		
@@ -527,28 +586,45 @@ public class testUI extends JFrame {
 		JPanel p2=new JPanel();	
 		p2.setLayout(new FlowLayout(FlowLayout.LEFT));
 		JLabel minInternalLabel=new JLabel("连续访问动作间最小时间间隔(毫秒)");
-		JTextField minInternalText=new JTextField(6);
+		final JTextField minInternalText=new JTextField(6);
 		p2.add(minInternalLabel);
 		p2.add(minInternalText);
 		//第三行用于配置连续访问最长时间
 		JPanel p3=new JPanel();
 		p3.setLayout(new FlowLayout(FlowLayout.LEFT));
 		JLabel maxTimeLabel=new JLabel("连续访问最长时间(小时)");
-		JTextField maxTimeText=new JTextField(6);
+		final JTextField maxTimeText=new JTextField(6);
 		p3.add(maxTimeLabel);
 		p3.add(maxTimeText);
+		//第四行是一个保存按钮，保存所有的噪声识别规则
+        JPanel p4=new JPanel();
+        JButton saveAll=new JButton("保存噪音识别规则");
+        saveAll.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				String mininter=minInternalText.getText();
+				String maxtime=maxTimeText.getText();
+				miningconfigservice.setMinIternal(mininter);
+				miningconfigservice.setMaxTime(maxtime);
+				System.out.println("\nminInternal is: "+miningconfigservice.getMinInternal());
+				System.out.println("\nmaxTime is: "+miningconfigservice.getMaxTime());
+			}        	
+        });
+        p4.setLayout(new FlowLayout(FlowLayout.LEFT));
+        p4.add(saveAll);
 		
 		chooseNoisePanel.add(p1);
 		chooseNoisePanel.add(p2);
 		chooseNoisePanel.add(p3);			
+		chooseNoisePanel.add(p4);
 		
-		/**噪声识别规则1中定义的正则表达式结果列表 */		
-		/*DefaultListModel noiseResultModel=new DefaultListModel();		
-		JList noiseResultList=new JList(noiseResultModel);*/
-		JTextArea noiseResultArea=new JTextArea(30,22);
-		JScrollPane scrollNoisePane=new JScrollPane(noiseResultArea);
+		/**噪声识别规则1中定义的正则表达式结果列表 */				
 		
-		//这里将写入的正则表达式添加进来用noiseResultModel.addElement
+		noiseResultList.setVisibleRowCount(30);
+		noiseResultList.setPreferredSize(getPreferredSize());
+		JScrollPane scrollNoisePane=new JScrollPane(noiseResultList);
 		
 		resultPanel2.add(scrollNoisePane);
 		resultPanel2.setBorder(BorderFactory.createTitledBorder("噪音表达式结果"));
@@ -559,66 +635,116 @@ public class testUI extends JFrame {
 	}
 
 	//初始化活动识别面板
-	private void initActivityIdentifyPanel() {
+	
+	//初始化活动识别面板
+    private void initActivityIdentifyPanel() {
 		//activityIdentifyPanel.setBackground(Color.YELLOW);
+		
 		activityIdentifyPanel.setBorder(BorderFactory.createTitledBorder("活动识别规则"));
 		activityIdentifyPanel.setLayout(new GridLayout(1,4));
+		productResultModel=new DefaultListModel();
+		productList=new JList(productResultModel);
+		tagList=new JList();
+		String[] cols = {"活动","取子串"};
+		String[][] attr = null;	
+		activityResultModel = new DefaultTableModel(attr, cols);
+		activityResultModel.setColumnIdentifiers(cols);
+		activityResultTable=new JTable(activityResultModel);		
 		
 		/** 产品面板包括一个产品选择下拉框和一个所选产品的JList列表，产品数目固定 */
 		JPanel productPanel=new JPanel();
 		JPanel up=new JPanel();	
 		up.setLayout(new GridLayout(2,1));
 		String[] productName={"新闻","网页","时评","图片","音乐","网址"};
-		JComboBox productCombo=new JComboBox(productName);
+		productCombo=new JComboBox(productName);
 		productCombo.setBorder(BorderFactory.createTitledBorder("所有产品列表"));
-		productCombo.addItemListener(new ItemListener(){
-
-			@Override
-			//读取选中的产品，存储到某个值，点击按钮后添加到所选产品列表中
-			public void itemStateChanged(ItemEvent e) {
-				// TODO Auto-generated method stub
-				
-			}});
+	
 		JButton addProductButton=new JButton("添加产品");
 		addProductButton.addActionListener(new ActionListener(){
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
+				//点击按钮后选择的产品显示在JList中
+				readlogservice=new LogReadServiceImpl();
+				String productStr=productCombo.getSelectedItem().toString();
+				String productEngname=productsname.get(productStr);
+				miningconfigservice.addAnalyzedProduct(productEngname);
+				productResultModel.addElement(productStr);				
+				productList.setModel(productResultModel);				
+				//System.out.println("\nanalyzed product is: "+miningconfigservice.getAllAnalyzedProducts());
 				
-			}
-			
+				//点击按钮后在字段部分显示的字段产生变化
+				ArrayList<String> proList=new ArrayList<String>(miningconfigservice.getAllAnalyzedProducts());
+				System.out.println("\nproList: "+proList);
+				//ArrayList<String> proList=new ArrayList<String>();
+				//proList.add("page");
+				tagList.setListData(readlogservice.getLogTagsByProducts(proList).toArray());
+				System.out.println("\n所选产品对应字段："+readlogservice.getLogTagsByProducts(proList));			
+				
+			}			
 		});
 		up.add(productCombo);
-		up.add(addProductButton);	
+		up.add(addProductButton);			
 		
-		JList productList=new JList();	
-		productList.setPreferredSize(new Dimension(120,370));
-		//读取JList中的所有产品，方便后面字段进行筛选
+		productList.setVisibleRowCount(22);
+		productList.setPreferredSize(getPreferredSize());
+		JScrollPane productPane=new JScrollPane(productList);		
+		productPane.setBorder(BorderFactory.createTitledBorder("选择的产品"));
 		
+		productPanel.setLayout(new BorderLayout());
 		productPanel.add(up,BorderLayout.NORTH);
-		productPanel.add(productList,BorderLayout.CENTER);	
+		productPanel.add(productPane);	
 		
 		/** 字段面板包括对应产品的所有字段，有一个JList */
-		JPanel tagPanel=new JPanel();
-		tagPanel.setBorder(BorderFactory.createTitledBorder("产品所有字段"));
-		//用一个Vector接收所有的字段,并建立JList
-		JList tagList=new JList();		
-		JScrollPane tagPane=new JScrollPane(tagList);
-		tagPane.setPreferredSize(new Dimension(200,400));
-	    tagList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+		JPanel tagPanel=new JPanel(new BorderLayout());		
+		tagPanel.setBorder(BorderFactory.createTitledBorder("产品所有字段"));		
+		tagList.setVisibleRowCount(20); 
+		tagList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+		tagList.setPreferredSize(getPreferredSize());
+		JScrollPane tagPane=new JScrollPane(tagList);		
+	   
 	    //tagList.getSelectedValue()来记录选择的活动字段
-		
+		tagPanel.add(tagPane);
 		/** 操作面板包括选择字段作为活动的所有操作，包括两个添加按钮，一个timestamp结果框，一个正则表达式输入框 */
 		JPanel operationPanel=new JPanel();	
 		operationPanel.setBorder(BorderFactory.createTitledBorder("选择活动字段"));
 		Box operationBox=Box.createVerticalBox();
 		JButton addTimestampButton=new JButton("添加时间戳");
-		JButton addActivityButton=new JButton("添加活动");
-		JTextField timestampText=new JTextField(6);
+		final JTextField timestampText=new JTextField(6);		
 		timestampText.setEditable(false);
+		final JTextField actExpressText=new JTextField(6);
 		JLabel actExpressLabel=new JLabel("活动子串规则");
-		JTextField actExpressText=new JTextField(6);
+		addTimestampButton.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				String selectedtime=tagList.getSelectedValue().toString();
+				timestampText.setText(selectedtime);
+				System.out.println("\nselected timestamp is : "+selectedtime);
+			}
+			
+		}); 
+		JButton addActivityButton=new JButton("添加活动");
+		addActivityButton.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				String selectedactivity=tagList.getSelectedValue().toString();				
+				String actExpression=actExpressText.getText();
+				if(!miningconfigservice.getAllActivityIdentifyRules().containsKey(selectedactivity)){
+					miningconfigservice.addActivityIdentifyRule(selectedactivity, actExpression);
+					activityResultModel.addRow(miningconfigservice.getActivityFormat().toArray());		
+				}
+				activityResultTable.setModel(activityResultModel);				
+				System.out.println("\nselected activity is : "+selectedactivity+" and Expression is: "+actExpression);
+				System.out.println("\nactivity format is:"+miningconfigservice.getActivityFormat());
+				
+			}			
+		});				
+				
 		operationBox.add(Box.createVerticalStrut(20));
 		operationBox.add(addTimestampButton);
 		operationBox.add(Box.createVerticalStrut(20));//创建一个不可见的30单位的组件
@@ -632,12 +758,11 @@ public class testUI extends JFrame {
 		operationPanel.add(operationBox);		
 		
 		/** 活动结果面板包括对选择的一列或多列字段及子串的结果展示，是一个JList */
-		JPanel activityResultPanel=new JPanel();
-		activityResultPanel.setBorder(BorderFactory.createTitledBorder("活动选择结果"));
-		//获取所选字段和字段子串，有一个逻辑操作		
-		JList activityResultList=new JList();
-		JScrollPane actResultPane=new JScrollPane(activityResultList);
-		actResultPane.setPreferredSize(getPreferredSize());		
+		JPanel activityResultPanel=new JPanel(new BorderLayout());
+		activityResultPanel.setBorder(BorderFactory.createTitledBorder("活动选择结果"));		
+		JScrollPane actResultPane=new JScrollPane(activityResultTable);
+		actResultPane.setPreferredSize(getPreferredSize());
+		activityResultPanel.add(actResultPane);
 		
 		/** 将所有面板加入其中 */
 		activityIdentifyPanel.add(productPanel);
@@ -649,17 +774,42 @@ public class testUI extends JFrame {
 	//初始化案例识别面板
 	private void initCaseIdentifyPanel() {
 		//caseIdentifyPanel.setBackground(Color.GREEN);
+		ButtonGroup casechooseGroup=new ButtonGroup();
 		caseIdentifyPanel.setBorder(BorderFactory.createTitledBorder("案例识别规则"));
 		caseIdentifyPanel.setLayout(new GridLayout(1,3));
 		JList tagList=new JList();
 		tagList.setBorder(BorderFactory.createTitledBorder("可选活动字段"));
 		JPanel caseChooseModePanel=new JPanel();
-		JRadioButton mainIdButton=new JRadioButton("主案例ID（唯一）");
-		JRadioButton secondIdButton=new JRadioButton("可选案例ID（可组合）");
+		JRadioButton mainIdButton=new JRadioButton("主案例ID（唯一）",true);
+		JRadioButton secondIdButton=new JRadioButton("可选案例ID（可组合）",false);
+		casechooseGroup.add(mainIdButton);
+		casechooseGroup.add(secondIdButton);
 		caseChooseModePanel.add(mainIdButton,BorderLayout.NORTH);
 		caseChooseModePanel.add(secondIdButton,BorderLayout.SOUTH);
+		mainIdButton.addItemListener(new ItemListener(){
+
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				// TODO Auto-generated method stub
+				if(e.getStateChange()==e.SELECTED){
+					
+				}					
+			}			
+			
+		});
+		secondIdButton.addItemListener(new ItemListener(){
+
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				// TODO Auto-generated method stub
+				if(e.getStateChange()==e.SELECTED){
+					
+				}
+			}		
+			
+		});
 		JList caseResultList=new JList();
-		caseResultList.setBorder(BorderFactory.createTitledBorder("选已选活动字段"));
+		caseResultList.setBorder(BorderFactory.createTitledBorder("已选活动字段"));
 		caseIdentifyPanel.add(tagList);
 		caseIdentifyPanel.add(caseChooseModePanel);
 		caseIdentifyPanel.add(caseResultList);			

@@ -48,7 +48,7 @@ public class LogContent {
 		LogFilesReader logfilesReader = new LogFilesReader();
 		cateList = new ArrayList<String>();
 		cateList = logfilesReader.getCateList(readfile);
-		readFile(readfile, logUI);
+		readFile(readfile);
 		// if(cateList.size()>1)
 		// {
 		//			
@@ -68,9 +68,9 @@ public class LogContent {
 	 * @param logUI
 	 *            GUI for test
 	 */
-	private void readFile(File readfile, testUI logUI) {
+	private void readFile(File readfile) {
 		if (!readfile.isDirectory()) {
-			readFileContent(readfile, logUI);
+			readFileContent(readfile);
 		//	System.out.println(readfile.getName() + " is not Directory\n");
 		} else if (readfile.isDirectory()) {
 			//System.out.println(readfile.getName() + " is Directory\n");
@@ -78,10 +78,10 @@ public class LogContent {
 			for (int i = 0; i < fileList.length; i++) {
 				File editfile = fileList[i];
 				if (!editfile.isDirectory()) {
-					readFileContent(editfile, logUI);
+					readFileContent(editfile);
 
 				} else if (editfile.isDirectory()) {
-					readFile(editfile, logUI);
+					readFile(editfile);
 				}
 			}
 		}
@@ -95,7 +95,7 @@ public class LogContent {
 	 * @param logUI
 	 *            GUI for test
 	 */
-	private void readFileContent(File file, testUI logUI) {
+	private void readFileContent(File file) {
 
 		BufferedReader reader;
 		String record;
@@ -304,7 +304,7 @@ public class LogContent {
 	 *            GUI for test/ it is not used here
 	 * @return
 	 */
-	public ArrayList<Log> getContent(File readfile, testUI logUI) {
+	public ArrayList<Log> getContent(File readfile) {
 		// TODO Auto-generated method stub
 		// the List of log that represent the content that want to be read
 		logList = new ArrayList<Log>();
@@ -313,7 +313,7 @@ public class LogContent {
 		cateList = new ArrayList<String>();
 		cateList = logfilesReader.getCateList(readfile);
 
-		readFile(readfile, logUI);
+		readFile(readfile);
 		// if(cateList.size()>1)
 		// {
 		//			

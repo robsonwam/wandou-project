@@ -686,7 +686,7 @@ public class testUI extends JFrame {
 	 * @param tableHead
 	 *            name of columns
 	 */
-	public void setTableHead(ArrayList<Object> tableHead) {
+	public void setTableHead(ArrayList<String> tableHead) {
 		tableModel.setColumnIdentifiers(tableHead.toArray());
 
 	}

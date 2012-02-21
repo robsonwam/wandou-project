@@ -1,18 +1,29 @@
 package cn.edu.thu.log.test;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
+import java.awt.Color;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.File;
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.Vector;
 
 import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 
 import cn.edu.thu.log.read.Log;
+import cn.edu.thu.log.web.service.LogReadService;
+import cn.edu.thu.log.web.service.MiningConfigUIService;
 import cn.edu.thu.log.web.service.impl.LogReadServiceImpl;
+import cn.edu.thu.log.web.service.impl.MiningConfigUIServiceImpl;
 
 /**
  * applicationUI for test
@@ -86,7 +97,11 @@ public class testUI extends JFrame {
 	JPanel caseIdentifyPanel;
 	Container container;
 	CardLayout cardManager;
-
+	
+	LogReadService readlog;
+	ArrayList<String> allProducts=new ArrayList<String>();
+	MiningConfigUIService miningconfigservice;
+	DefaultTableModel tagModel;
 	/**
 	 * construction function
 	 * 
@@ -96,7 +111,14 @@ public class testUI extends JFrame {
 	public testUI() {
 
 		// initiate the UI
-
+		miningconfigservice=new MiningConfigUIServiceImpl();
+		readlog=new LogReadServiceImpl();
+		allProducts.add("新闻");
+		allProducts.add("网页");
+		allProducts.add("时评");
+		allProducts.add("图片");
+		allProducts.add("音乐");
+		allProducts.add("网址");
 		initComponents();
 		start();
 	}
@@ -107,36 +129,9 @@ public class testUI extends JFrame {
 	 * @throws Exception
 	 */
 	private void start() {
-		reader = new LogReadServiceImpl();
-		// TODO Auto-generated method stub
+		reader = new LogReadServiceImpl();		// TODO Auto-generated method stub
 
-		// Book tempBook = new Book("1", "gone with wind", "literature",
-		// "amerian writer", 50, "1988/3/30", "america", "2012.1.11",
-		// "carol");
-		//
-		// tableModel.addRow(tempBook.toArrays());
-		// bookList.add(tempBook);
-		//
-		// tempBook = new Book("2", "history of china", "history", "chinese",
-		// 100,
-		// "1949/10/1", "china", "2012/2/11", "reinier");
-		//
-		// tableModel.addRow(tempBook.toArrays());
-		// bookList.add(tempBook);
-		//
-		// tempBook = new Book("3", "gone with wind", "literature",
-		// "amerian writer", 20, "2010/5/20", "america", "2012.1.11",
-		// "carol");
-		//
-		// tableModel.addRow(tempBook.toArrays());
-		// bookList.add(tempBook);
-
-		// parseXML=new ConfigReader();
-		// parseXML.parse("../myenv.xml");
-
-		// prop =parseXML.getProps();
-		// tableModel.addRow( prop.values().toArray());
-		// System.out.print(prop.keys());
+		
 	}
 
 	/**
@@ -470,26 +465,40 @@ public class testUI extends JFrame {
 		logCleanPanel.setBorder(BorderFactory.createTitledBorder("日志清洗规则"));
 		JPanel chooseCleanPanel=new JPanel();
 		JPanel resultPanel1=new JPanel();
+		String[] cols = {"字段","字段格式"};
+		String[][] attr = null;	
+		tagModel = new DefaultTableModel(attr, cols);
 		
 		/**  绘制配置字段面板   */
+		Vector<String> alltags=new Vector<String>(readlog.getLogTagsByProducts(allProducts));		
 		//下拉表中放入日志中所有存在的字段，可通过读取日志配置文件
-		JComboBox chooseAttri=new JComboBox();
+		final JComboBox chooseAttri=new JComboBox(alltags);		
 		//文本框中让用户写入字段期望的正则表达式
-		JTextField expression=new JTextField(15);
+		final JTextField expressionText=new JTextField(15);
 		//按钮将以上字段和正则表达式规则一同放入下边的table中
 		JButton addButton=new JButton("添加字段规范");
-		
+		addButton.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				String tagname=chooseAttri.getSelectedItem().toString();
+				String expression=expressionText.getText();
+				miningconfigservice.addlogCleanRule(tagname, expression);
+				tagModel.addRow(miningconfigservice.getTagFormat().toArray());
+				System.out.println("\ntagname is "+tagname+", expression is"+expression);
+				System.out.println("alllogs "+ miningconfigservice.getallLogCleanRules().toString());
+			}
+			
+		});
 	    chooseCleanPanel.add(chooseAttri);
-	    chooseCleanPanel.add(expression);
+	    chooseCleanPanel.add(expressionText);
 	    chooseCleanPanel.add(addButton);
 	    
-	    /**绘制配置字段结果战士面板 */
-	    String[] cols = null;
-		String[][] attr = null;
-		DefaultTableModel resultModel = new DefaultTableModel(attr, cols);
-		JTable resultTable = new JTable(resultModel);
-		
-		resultPanel1.add(new JScrollPane(resultTable));		
+	    /**绘制配置字段结果战士面板 */		
+		tagModel.setColumnIdentifiers(cols);		
+		JTable tagTable = new JTable(tagModel);		
+		resultPanel1.add(new JScrollPane(tagTable));		
 		
 		logCleanPanel.add(chooseCleanPanel,BorderLayout.NORTH);
 		logCleanPanel.add(resultPanel1,BorderLayout.CENTER);
@@ -639,8 +648,21 @@ public class testUI extends JFrame {
 
 	//初始化案例识别面板
 	private void initCaseIdentifyPanel() {
-		caseIdentifyPanel.setBackground(Color.GREEN);
+		//caseIdentifyPanel.setBackground(Color.GREEN);
 		caseIdentifyPanel.setBorder(BorderFactory.createTitledBorder("案例识别规则"));
+		caseIdentifyPanel.setLayout(new GridLayout(1,3));
+		JList tagList=new JList();
+		tagList.setBorder(BorderFactory.createTitledBorder("可选活动字段"));
+		JPanel caseChooseModePanel=new JPanel();
+		JRadioButton mainIdButton=new JRadioButton("主案例ID（唯一）");
+		JRadioButton secondIdButton=new JRadioButton("可选案例ID（可组合）");
+		caseChooseModePanel.add(mainIdButton,BorderLayout.NORTH);
+		caseChooseModePanel.add(secondIdButton,BorderLayout.SOUTH);
+		JList caseResultList=new JList();
+		caseResultList.setBorder(BorderFactory.createTitledBorder("选已选活动字段"));
+		caseIdentifyPanel.add(tagList);
+		caseIdentifyPanel.add(caseChooseModePanel);
+		caseIdentifyPanel.add(caseResultList);			
 	}
 
 	/**
@@ -672,22 +694,16 @@ public class testUI extends JFrame {
 		}
 
 		tableModel.addRow(logRecord.toArray());
-		// ArrayList<String> tempList=new ArrayList<String>();
-		// for(int i=0;i<5;i++){
-		// tempList.add(logRecord.get(i).toString());}
-		// String[] test={"test","test","test","test"};
-		// //tableModel.addRow(test);
-
 	}
 
 	/**
 	 * set up Table's head based on product
 	 * 
-	 * @param tableHead
+	 * @param logTags
 	 *            name of columns
 	 */
-	public void setTableHead(ArrayList<String> tableHead) {
-		tableModel.setColumnIdentifiers(tableHead.toArray());
+	public void setTableHead(ArrayList<String> logTags) {
+		tableModel.setColumnIdentifiers(logTags.toArray());
 
 	}
 
@@ -764,21 +780,16 @@ public class testUI extends JFrame {
 			// fileName = chooser.getSelectedFile().getName();
 			// filePath = chooser.getSelectedFile().getPath();
 			chosenfile = chooser.getSelectedFile();
-			// chosenfiles = chooser.getSelectedFiles();
-			// chosenfile=chosenfiles[0];
+			
 		}
 		try {
-			// reader.addLog(logList,chosenfile, this);
+			
 			reader.readLog(chosenfile, this);
-
-			// ArrayList<Object> test=new ArrayList<Object>();
-			// test.add("test");
-			// addLog(test);
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	//	updateCaseIDList();
+	
 
 	}
 
@@ -788,9 +799,7 @@ public class testUI extends JFrame {
 	public void saveAs() {
 		// chooser file
 		JFileChooser chooser = new JFileChooser();
-		// FileNameExtensionFilter filter = new FileNameExtensionFilter(
-		// "arff Files", "arff");
-		// chooser.setFileFilter(filter);
+		
 		chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 		chooser.setMultiSelectionEnabled(true);
 		chooser.setCurrentDirectory(chosenfile.getAbsoluteFile());

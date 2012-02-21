@@ -11,7 +11,7 @@ import java.util.ArrayList;
  */
 public class LogFilesReader {
 	/**
-	 *list of category
+	 * list of category
 	 */
 	ArrayList<String> cateList;
 

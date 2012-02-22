@@ -1,8 +1,11 @@
 package cn.edu.thu.log.web.service;
 
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
+
+import org.w3c.dom.Document;
 
 /** 
  * serve for the UI to save and get all the configuration rules
@@ -30,7 +33,17 @@ public interface MiningConfigUIService {
 	public void addActivityIdentifyRule(String activityname,String actexpression);
 	public Map<String, String> getAllActivityIdentifyRules();
 	public ArrayList<String> getActivityFormat();
+	public String getTimeStamp();
+	public void setTimeStamp(String timestamp);
 	
 	/** 为案例识别规则界面提供服务 */
-	public void addCaseIdentifyRule();
+	public void addCaseIdentifyRule(String caseidentifyrule,String type);
+	public Map<String,String> getAllCaseIdentifyRules();
+	public void clearCaseIdentifyRules();
+	
+	//读取界面的用户配置，写成doc形式
+	public void writeMiningConfig(String outfile);
+		
+	//将doc配置文件写入xml中
+	public void callWirteMiningConfig(Document doc, Writer writer);
 }

@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.util.ArrayList;
 
 import cn.edu.thu.log.test.testUI;
+import cn.edu.thu.log.xes.XESWriter;
 
 /**
  * reader for content of log file,which contains functions that can read content
@@ -24,7 +25,11 @@ public class LogContent {
 	/** Log's configuration class */
 	LogConfig logConfig;
 	ArrayList<Log> logList;
-
+	ArrayList<String> logHeadContentParams;
+	ArrayList<String> logBodyContentParams;
+	/**logBuffer to save one record's content*/
+	LogBuffer logBuffer;
+	XESWriter xesWriter;
 	/**
 	 * constructor
 	 * 
@@ -34,6 +39,7 @@ public class LogContent {
 	public LogContent(LogConfig logConfig) {
 		this.logConfig = logConfig;
 		logList = new ArrayList<Log>();
+		//xesWriter=new XESWriter();
 	}
 
 	/**
@@ -51,7 +57,7 @@ public class LogContent {
 		readFile(readfile);
 		// if(cateList.size()>1)
 		// {
-		//			
+		//
 		// readFile(readfile, logUI);
 		// }
 		// else{
@@ -71,9 +77,9 @@ public class LogContent {
 	private void readFile(File readfile) {
 		if (!readfile.isDirectory()) {
 			readFileContent(readfile);
-		//	System.out.println(readfile.getName() + " is not Directory\n");
+			// System.out.println(readfile.getName() + " is not Directory\n");
 		} else if (readfile.isDirectory()) {
-			//System.out.println(readfile.getName() + " is Directory\n");
+			// System.out.println(readfile.getName() + " is Directory\n");
 			File[] fileList = readfile.listFiles();
 			for (int i = 0; i < fileList.length; i++) {
 				File editfile = fileList[i];
@@ -160,8 +166,8 @@ public class LogContent {
 					// System.out.print("\n escapteSymble after is"+escapeSymble);
 					if (String.valueOf(logHeadContent.charAt(i)).matches(
 							escapeSymble)) {
-//						System.out.print("\n found escape Symble:"
-//								+ logHeadContent.charAt(i));
+						// System.out.print("\n found escape Symble:"
+						// + logHeadContent.charAt(i));
 						i += 2;
 					}
 				}
@@ -185,71 +191,28 @@ public class LogContent {
 					// System.out.print("\n escapteSymble after is"+escapeSymble);
 					if (String.valueOf(logBodyContent.charAt(i)).matches(
 							escapeSymble)) {
-//						System.out.print("\n found escape Symble:"
-//								+ logBodyContent.charAt(i));
+						// System.out.print("\n found escape Symble:"
+						// + logBodyContent.charAt(i));
 						i += 2;
 					}
 
 				}
-				// combine the headparams and the bodyparams to generate log
-				// params
+			
+				
+				// combine the headparams and the bodyparams to generate log params
 				params.addAll(headparams);
 				params.addAll(bodyparams);
-//				System.out.print("\nheadParams" + headparams);
-//				System.out.print("\nbodyparams" + bodyparams);
-
-				// for (int i = 0; i < temprecord.length(); i++) {
-				// if (String.valueOf(temprecord.charAt(i)).matches(
-				// logBodyTokenizer)) {
-				// params.add(temprecord.substring(startIndex, i));
-				// startIndex = i + 1;
-				// }
-				// if (String.valueOf(temprecord.charAt(i)).matches(
-				// logHeadBodyTokenizer)) {
-				// // if (temprecord.charAt(i) == ';') {
-				// // logHeadContent=record.
-				// params.add(temprecord.substring(startIndex, i));
-				// logHeadContent = record.substring(0, i);
-				// logBodyContent = record.substring(i, record.length());
-				// // System.out.print("\n log body content "
-				// // + logBodyContent);
-				// // System.out.print("\n log Head content "
-				// // + logHeadContent);
-				// startIndex = i + 1;
-				// }
-				// // the token after"\" does not count
-				// String speciaString = new String("\\\\");
-				// //
-				// System.out.print("\n escapteSymble before is"+escapeSymble);
-				// if (escapeSymble.matches(speciaString)) {
-				// //
-				// "\" is also the escape symble in java. so if the log use "\" as escapesymble, the java will inteprated as "\\\\"
-				// escapeSymble = new String("\\\\");
-				//
-				// }
-				// //
-				// System.out.print("\n escapteSymble after is"+escapeSymble);
-				// if (String.valueOf(temprecord.charAt(i)).matches(
-				// escapeSymble)) {
-				// System.out.print("\n found escape Symble:"
-				// + temprecord.charAt(i));
-				// i += 2;
-				// }
-				// // the token"," between"()" does not count
-				// // if (temprecord.charAt(i) == '(') {
-				// // for (int j = i; j < temprecord.length(); j++) {
-				// // if (temprecord.charAt(j) == ')') {
-				// // i = j;
-				// // break;
-				// // }
-				// //
-				// // }
-				// //
-				// // }
-				//
-				// }
-				// System.out.print("\nread log params:" + params);
-
+				
+				
+				//For XES 
+//				logBuffer = new 	LogBuffer();
+//				logBuffer.setLogHeadContent(headparams);
+//				logBuffer.setLogBodyContent(headparams);
+//				logBuffer.setLogContent(params);
+				
+			//	xesWriter.writeEvent(logBuffer);
+				
+				// add more null to fit the merged tags
 				String category = file.getName().split("_")[0];
 				int indexCate = 0;
 				for (int i = 0; i < cateList.size(); i++) {
@@ -259,19 +222,15 @@ public class LogContent {
 				}
 				int insertIndex = 0;
 				int insertParamscount = 0;
-				// LogConfig logConfig=new LogConfig();
 				insertIndex += headparams.size();
-				// insertIndex += logConfig.getLogHead().size();
-//				System.out.print("\nlog head size:"
-//						+ logConfig.getLogHead().size());
 
 				for (int i = 0; i < indexCate; i++) {
 
 					int tempBodyParamCount = logConfig.getLogBodyByCate(
 							cateList.get(i)).size();
-					// insertIndex+=tempBodyParamCount;
 					insertParamscount += tempBodyParamCount;
-//					System.out.print("\nlog body size:" + tempBodyParamCount);
+					// System.out.print("\nlog body size:" +
+					// tempBodyParamCount);
 
 				}
 
@@ -279,11 +238,11 @@ public class LogContent {
 				for (int j = 0; j < insertParamscount; j++) {
 					params.add(insertIndex, null);
 				}
-//				System.out.print("\n params add:" + params);
+				// System.out.print("\n params add:" + params);
 				// logUI.addLog(params);
 				log.setLogContent(params);
 
-//				System.out.print("\nadd log:" + log.getLogContent());
+				// System.out.print("\nadd log:" + log.getLogContent());
 				logList.add(log);
 
 			}
@@ -307,7 +266,7 @@ public class LogContent {
 	public ArrayList<Log> getContent(String filePath) {
 		// TODO Auto-generated method stub
 		// the List of log that represent the content that want to be read
-		File readfile=new File(filePath);
+		File readfile = new File(filePath);
 		logList = new ArrayList<Log>();
 
 		LogFilesReader logfilesReader = new LogFilesReader();
@@ -317,7 +276,7 @@ public class LogContent {
 		readFile(readfile);
 		// if(cateList.size()>1)
 		// {
-		//			
+		//
 		// readFile(readfile, logUI);
 		// }
 		// else{

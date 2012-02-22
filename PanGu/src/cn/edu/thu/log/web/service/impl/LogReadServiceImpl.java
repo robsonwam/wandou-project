@@ -90,18 +90,18 @@ public class LogReadServiceImpl implements LogReadService {
 	public ArrayList<String> getLogTagsByProducts(ArrayList<String> productList) {
 		ArrayList<String> logTags=new ArrayList<String>();
 		
-		if(logConfig.getLogTags().size()==0)
-		{
+		//if(logConfig.getLogTags().size()==0)
+		//{
 			logConfig.config(CONFIGFILE);
 			logTags.addAll(logConfig.getLogHead());
 			
 			//logTags.addAll(logConfig.readTags("action", productList));
 			logTags.addAll(logConfig.readTagsByProducts(productList));
 			//logTags.addAll(logConfig.getLogBodyByProducts(productList));
-		}
-		else{
+	//	}
+	//	else{
 			logTags =logConfig.getLogTags();
-		}
+	//	}
 			
 	//	System.out.print("\n tags of prodcut"+logTags);
 		return logTags;

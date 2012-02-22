@@ -10,6 +10,7 @@ import org.w3c.dom.Document;
  */
 public interface MiningConfigWriteService {
 	
+	
 	//读取界面的用户配置，写成doc形式
 	public void writeMiningConfig(String outfile);
 	

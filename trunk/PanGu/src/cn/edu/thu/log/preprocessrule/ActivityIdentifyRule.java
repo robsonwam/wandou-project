@@ -10,9 +10,9 @@ public class ActivityIdentifyRule {
 	private String activityname;
 	private String actexpression;
 	private ArrayList<String> activity_format;
-	private Map<String, String> activityIdentifyRules;
-	// private Set<Map<String,String>> activityIdentifyRules=null;
+	private Map<String, String> activityIdentifyRules;	
 	private Set<String> allAnalyzedProducts;
+	private String timestamp=null;
 
 	public ActivityIdentifyRule() {
 		allAnalyzedProducts = new HashSet<String>();
@@ -48,8 +48,48 @@ public class ActivityIdentifyRule {
 		return activity_format;
 	}
 
-	public Map<String, String> getActivityIdentifyRules() {
+	public Map<String, String> getAllActivityIdentifyRules() {
 		return activityIdentifyRules;
+	}
+
+	public String getTimestamp() {
+		return timestamp;
+	}
+
+	public void setTimestamp(String timestamp) {
+		this.timestamp = timestamp;
+	}
+
+	public String getActivityname() {
+		return activityname;
+	}
+
+	public void setActivityname(String activityname) {
+		this.activityname = activityname;
+	}
+
+	public String getActexpression() {
+		return actexpression;
+	}
+
+	public void setActexpression(String actexpression) {
+		this.actexpression = actexpression;
+	}
+
+	public ArrayList<String> getActivity_format() {
+		return activity_format;
+	}
+
+	public void setActivity_format(ArrayList<String> activity_format) {
+		this.activity_format = activity_format;
+	}
+
+	public void setActivityIdentifyRules(Map<String, String> activityIdentifyRules) {
+		this.activityIdentifyRules = activityIdentifyRules;
+	}
+
+	public void setAllAnalyzedProducts(Set<String> allAnalyzedProducts) {
+		this.allAnalyzedProducts = allAnalyzedProducts;
 	}
 
 }

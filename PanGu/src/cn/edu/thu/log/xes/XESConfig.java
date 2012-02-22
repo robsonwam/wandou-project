@@ -29,4 +29,36 @@ public class XESConfig {
 		timeStamp = "timestamp";
 	}
 
+	public ArrayList<String> getCaseIDList() {
+		return caseIDList;
+	}
+
+	public void setCaseIDList(ArrayList<String> caseIDList) {
+		this.caseIDList = caseIDList;
+	}
+
+	public ArrayList<String> getActivityIDList() {
+		return activityIDList;
+	}
+
+	public void setActivityIDList(ArrayList<String> activityIDList) {
+		this.activityIDList = activityIDList;
+	}
+
+	public String getTimeStamp() {
+		return timeStamp;
+	}
+
+	public void setTimeStamp(String timeStamp) {
+		this.timeStamp = timeStamp;
+	}
+
+	public String getConfigFile() {
+		return configFile;
+	}
+
+	public void setConfigFile(String configFile) {
+		this.configFile = configFile;
+	}
+
 }

@@ -11,9 +11,6 @@ public class testApp {
 		testUI logUI=new testUI();
 		//logUI = new testUI();
 		logUI.setVisible(true);
-		logUI.setSize(600, 600);
-		
+		logUI.setSize(600, 600);	
 	}
-
-
 }

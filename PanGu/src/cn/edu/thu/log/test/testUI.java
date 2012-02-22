@@ -45,8 +45,10 @@ import javax.swing.table.DefaultTableModel;
 import cn.edu.thu.log.read.Log;
 import cn.edu.thu.log.web.service.LogReadService;
 import cn.edu.thu.log.web.service.MiningConfigUIService;
+import cn.edu.thu.log.web.service.MiningConfigWriteService;
 import cn.edu.thu.log.web.service.impl.LogReadServiceImpl;
 import cn.edu.thu.log.web.service.impl.MiningConfigUIServiceImpl;
+import cn.edu.thu.log.web.service.impl.MiningConfigWriteServiceImpl;
 
 /**
  * applicationUI for test
@@ -103,7 +105,7 @@ public class testUI extends JFrame {
 	File chosenfile;
 	File[] chosenfiles;
 	// Service
-	LogReadServiceImpl reader;
+	LogReadServiceImpl logreadservice;
 
 	/** Config miningfile */
 	JMenu miningConfig;
@@ -120,13 +122,14 @@ public class testUI extends JFrame {
 	JPanel caseIdentifyPanel;
 	Container container;
 	CardLayout cardManager;
-	
-    //事件处理部分所需变量
+
+	// 事件处理部分所需变量
 	LogReadService readlogservice;
-	ArrayList<String> allProducts=new ArrayList<String>();
 	MiningConfigUIService miningconfigservice;
+	//MiningConfigWriteService miningconfigwriteservice;
+	ArrayList<String> allProducts = new ArrayList<String>();	
 	DefaultTableModel tagModel;
-	DefaultListModel noiseResultModel;	
+	DefaultListModel noiseResultModel;
 	JList noiseResultList;
 	JComboBox productCombo;
 	JList productList;
@@ -134,7 +137,14 @@ public class testUI extends JFrame {
 	JList tagList;
 	DefaultTableModel activityResultModel;
 	JTable activityResultTable;
-	Map<String,String> productsname;
+	Map<String, String> productsname;
+	DefaultListModel caseResultModel;
+	JList caseList;
+	JList caseResultList;
+	int flag = -1;
+	int buttoncount = 0;
+	ArrayList<String> tempList;
+
 	/**
 	 * construction function
 	 * 
@@ -144,9 +154,10 @@ public class testUI extends JFrame {
 	public testUI() {
 
 		// initiate the UI
-		miningconfigservice=new MiningConfigUIServiceImpl();
-		readlogservice=new LogReadServiceImpl();
-		productsname=new HashMap<String,String>();
+		miningconfigservice = new MiningConfigUIServiceImpl();
+		//miningconfigwriteservice=new MiningConfigWriteServiceImpl();
+		// readlogservice=new LogReadServiceImpl();
+		productsname = new HashMap<String, String>();
 		productsname.put("新闻", "news");
 		productsname.put("网页", "page");
 		productsname.put("时评", "real");
@@ -159,8 +170,9 @@ public class testUI extends JFrame {
 		allProducts.add("image");
 		allProducts.add("music");
 		allProducts.add("nav");
-		initComponents();
 		start();
+		initComponents();
+
 	}
 
 	/**
@@ -169,7 +181,7 @@ public class testUI extends JFrame {
 	 * @throws Exception
 	 */
 	private void start() {
-		reader = new LogReadServiceImpl();		
+		logreadservice = new LogReadServiceImpl();
 		// TODO Auto-generated method stub
 	}
 
@@ -198,7 +210,7 @@ public class testUI extends JFrame {
 		// 初始化挖掘配置文件面板
 		initMiningConfigPanel();
 
-		//在cardLayout布局的frame中添加不同面板
+		// 在cardLayout布局的frame中添加不同面板
 		container.add(homePanel, "home面板");
 		container.add(logCleanPanel, "日志清洗面板");
 		container.add(noiseIdentifyPanel, "噪音识别面板");
@@ -207,7 +219,7 @@ public class testUI extends JFrame {
 
 	}
 
-	//初始化菜单栏
+	// 初始化菜单栏
 	private void initMenuBar() {
 		{// 主页菜单
 			homeMenu = new JMenu("Home");
@@ -367,7 +379,7 @@ public class testUI extends JFrame {
 		}
 	}
 
-	//初始化home面板
+	// 初始化home面板
 	private void initHomePanel() {
 		homePanel.setLayout(new BorderLayout());
 		{
@@ -481,16 +493,14 @@ public class testUI extends JFrame {
 				public void actionPerformed(ActionEvent e) {
 					// TODO Auto-generated method stub
 					sortByDate();
-
 				}
-
 			});
 			controlPanel.add(sortDateButton);
 			homePanel.add(controlPanel, BorderLayout.SOUTH);
 		}
 	}
 
-	//初始化挖掘配置文件面板
+	// 初始化挖掘配置文件面板
 	private void initMiningConfigPanel() {
 		initLogCleanPanel();
 		initNoiseIdentifyPanel();
@@ -498,273 +508,298 @@ public class testUI extends JFrame {
 		initCaseIdentifyPanel();
 	}
 
-	//初始化日志清洗面板
+	// 初始化日志清洗面板
 	private void initLogCleanPanel() {
-		//logCleanPanel.setBackground(Color.BLACK);
-		//logCleanPanel.setLayout(new BorderLayout());
+		// logCleanPanel.setBackground(Color.BLACK);
+		// logCleanPanel.setLayout(new BorderLayout());
 		logCleanPanel.setBorder(BorderFactory.createTitledBorder("日志清洗规则"));
-		JPanel chooseCleanPanel=new JPanel();
-		JPanel resultPanel1=new JPanel();
-		String[] cols = {"字段","字段格式"};
-		String[][] attr = null;	
+		JPanel chooseCleanPanel = new JPanel();
+		JPanel resultPanel1 = new JPanel();
+		String[] cols = { "字段", "字段格式" };
+		String[][] attr = null;
 		tagModel = new DefaultTableModel(attr, cols);
-		
-		/**  绘制配置字段面板   */
-		Vector<String> alltags=new Vector<String>(readlogservice.getLogTagsByProducts(allProducts));		
-		System.out.println("\nalltags"+alltags);
-		//下拉表中放入日志中所有存在的字段，可通过读取日志配置文件
-		final JComboBox chooseAttri=new JComboBox(alltags);		
-		//文本框中让用户写入字段期望的正则表达式
-		final JTextField expressionText=new JTextField(15);
-		//按钮将以上字段和正则表达式规则一同放入下边的table中
-		JButton addButton=new JButton("添加字段规范");
-		addButton.addActionListener(new ActionListener(){
+
+		/** 绘制配置字段面板 */
+		Vector<String> alltags = new Vector<String>(
+				logreadservice.getLogTagsByProducts(allProducts));
+		System.out.println("\nalltags" + alltags);
+		// 下拉表中放入日志中所有存在的字段，可通过读取日志配置文件
+		final JComboBox chooseAttri = new JComboBox(alltags);
+		// 文本框中让用户写入字段期望的正则表达式
+		final JTextField expressionText = new JTextField(15);
+		// 按钮将以上字段和正则表达式规则一同放入下边的table中
+		JButton addButton = new JButton("添加字段规范");
+		addButton.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
-				String tagname=chooseAttri.getSelectedItem().toString();
-				String expression=expressionText.getText();				
-				if(!miningconfigservice.getallLogCleanRules().containsKey(tagname)){				
-					miningconfigservice.addLogCleanRule(tagname, expression);	
-					tagModel.addRow(miningconfigservice.getTagFormat().toArray());
+				String tagname = chooseAttri.getSelectedItem().toString();
+				String expression = expressionText.getText();
+				if (!miningconfigservice.getallLogCleanRules().containsKey(
+						tagname)) {
+					miningconfigservice.addLogCleanRule(tagname, expression);
+					tagModel.addRow(miningconfigservice.getTagFormat()
+							.toArray());
 				}
-				System.out.println("\ntagname is "+tagname+", expression is"+expression);
-				System.out.println("alllogs "+ miningconfigservice.getallLogCleanRules().toString());
+				System.out.println("\ntagname is " + tagname
+						+ ", expression is" + expression);
+				System.out.println("alllogs "
+						+ miningconfigservice.getallLogCleanRules().toString());
 			}
-			
+
 		});
-	    chooseCleanPanel.add(chooseAttri);
-	    chooseCleanPanel.add(expressionText);
-	    chooseCleanPanel.add(addButton);
-	    
-	    /**绘制配置字段结果战士面板 */		
-		tagModel.setColumnIdentifiers(cols);		
-		JTable tagTable = new JTable(tagModel);		
-		resultPanel1.add(new JScrollPane(tagTable));		
-		
-		logCleanPanel.add(chooseCleanPanel,BorderLayout.NORTH);
-		logCleanPanel.add(resultPanel1,BorderLayout.CENTER);
+		chooseCleanPanel.add(chooseAttri);
+		chooseCleanPanel.add(expressionText);
+		chooseCleanPanel.add(addButton);
+
+		/** 绘制配置字段结果战士面板 */
+		tagModel.setColumnIdentifiers(cols);
+		JTable tagTable = new JTable(tagModel);
+		resultPanel1.add(new JScrollPane(tagTable));
+
+		logCleanPanel.add(chooseCleanPanel, BorderLayout.NORTH);
+		logCleanPanel.add(resultPanel1, BorderLayout.CENTER);
 	}
 
-	//初始化噪音识别面板
-	private void initNoiseIdentifyPanel() {		
-		//noiseIdentifyPanel.setBackground(Color.RED);
-		noiseIdentifyPanel.setBorder(BorderFactory.createTitledBorder("噪声识别规则"));		
-		noiseIdentifyPanel.setLayout(new GridLayout(1,2));
-		//noiseResultModel=new DefaultListModel();		
-		//noiseResultList.setModel(noiseResultModel);
-		noiseResultList=new JList();
-		JPanel chooseNoisePanel=new JPanel();
-		JPanel resultPanel2=new JPanel(new BorderLayout());		
-		
-		/**  三种噪声识别规则的配置   */
-		chooseNoisePanel.setLayout(new GridLayout(4,1));
-		chooseNoisePanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));		
-		//第一行用于配置多个不能出现的正则表达式，如果出现则视为噪声
-		JPanel p1=new JPanel();	
+	// 初始化噪音识别面板
+	private void initNoiseIdentifyPanel() {
+		// noiseIdentifyPanel.setBackground(Color.RED);
+		noiseIdentifyPanel
+				.setBorder(BorderFactory.createTitledBorder("噪声识别规则"));
+		noiseIdentifyPanel.setLayout(new GridLayout(1, 2));
+		// noiseResultModel=new DefaultListModel();
+		// noiseResultList.setModel(noiseResultModel);
+		noiseResultList = new JList();
+		JPanel chooseNoisePanel = new JPanel();
+		JPanel resultPanel2 = new JPanel(new BorderLayout());
+
+		/** 三种噪声识别规则的配置 */
+		chooseNoisePanel.setLayout(new GridLayout(4, 1));
+		chooseNoisePanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		// 第一行用于配置多个不能出现的正则表达式，如果出现则视为噪声
+		JPanel p1 = new JPanel();
 		p1.setLayout(new FlowLayout(FlowLayout.LEFT));
-		final JTextField noiseAttr=new JTextField(15);
-		JButton addNoiseButton=new JButton("添加");
-		addNoiseButton.addActionListener(new ActionListener(){
+		final JTextField noiseAttr = new JTextField(15);
+		JButton addNoiseButton = new JButton("添加");
+		addNoiseButton.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
-				String noiseStr=noiseAttr.getText();
+				String noiseStr = noiseAttr.getText();
 				miningconfigservice.addNoiseIdentifyRule(noiseStr);
-				//noiseResultModel.addElement(miningconfigservice.getNoiseIdentifyRule());
-				noiseResultList.setListData(miningconfigservice.getAllNoiseIdentifyRules().toArray());
-				System.out.println("\nnoise rule is "+noiseStr);
-				System.out.println("all noise rule are: "+ miningconfigservice.getAllNoiseIdentifyRules());
+				// noiseResultModel.addElement(miningconfigservice.getNoiseIdentifyRule());
+				noiseResultList.setListData(miningconfigservice
+						.getAllNoiseIdentifyRules().toArray());
+				System.out.println("\nnoise rule is " + noiseStr);
+				System.out.println("all noise rule are: "
+						+ miningconfigservice.getAllNoiseIdentifyRules());
 			}
-			
+
 		});
 		p1.add(noiseAttr);
 		p1.add(addNoiseButton);
-		
-		//第二行用于配置连续访问动作间最小时间间隔
-		JPanel p2=new JPanel();	
+
+		// 第二行用于配置连续访问动作间最小时间间隔
+		JPanel p2 = new JPanel();
 		p2.setLayout(new FlowLayout(FlowLayout.LEFT));
-		JLabel minInternalLabel=new JLabel("连续访问动作间最小时间间隔(毫秒)");
-		final JTextField minInternalText=new JTextField(6);
+		JLabel minInternalLabel = new JLabel("连续访问动作间最小时间间隔(毫秒)");
+		final JTextField minInternalText = new JTextField(6);
 		p2.add(minInternalLabel);
 		p2.add(minInternalText);
-		//第三行用于配置连续访问最长时间
-		JPanel p3=new JPanel();
+		// 第三行用于配置连续访问最长时间
+		JPanel p3 = new JPanel();
 		p3.setLayout(new FlowLayout(FlowLayout.LEFT));
-		JLabel maxTimeLabel=new JLabel("连续访问最长时间(小时)");
-		final JTextField maxTimeText=new JTextField(6);
+		JLabel maxTimeLabel = new JLabel("连续访问最长时间(小时)");
+		final JTextField maxTimeText = new JTextField(6);
 		p3.add(maxTimeLabel);
 		p3.add(maxTimeText);
-		//第四行是一个保存按钮，保存所有的噪声识别规则
-        JPanel p4=new JPanel();
-        JButton saveAll=new JButton("保存噪音识别规则");
-        saveAll.addActionListener(new ActionListener(){
+		// 第四行是一个保存按钮，保存所有的噪声识别规则
+		JPanel p4 = new JPanel();
+		JButton saveAll = new JButton("保存噪音识别规则");
+		saveAll.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
-				String mininter=minInternalText.getText();
-				String maxtime=maxTimeText.getText();
+				String mininter = minInternalText.getText();
+				String maxtime = maxTimeText.getText();
 				miningconfigservice.setMinIternal(mininter);
 				miningconfigservice.setMaxTime(maxtime);
-				System.out.println("\nminInternal is: "+miningconfigservice.getMinInternal());
-				System.out.println("\nmaxTime is: "+miningconfigservice.getMaxTime());
-			}        	
-        });
-        p4.setLayout(new FlowLayout(FlowLayout.LEFT));
-        p4.add(saveAll);
-		
+				System.out.println("\nminInternal is: "
+						+ miningconfigservice.getMinInternal());
+				System.out.println("\nmaxTime is: "
+						+ miningconfigservice.getMaxTime());
+			}
+		});
+		p4.setLayout(new FlowLayout(FlowLayout.LEFT));
+		p4.add(saveAll);
+
 		chooseNoisePanel.add(p1);
 		chooseNoisePanel.add(p2);
-		chooseNoisePanel.add(p3);			
+		chooseNoisePanel.add(p3);
 		chooseNoisePanel.add(p4);
-		
-		/**噪声识别规则1中定义的正则表达式结果列表 */				
-		
+
+		/** 噪声识别规则1中定义的正则表达式结果列表 */
+
 		noiseResultList.setVisibleRowCount(30);
 		noiseResultList.setPreferredSize(getPreferredSize());
-		JScrollPane scrollNoisePane=new JScrollPane(noiseResultList);
-		
+		JScrollPane scrollNoisePane = new JScrollPane(noiseResultList);
+
 		resultPanel2.add(scrollNoisePane);
 		resultPanel2.setBorder(BorderFactory.createTitledBorder("噪音表达式结果"));
-		
+
 		noiseIdentifyPanel.add(chooseNoisePanel);
 		noiseIdentifyPanel.add(resultPanel2);
-		
+
 	}
 
-	//初始化活动识别面板
-	
-	//初始化活动识别面板
-    private void initActivityIdentifyPanel() {
-		//activityIdentifyPanel.setBackground(Color.YELLOW);
-		
-		activityIdentifyPanel.setBorder(BorderFactory.createTitledBorder("活动识别规则"));
-		activityIdentifyPanel.setLayout(new GridLayout(1,4));
-		productResultModel=new DefaultListModel();
-		productList=new JList(productResultModel);
-		tagList=new JList();
-		String[] cols = {"活动","取子串"};
-		String[][] attr = null;	
+	// 初始化活动识别面板
+	private void initActivityIdentifyPanel() {
+		// activityIdentifyPanel.setBackground(Color.YELLOW);
+
+		activityIdentifyPanel.setBorder(BorderFactory
+				.createTitledBorder("活动识别规则"));
+		activityIdentifyPanel.setLayout(new GridLayout(1, 4));
+		productResultModel = new DefaultListModel();
+		productList = new JList(productResultModel);
+		tagList = new JList();
+		String[] cols = { "活动", "取子串" };
+		String[][] attr = null;
 		activityResultModel = new DefaultTableModel(attr, cols);
 		activityResultModel.setColumnIdentifiers(cols);
-		activityResultTable=new JTable(activityResultModel);		
-		
+		activityResultTable = new JTable(activityResultModel);
+
 		/** 产品面板包括一个产品选择下拉框和一个所选产品的JList列表，产品数目固定 */
-		JPanel productPanel=new JPanel();
-		JPanel up=new JPanel();	
-		up.setLayout(new GridLayout(2,1));
-		String[] productName={"新闻","网页","时评","图片","音乐","网址"};
-		productCombo=new JComboBox(productName);
+		JPanel productPanel = new JPanel();
+		JPanel up = new JPanel();
+		up.setLayout(new GridLayout(2, 1));
+		String[] productName = { "新闻", "网页", "时评", "图片", "音乐", "网址" };
+		productCombo = new JComboBox(productName);
 		productCombo.setBorder(BorderFactory.createTitledBorder("所有产品列表"));
-	
-		JButton addProductButton=new JButton("添加产品");
-		addProductButton.addActionListener(new ActionListener(){
+		// logreadservice=new LogReadServiceImpl();
+		JButton addProductButton = new JButton("添加产品");
+		addProductButton.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
-				//点击按钮后选择的产品显示在JList中
-				readlogservice=new LogReadServiceImpl();
-				String productStr=productCombo.getSelectedItem().toString();
-				String productEngname=productsname.get(productStr);
+				// 点击按钮后选择的产品显示在JList中
+
+				String productStr = productCombo.getSelectedItem().toString();
+				String productEngname = productsname.get(productStr);
 				miningconfigservice.addAnalyzedProduct(productEngname);
-				productResultModel.addElement(productStr);				
-				productList.setModel(productResultModel);				
-				//System.out.println("\nanalyzed product is: "+miningconfigservice.getAllAnalyzedProducts());
-				
-				//点击按钮后在字段部分显示的字段产生变化
-				ArrayList<String> proList=new ArrayList<String>(miningconfigservice.getAllAnalyzedProducts());
-				System.out.println("\nproList: "+proList);
-				//ArrayList<String> proList=new ArrayList<String>();
-				//proList.add("page");
-				tagList.setListData(readlogservice.getLogTagsByProducts(proList).toArray());
-				System.out.println("\n所选产品对应字段："+readlogservice.getLogTagsByProducts(proList));			
-				
-			}			
+				productResultModel.addElement(productStr);
+				productList.setModel(productResultModel);
+				// System.out.println("\nanalyzed product is: "+miningconfigservice.getAllAnalyzedProducts());
+
+				// 点击按钮后在字段部分显示的字段产生变化
+				tempList = new ArrayList<String>(miningconfigservice
+						.getAllAnalyzedProducts());
+				System.out.println("\nproductList: " + tempList);
+				tagList.setListData(logreadservice.getLogTagsByProducts(
+						tempList).toArray());
+				System.out.println("\n所选产品对应字段："
+						+ logreadservice.getLogTagsByProducts(tempList));
+				// 初始化案例识别面板
+				caseList.setListData(logreadservice.getLogTagsByProducts(
+						tempList).toArray());
+			}
 		});
 		up.add(productCombo);
-		up.add(addProductButton);			
-		
+		up.add(addProductButton);
+
 		productList.setVisibleRowCount(22);
 		productList.setPreferredSize(getPreferredSize());
-		JScrollPane productPane=new JScrollPane(productList);		
+		JScrollPane productPane = new JScrollPane(productList);
+		productPane.createVerticalScrollBar();
 		productPane.setBorder(BorderFactory.createTitledBorder("选择的产品"));
-		
+
 		productPanel.setLayout(new BorderLayout());
-		productPanel.add(up,BorderLayout.NORTH);
-		productPanel.add(productPane);	
-		
+		productPanel.add(up, BorderLayout.NORTH);
+		productPanel.add(productPane);
+
 		/** 字段面板包括对应产品的所有字段，有一个JList */
-		JPanel tagPanel=new JPanel(new BorderLayout());		
-		tagPanel.setBorder(BorderFactory.createTitledBorder("产品所有字段"));		
-		tagList.setVisibleRowCount(20); 
+		JPanel tagPanel = new JPanel(new BorderLayout());
+		tagPanel.setBorder(BorderFactory.createTitledBorder("产品所有字段"));
+		tagList.setVisibleRowCount(20);
 		tagList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 		tagList.setPreferredSize(getPreferredSize());
-		JScrollPane tagPane=new JScrollPane(tagList);		
-	   
-	    //tagList.getSelectedValue()来记录选择的活动字段
+		JScrollPane tagPane = new JScrollPane(tagList);
+		tagPane.createHorizontalScrollBar();
+		// tagList.getSelectedValue()来记录选择的活动字段
 		tagPanel.add(tagPane);
 		/** 操作面板包括选择字段作为活动的所有操作，包括两个添加按钮，一个timestamp结果框，一个正则表达式输入框 */
-		JPanel operationPanel=new JPanel();	
+		JPanel operationPanel = new JPanel();
 		operationPanel.setBorder(BorderFactory.createTitledBorder("选择活动字段"));
-		Box operationBox=Box.createVerticalBox();
-		JButton addTimestampButton=new JButton("添加时间戳");
-		final JTextField timestampText=new JTextField(6);		
+		Box operationBox = Box.createVerticalBox();
+		JButton addTimestampButton = new JButton("添加时间戳");
+		final JTextField timestampText = new JTextField(6);
 		timestampText.setEditable(false);
-		final JTextField actExpressText=new JTextField(6);
-		JLabel actExpressLabel=new JLabel("活动子串规则");
-		addTimestampButton.addActionListener(new ActionListener(){
+		final JTextField actExpressText = new JTextField(6);
+		JLabel actExpressLabel = new JLabel("活动子串规则");
+		addTimestampButton.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
-				String selectedtime=tagList.getSelectedValue().toString();
+				String selectedtime = tagList.getSelectedValue().toString();
 				timestampText.setText(selectedtime);
-				System.out.println("\nselected timestamp is : "+selectedtime);
+				miningconfigservice.setTimeStamp(selectedtime);
+				// System.out.println("\nall activity tags are: "+logreadservice.getLogTagsByProducts(tempList));
+				// logreadservice.getLogTagsByProducts(tempList).remove(selectedtime);
+				// System.out.println("\nremove timestamp: "+logreadservice.getLogTagsByProducts(tempList).remove(selectedtime));
+				// System.out.println("\nremove timestamp: "+logreadservice.getLogTagsByProducts(tempList));
+				// System.out.println("\nselected timestamp is : "+selectedtime);
 			}
-			
-		}); 
-		JButton addActivityButton=new JButton("添加活动");
-		addActivityButton.addActionListener(new ActionListener(){
+
+		});
+		JButton addActivityButton = new JButton("添加活动");
+		addActivityButton.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
-				String selectedactivity=tagList.getSelectedValue().toString();				
-				String actExpression=actExpressText.getText();
-				if(!miningconfigservice.getAllActivityIdentifyRules().containsKey(selectedactivity)){
-					miningconfigservice.addActivityIdentifyRule(selectedactivity, actExpression);
-					activityResultModel.addRow(miningconfigservice.getActivityFormat().toArray());		
+				String selectedactivity = tagList.getSelectedValue().toString();
+				String actExpression = actExpressText.getText();
+				if (!miningconfigservice.getAllActivityIdentifyRules()
+						.containsKey(selectedactivity)) {
+					miningconfigservice.addActivityIdentifyRule(
+							selectedactivity, actExpression);
+					activityResultModel.addRow(miningconfigservice
+							.getActivityFormat().toArray());
 				}
-				activityResultTable.setModel(activityResultModel);				
-				System.out.println("\nselected activity is : "+selectedactivity+" and Expression is: "+actExpression);
-				System.out.println("\nactivity format is:"+miningconfigservice.getActivityFormat());
-				
-			}			
-		});				
-				
+				activityResultTable.setModel(activityResultModel);
+				System.out.println("\nselected activity is : "
+						+ selectedactivity + " and Expression is: "
+						+ actExpression);
+				System.out.println("\nactivity format is:"
+						+ miningconfigservice.getActivityFormat());
+
+			}
+		});
+
 		operationBox.add(Box.createVerticalStrut(20));
 		operationBox.add(addTimestampButton);
-		operationBox.add(Box.createVerticalStrut(20));//创建一个不可见的30单位的组件
+		operationBox.add(Box.createVerticalStrut(20));// 创建一个不可见的30单位的组件
 		operationBox.add(timestampText);
 		operationBox.add(Box.createVerticalStrut(100));
 		operationBox.add(actExpressLabel);
 		operationBox.add(Box.createVerticalStrut(20));
 		operationBox.add(actExpressText);
 		operationBox.add(Box.createVerticalStrut(100));
-		operationBox.add(addActivityButton);		
-		operationPanel.add(operationBox);		
-		
+		operationBox.add(addActivityButton);
+		operationPanel.add(operationBox);
+
 		/** 活动结果面板包括对选择的一列或多列字段及子串的结果展示，是一个JList */
-		JPanel activityResultPanel=new JPanel(new BorderLayout());
-		activityResultPanel.setBorder(BorderFactory.createTitledBorder("活动选择结果"));		
-		JScrollPane actResultPane=new JScrollPane(activityResultTable);
+		JPanel activityResultPanel = new JPanel(new BorderLayout());
+		activityResultPanel.setBorder(BorderFactory
+				.createTitledBorder("活动选择结果"));
+		JScrollPane actResultPane = new JScrollPane(activityResultTable);
 		actResultPane.setPreferredSize(getPreferredSize());
 		activityResultPanel.add(actResultPane);
-		
+
 		/** 将所有面板加入其中 */
 		activityIdentifyPanel.add(productPanel);
 		activityIdentifyPanel.add(tagPanel);
@@ -772,48 +807,101 @@ public class testUI extends JFrame {
 		activityIdentifyPanel.add(activityResultPanel);
 	}
 
-	//初始化案例识别面板
+	// 初始化案例识别面板
 	private void initCaseIdentifyPanel() {
-		//caseIdentifyPanel.setBackground(Color.GREEN);
-		ButtonGroup casechooseGroup=new ButtonGroup();
+		// caseIdentifyPanel.setBackground(Color.GREEN);
+		ButtonGroup casechooseGroup = new ButtonGroup();
 		caseIdentifyPanel.setBorder(BorderFactory.createTitledBorder("案例识别规则"));
-		caseIdentifyPanel.setLayout(new GridLayout(1,3));
-		JList tagList=new JList();
-		tagList.setBorder(BorderFactory.createTitledBorder("可选活动字段"));
-		JPanel caseChooseModePanel=new JPanel();
-		JRadioButton mainIdButton=new JRadioButton("主案例ID（唯一）",true);
-		JRadioButton secondIdButton=new JRadioButton("可选案例ID（可组合）",false);
+		caseIdentifyPanel.setLayout(new GridLayout(1, 3));
+		caseList = new JList();
+		caseList.setBorder(BorderFactory.createTitledBorder("可选活动字段"));
+		System.out.println("tempList" + tempList);
+
+		JPanel caseChooseModePanel = new JPanel();
+		final JRadioButton mainIdButton = new JRadioButton("主案例ID（唯一）", true);
+		final JRadioButton secondIdButton = new JRadioButton("可选案例ID（可组合）",
+				false);
 		casechooseGroup.add(mainIdButton);
 		casechooseGroup.add(secondIdButton);
-		caseChooseModePanel.add(mainIdButton,BorderLayout.NORTH);
-		caseChooseModePanel.add(secondIdButton,BorderLayout.SOUTH);
-		mainIdButton.addItemListener(new ItemListener(){
+		caseChooseModePanel.add(mainIdButton, BorderLayout.NORTH);
+		caseChooseModePanel.add(secondIdButton, BorderLayout.SOUTH);
+		JButton caseIDButton = new JButton("添加案例ID");
+		caseChooseModePanel.add(caseIDButton);
+		JButton saveAllButton=new JButton("保存所有配置信息");
+		//miningconfigwriteservice=new MiningConfigWriteServiceImpl();
+		saveAllButton.addActionListener(new ActionListener(){
 
 			@Override
-			public void itemStateChanged(ItemEvent e) {
+			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
-				if(e.getStateChange()==e.SELECTED){
-					
-				}					
-			}			
+				//miningconfigwriteservice=new MiningConfigWriteServiceImpl();
+				//miningconfigwriteservice.writeMiningConfig("miningconfig.xml");
+				miningconfigservice.writeMiningConfig("miningconfig1.xml");
+			}
 			
 		});
-		secondIdButton.addItemListener(new ItemListener(){
+		caseChooseModePanel.add(saveAllButton);
+		caseIDButton.addActionListener(new ActionListener() {
 
 			@Override
-			public void itemStateChanged(ItemEvent e) {
+			public void actionPerformed(ActionEvent e) {
+				buttoncount++;
 				// TODO Auto-generated method stub
-				if(e.getStateChange()==e.SELECTED){
-					
+				if (mainIdButton.isSelected()) {
+					if (buttoncount == 1) {
+						caseResultModel.addElement(caseList.getSelectedValue());
+						caseResultList.setModel(caseResultModel);
+						miningconfigservice.addCaseIdentifyRule(caseList
+								.getSelectedValue().toString(), "mainid");
+					}
+					else
+						JOptionPane.showMessageDialog(container, "主案例ID只能选择一个字段！");
+					System.out.println("\nallcaseIdentifyRules: "+miningconfigservice.getAllCaseIdentifyRules());
 				}
-			}		
+				if(secondIdButton.isSelected()){
+					caseResultModel.addElement(caseList.getSelectedValue());
+					caseResultList.setModel(caseResultModel);
+					miningconfigservice.addCaseIdentifyRule(caseList.getSelectedValue().toString(), "secondid");
+				}
+				System.out.println("\nallcaseIdentifyRules: "+miningconfigservice.getAllCaseIdentifyRules());
+			}
 			
+
 		});
-		JList caseResultList=new JList();
+		mainIdButton.addItemListener(new ItemListener() {
+
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				// TODO Auto-generated method stub
+				if (e.getStateChange() == e.SELECTED) {
+					buttoncount=0;
+					miningconfigservice.clearCaseIdentifyRules();
+					caseResultModel.clear();
+					caseResultList.setModel(caseResultModel);
+				}
+			}
+
+		});
+		secondIdButton.addItemListener(new ItemListener() {
+
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				// TODO Auto-generated method stub
+				if (e.getStateChange() == e.SELECTED) {
+					buttoncount=0;
+					miningconfigservice.clearCaseIdentifyRules();
+					caseResultModel.clear();
+					caseResultList.setModel(caseResultModel);
+				}
+			}
+
+		});
+		caseResultModel = new DefaultListModel();
+		caseResultList = new JList(caseResultModel);
 		caseResultList.setBorder(BorderFactory.createTitledBorder("已选活动字段"));
-		caseIdentifyPanel.add(tagList);
+		caseIdentifyPanel.add(caseList);
 		caseIdentifyPanel.add(caseChooseModePanel);
-		caseIdentifyPanel.add(caseResultList);			
+		caseIdentifyPanel.add(caseResultList);
 	}
 
 	/**
@@ -888,7 +976,7 @@ public class testUI extends JFrame {
 			emptyTable();
 			try {
 
-				reader.readLog(chosenfile, this);
+				logreadservice.readLog(chosenfile, this);
 
 				// ArrayList<Object> test=new ArrayList<Object>();
 				// test.add("test");
@@ -898,7 +986,7 @@ public class testUI extends JFrame {
 				e.printStackTrace();
 			}
 		}
-		//updateCaseIDList();
+		// updateCaseIDList();
 
 	}
 
@@ -931,16 +1019,15 @@ public class testUI extends JFrame {
 			// fileName = chooser.getSelectedFile().getName();
 			// filePath = chooser.getSelectedFile().getPath();
 			chosenfile = chooser.getSelectedFile();
-			
+
 		}
 		try {
-			
-			reader.readLog(chosenfile, this);
+
+			logreadservice.readLog(chosenfile, this);
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	
 
 	}
 
@@ -950,7 +1037,7 @@ public class testUI extends JFrame {
 	public void saveAs() {
 		// chooser file
 		JFileChooser chooser = new JFileChooser();
-		
+
 		chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 		chooser.setMultiSelectionEnabled(true);
 		chooser.setCurrentDirectory(chosenfile.getAbsoluteFile());
@@ -1014,7 +1101,7 @@ public class testUI extends JFrame {
 	private void searchLog() {
 
 		String searchKey = searchField.getText();
-		reader.searchLog(searchKey, logList, this);
+		logreadservice.searchLog(searchKey, logList, this);
 		// int[] location = new int[2];
 
 	}

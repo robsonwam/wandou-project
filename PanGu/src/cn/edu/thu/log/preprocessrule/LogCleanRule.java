@@ -41,11 +41,45 @@ public class LogCleanRule {
 	public Map<String,String> getAllLogCleanRules(){
 		System.out.println(logCleanRules.toString());
 		return logCleanRules;		
-	}		
+	}	
+	
 	public ArrayList<String> getTagFormat() {
 		tag_format=new ArrayList<String>();
 		tag_format.add(tagname);
 		tag_format.add(expression);		
 		return tag_format;
 	}
+
+	public Map<String, String> getLogCleanRules() {
+		return logCleanRules;
+	}
+
+	public void setLogCleanRules(Map<String, String> logCleanRules) {
+		this.logCleanRules = logCleanRules;
+	}
+
+	public ArrayList<String> getTag_format() {
+		return tag_format;
+	}
+
+	public void setTag_format(ArrayList<String> tag_format) {
+		this.tag_format = tag_format;
+	}
+
+	public String getTagname() {
+		return tagname;
+	}
+
+	public void setTagname(String tagname) {
+		this.tagname = tagname;
+	}
+
+	public String getExpression() {
+		return expression;
+	}
+
+	public void setExpression(String expression) {
+		this.expression = expression;
+	}
+	
 }

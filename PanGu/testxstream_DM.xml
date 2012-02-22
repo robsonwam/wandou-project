@@ -1,0 +1,16 @@
+<XLog>
+  <XExtensions/>
+  <XAttributeMap lazy="true" buffered="false"/>
+  <XGlobalTraceAttributes/>
+  <XGlobalEventAttributes/>
+  <XEventClassifiers/>
+  <XTrace>
+    <XAttributeMap lazy="false" buffered="false">
+      <XAttribute key="attribute2_key" type="LITERAL" value="attribute2_value"/>
+      <XAttribute key="attribute1_key" type="LITERAL" value="attribute1_value"/>
+    </XAttributeMap>
+    <XEvent xid="D567451F-FF37-417C-BAD2-D70A70181D9C">
+      <XAttributeMap reference="../../XAttributeMap"/>
+    </XEvent>
+  </XTrace>
+</XLog>

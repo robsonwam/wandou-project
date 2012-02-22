@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<miningconfig>
+<logclean>
+<logtag 字段名="TimeStamp" 格式规则="a"/>
+<logtag 字段名="RemoteIP" 格式规则="asdf"/>
+</logclean>
+<noiseidentify>
+<noise 噪声串="as"/>
+<noise 噪声串="noise"/>
+<mininternal 最短间隔="3"/>
+<maxtime 最长时间="3"/>
+</noiseidentify>
+<activityidentify>
+<timestamp 时间戳="RemoteIP"/>
+<activity 活动子串规则="Type" 活动字段名="ContentType"/>
+<product 产品名称="page"/>
+</activityidentify>
+<caseidentify>
+<case id类型="OriginateIP" 案例id="mainid"/>
+</caseidentify>
+</miningconfig>

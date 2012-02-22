@@ -1,0 +1,35 @@
+<XLog>
+  <XExtensions/>
+  <XAttributeMap lazy="true" buffered="true"/>
+  <XGlobalTraceAttributes/>
+  <XGlobalEventAttributes/>
+  <XEventClassifiers/>
+  <XTrace>
+    <XAttributeMap lazy="false" buffered="true">
+      <XAttribute key="Indentifier" type="LITERAL" value="[contentType]"/>
+    </XAttributeMap>
+    <XEvent xid="7077E8BA-768A-4C23-80D9-C1CA8CC2EEA8">
+      <XAttributeMap lazy="false" buffered="false">
+        <XAttribute key="Ptn" type="LITERAL" value="null"/>
+        <XAttribute key="Encoding" type="LITERAL" value="null"/>
+        <XAttribute key="Start" type="LITERAL" value="sa:20"/>
+        <XAttribute key="Query" type="LITERAL" value="q:人体艺术"/>
+        <XAttribute key="MobileNo" type="LITERAL" value="null"/>
+        <XAttribute key="TransactionID" type="LITERAL" value="4338044891175025"/>
+        <XAttribute key="RemoteIP" type="LITERAL" value="10.10.128.58"/>
+        <XAttribute key="OriginateIP" type="LITERAL" value="123.171.68.138"/>
+        <XAttribute key="SessionID" type="LITERAL" value="DE972AB8A97D0B45DA472A6C39EF3906"/>
+        <XAttribute key="RespTime" type="LITERAL" value="rt:5.319"/>
+        <XAttribute key="logPath" type="LITERAL" value="D:\imageclick_file\imageclick\imagesearch_201111290000_0.log"/>
+        <XAttribute key="PageNum" type="LITERAL" value="pn:20"/>
+        <XAttribute key="Source" type="LITERAL" value="www"/>
+        <XAttribute key="TimeStamp" type="LITERAL" value="20111129000036999"/>
+        <XAttribute key="UA" type="LITERAL" value="Mozilla/4.0 (compatible\; MSIE 8.0\; Windows NT 5.1\; Trident/4.0\; QQDownload 677\; doyo 2.0.0)"/>
+        <XAttribute key="Hits" type="LITERAL" value=";hit:25989"/>
+        <XAttribute key="Referer" type="LITERAL" value="http://image.panguso.com/imagesearch.htm?q=%E4%BA%BA%E4%BD%93%E8%89%BA%E6%9C%AF"/>
+        <XAttribute key="Uid" type="LITERAL" value="null"/>
+        <XAttribute key="ContentType" type="LITERAL" value="image"/>
+      </XAttributeMap>
+    </XEvent>
+  </XTrace>
+</XLog>

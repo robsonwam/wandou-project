@@ -369,6 +369,7 @@ public class testUI extends JFrame {
 
 	//初始化home面板
 	private void initHomePanel() {
+		homePanel.setLayout(new BorderLayout());
 		{
 
 			String[] columns = null;

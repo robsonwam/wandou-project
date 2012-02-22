@@ -32,7 +32,7 @@
 <tag name="PageNum" />
 <tag name="Query" />
 <tag name="Rank" />
-<tag name="Url" />
+<tag name="URL" />
 </action>
 
 <!-- actinType:Search -->
@@ -45,27 +45,59 @@
 </action>
 </product>
 
-<!-- log body of product:page -->
-<product name="page">
-<!-- actinType:Click -->
-<action name="pageclick">
-<tag name="PageNum" />
+<!-- log body of product:music -->
+<product name="music">
+<!-- actinType:Jump -->
+<action name="musicjump">
+<tag name="OpType" />
 <tag name="Query" />
-<tag name="Rank" />
-<tag name="Url" />
+<tag name="Id" />
 </action>
 
 <!-- actinType:Search -->
-<action name="pagesearch">
-<tag name="Hits" />
-<tag name="PageNum" />
+<action name="musicsearch">
+<tag name="Type" />
+<tag name="From" />
 <tag name="Query" />
-<tag name="RespTime" />
 <tag name="Start" />
+<tag name="PageNum" />
+<tag name="Hits" />
+<tag name="RespTime" />
+</action>
+</product>
+
+
+<!-- log body of product:Navigation -->
+<product name="navigation">
+<!-- actinType:Click -->
+<action name="navclick">
+<tag name="Url" />
+<tag name="Classify" />
+<tag name="Name" />
+<tag name="SubClassify" />
+<tag name="Position" />
+<tag name="City" />
 </action>
 
-<!-- actinType:snapshot -->
-<action name="pagesnapshot">
+<!-- actinType:Onload-->
+<action name="navonload">
+<tag name="LoadTime" />
+<tag name="City" />
+</action>
+</product>
+
+<!-- log body of product:News -->
+<product name="news">
+<!-- actinType:Click -->
+<action name="newsclick">
+<tag name="PageNum" />
+<tag name="Query" />
+<tag name="Rank" />
+<tag name="URL" />
+</action>
+
+<!-- actinType:Search -->
+<action name="newssearch">
 <tag name="Hits" />
 <tag name="PageNum" />
 <tag name="Query" />
@@ -73,6 +105,88 @@
 <tag name="Start" />
 </action>
 </product>
+
+<!-- log body of product:OtherPage -->
+<product name="otherpage">
+<!-- actinType:Send -->
+<action name="otherpage">
+<tag name="U?" />
+</action>
+</product>
+
+<!-- log body of product:page -->
+<product name="page">
+<!-- actinType:Click -->
+<action name="pageclick">
+<tag name="PageNum" />
+<tag name="Query" />
+<tag name="QueryType" />
+<tag name="Rank" />
+<tag name="Shard" />
+<tag name="URL" />
+</action>
+
+<!-- actinType:Search -->
+<action name="pagesearch">
+<tag name="IsAdvance" />
+<tag name="AppRespTime" />
+<tag name="HasAds" />
+<tag name="Hits" />
+<tag name="PageNum"/>
+<tag name="Query" />
+<tag name="QueryType" />
+<tag name="RespTime" />
+<tag name="Start" />
+<tag name="userSource" />
+</action>
+
+<!-- actinType:snapshot -->
+<action name="pagesnapshot">
+<tag name="PageNum" />
+<tag name="Query" />
+<tag name="Rank" />
+<tag name="SnapshotURL"/>
+<tag name="URL"/>
+</action>
+</product>
+
+<!-- log body of product:Real -->
+<product name="real">
+<!-- actinType:Click -->
+<action name="realclick">
+<tag name="OpType" />
+<tag name="Query" />
+<tag name="BuzzID" />
+<tag name="Share" />
+<tag name="NewsID" />
+<tag name="ClickType" />
+<tag name="URL" />
+</action>
+
+<!-- actinType:Search -->
+<action name="realsearch">
+<tag name="Type" />
+<tag name="Query" />
+<tag name="Start" />
+<tag name="PageNum" />
+<tag name="Hits" />
+<tag name="RespTime" />
+<tag name="Result" />
+<tag name="Relation" />
+</action>
+</product>
+
+<!-- log body of product:SMS -->
+<product name="SMS">
+<!-- actinType:Send -->
+<action name="smssend">
+<tag name="Query" />
+<tag name="Receiver" />
+<tag name="SendResult" />
+</action>
+</product>
+
 </logbody>
 
 </log>
+

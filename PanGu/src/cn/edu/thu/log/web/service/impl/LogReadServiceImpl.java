@@ -100,7 +100,7 @@ public class LogReadServiceImpl implements LogReadService {
 			//logTags.addAll(logConfig.getLogBodyByProducts(productList));
 	//	}
 	//	else{
-			logTags =logConfig.getLogTags();
+			//logTags =logConfig.getLogTags();
 	//	}
 			
 	//	System.out.print("\n tags of prodcut"+logTags);

@@ -70,7 +70,7 @@ public class LogReadServiceImpl implements LogReadService {
 		ArrayList<String> logTags = logConfig.getLogTags();
 		// read the logFile and display the information on UI
 		ArrayList<Log> logList = new ArrayList<Log>();
-		logList = logContent.getContent(file, logUI);
+		logList = logContent.getContent(file.getAbsolutePath());
 		if (logList == null) {
 			System.out.print("\nlogList  is null");
 		} else {

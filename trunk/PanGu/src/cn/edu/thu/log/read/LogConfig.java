@@ -99,7 +99,7 @@ public class LogConfig {
 			// }
 
 			// read config to set up the log symbols
-			// readSymbols();
+			readSymbols();
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -188,23 +188,6 @@ public class LogConfig {
 	public ArrayList<String> readLogHead() {
 
 		ArrayList<String> logheadTagList = readTags(LOGHEAD_INDENTIFIER, null);
-		// ArrayList<String> logheadTagList = new ArrayList<String>();
-		// NodeList nodeList = doc.getElementsByTagName(LOGHEAD_INDENTIFIER);
-		//		
-		// for (int i = 0; i < nodeList.getLength(); i++) {
-		// Node node = nodeList.item(i);
-		//			
-		// NodeList tagNodeList = node.getChildNodes();
-		// for (int t = 0; t < tagNodeList.getLength(); t++) {
-		// Node tagNode = tagNodeList.item(t);
-		// if (tagNode.hasAttributes()) {
-		// // System.out.print("\n tagNode有属性");
-		// String tagName = tagNode.getAttributes().getNamedItem(
-		// "name").getNodeValue();
-		// logheadTagList.add(tagName);
-		// }
-		// }
-		// }
 		return logheadTagList;
 	}
 
@@ -228,24 +211,9 @@ public class LogConfig {
 		tempTagList = readTags(ACTION_INDENTIFIER, actionList);
 		tagsList.add(tempTagList);
 		testLogBodyTagList.addAll(tempTagList);
-		// for (int i = 0; i < actionList.size(); i++) {
-		// ArrayList<String> tempTagList = new ArrayList<String>();
-		// //tempTagList= readTags(actionList.get(i), null);
-		// tempTagList= readTags(ACTION_INDENTIFIER, actionList);
-		// tagsList.add(tempTagList);
-		// testLogBodyTagList.addAll(tempTagList);
-		// }
 		logBody = testLogBodyTagList;
 	//	mergeLogBody(tagsList);
 
-		// mergeConfig(actionList);
-		// ArrayList<String> productList = readTags(LOGBODY_INDENTIFIER, null);
-		// System.out.print("\nProductList:" + productList);
-		// NodeList logBodyNodes = ((org.w3c.dom.Document) doc)
-		// .getElementsByTagName(newfileCate);
-		// logBody = new ArrayList<String>();
-		// logBody.addAll(readAttributes(logBodyNodes));
-		// System.out.print("\n new log body tags are:" + logBody);
 		return testLogBodyTagList;
 	}
 //!!!!!还不太清楚如果tag被merge了，那么记录怎么办

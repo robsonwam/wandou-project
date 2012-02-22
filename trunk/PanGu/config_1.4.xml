@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<log version="1.5">
+<log version="1.4">
 <!-- inforamtion about Symbols -->
 
 <Tokenizer name="logHeadTokenizer" value=","/>
@@ -22,10 +22,6 @@
 <tag name="Encoding" />
 <tag name="Referer" />
 <tag name="Uid" />
-<tag name="PGID" />
-<tag name="DeviceID" />
-<tag name="Latitude" />
-<tag name="Longitude" />
 </loghead>
 
 <logbody>

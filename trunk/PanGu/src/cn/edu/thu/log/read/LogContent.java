@@ -236,7 +236,7 @@ public class LogContent {
 
 				logConfig.getLogBody().size();
 				for (int j = 0; j < insertParamscount; j++) {
-					params.add(insertIndex, null);
+					params.add(insertIndex, " ");
 				}
 				// System.out.print("\n params add:" + params);
 				// logUI.addLog(params);

@@ -23,6 +23,8 @@ import org.deckfour.xes.model.impl.XAttributeLiteralImpl;
 import org.deckfour.xes.model.impl.XAttributeMapImpl;
 import org.deckfour.xes.xstream.XesXStreamPersistency;
 
+import sun.security.krb5.Config;
+
 import cn.edu.thu.log.read.Log;
 import cn.edu.thu.log.read.LogBuffer;
 import cn.edu.thu.log.read.LogConfig;
@@ -37,14 +39,14 @@ public class XESWriter {
 	String timestampTag;
 	public static XFactory factory = XFactoryRegistry.instance()
 			.currentDefault();
-	private final String readFilePath = "D:/imageclick_file/imageclick_201111290129_0.log";
-	private final String logconfigFile = "config_1.4.xml";
+	private final String LOGCONFIGFILE = "config_1.4.xml";
 	XESConfig xesConfig;
 	String filePath;
 	String resultFilePath;
 	// from logContent
 	ArrayList<String> cateList;
 	LogConfig logConfig;
+	ArrayList<ArrayList<String>> existCaseIDList;
 
 	// WebConfigReadServiceImpl configRead; 应该有一个接口可以读取关于设置的参数
 	public XESWriter(XESConfig xesConfig, String filePath) {
@@ -69,6 +71,7 @@ public class XESWriter {
 		LogFilesReader logfilesReader = new LogFilesReader();
 		cateList = new ArrayList<String>();
 		cateList = logfilesReader.getCateList(filePath);
+		existCaseIDList = new ArrayList<ArrayList<String>>();
 		File readfile = new File(filePath);
 		readFile(readfile);
 		// if(cateList.size()>1)
@@ -119,7 +122,8 @@ public class XESWriter {
 	 *            GUI for test
 	 */
 	private void readFileContent(File file) {
-
+		logConfig.config(LOGCONFIGFILE, file.getAbsolutePath());
+		ArrayList<String> logTagList = logConfig.getLogTags();
 		BufferedReader reader;
 		String record;
 		String logHeadTokenizer = logConfig.getLogHeadTokenizer();
@@ -129,18 +133,19 @@ public class XESWriter {
 		String logHeadContent = null;
 		String logBodyContent = null;
 		LogBuffer logBuffer = new LogBuffer();
-		//XES Elemet
-		XEvent event=factory.createEvent();
-		XTrace trace=factory.createTrace();
-		XLog log=factory.createLog();
+		// XES Elemet
+		XEvent event = factory.createEvent();
+		XTrace trace = factory.createTrace();
+		XLog log = factory.createLog();
+
 		// read each log Record
 		try {
 			reader = new BufferedReader(new FileReader(file));
 			while ((record = reader.readLine()) != null) {
-				//Log log = new Log();
+				// Log log = new Log();
 				// set up the file path and file name for this log
-				//log.setLogName(file.getName());
-				//log.setLogPath(file.getPath());
+				// log.setLogName(file.getName());
+				// log.setLogPath(file.getPath());
 				// String temprecord = record.concat(logBodyTokenizer);
 				String temprecord = record;
 				// deal with each log record
@@ -232,8 +237,31 @@ public class XESWriter {
 				logBuffer.setLogHeadContent(headparams);
 				logBuffer.setLogBodyContent(headparams);
 				logBuffer.setLogContent(params);
+				logBuffer.setLogTagList(logTagList);
 
-				writeEvent(event,logBuffer);
+				writeEvent(event, logBuffer);
+				// set caseIDList(Content) of LogBuffer
+				ArrayList<String> caseIDContentList = new ArrayList<String>();
+				for (int i = 0; i < xesConfig.getCaseIDList().size(); i++) {
+					String caseID = xesConfig.getCaseIDList().get(i);
+					for (int j = 0; j < logBuffer.getLogTagList().size(); j++) {
+						if (xesConfig
+								.getCaseIDList()
+								.get(i)
+								.equalsIgnoreCase(
+										logBuffer.getLogTagList().get(j))) {
+							caseIDContentList.add(logBuffer.getLogContent()
+									.get(j).toString());
+
+						}
+					}
+				}
+				logBuffer.setCaseIDList(caseIDContentList);
+				// add caseIDList to existingCaseIDList
+				existCaseIDList.add(logBuffer.getCaseIDList());
+
+				// logBuffer.setActivityIDList(xesConfig.getActivityIDList());
+				// logBuffer.setTimeStamp(xesConfig.getTimeStamp());
 
 				// // add more null to fit the merged tags
 				// String category = file.getName().split("_")[0];
@@ -270,10 +298,49 @@ public class XESWriter {
 
 			}
 			reader.close();
-			//xes
+			// xes
+
+			for (int s = 0; s < existCaseIDList.size(); s++) {
+				for (int t = 0; t < existCaseIDList.get(s).size(); t++) {
+					for (int p = 0; p < logBuffer.getCaseIDList().size(); p++) {
+						if (logBuffer
+								.getCaseIDList()
+								.get(p)
+								.equalsIgnoreCase(existCaseIDList.get(s).get(t))) {
+//!!!!!!!
+						}
+					}
+				}
+			}
+
+			XAttributeMap traceAttributeMap = factory.createAttributeMap();
+			XAttribute traceAttribute1 = factory.createAttributeLiteral(
+					"Indentifier", xesConfig.getActivityIDList().toString(),
+					null);
+			// XAttribute traceAttribute2=factory.createAttributeLiteral("ID",
+			// logBuffer.g, null);
+			// existCaseIDList.add(e)
+			traceAttributeMap.put(traceAttribute1.getKey(), traceAttribute1);
+			// traceAttributeMap.put(traceAttribute2.getKey(), traceAttribute2);
+			trace.setAttributes(traceAttributeMap);
 			log.add(trace);
 			trace.add(event);
-
+			// write to XES
+			File sFile = new File(resultFilePath);
+			if (sFile.exists()) {
+				sFile.delete();
+			}
+			try {
+				sFile.createNewFile();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			XStream xstream = new XStream();
+			XesXStreamPersistency.register(xstream);
+			OutputStream oStream = new BufferedOutputStream(
+					new FileOutputStream(sFile));
+			xstream.toXML(log, oStream);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -281,24 +348,52 @@ public class XESWriter {
 
 	}
 
-	private XEvent writeEvent(XEvent event,LogBuffer logBuffer) {
+	private void writeEvent(XEvent event, LogBuffer logBuffer) {
 		// get the tags of loghead and logbody from one record
-		logConfig.config(logconfigFile, logBuffer.getLogPath());
-		ArrayList<String> logTags = logConfig.getLogTags();
+		// logConfig.config(logconfigFile, logBuffer.getLogPath());
+		// ArrayList<String> logTags = logConfig.getLogTags();
+		ArrayList<String> logTags = logBuffer.getLogTagList();
 		// get content of this event
 		ArrayList<Object> logContents = logBuffer.getLogContent();
 		// create a event
-		//XEvent event = factory.createEvent();
+		// XEvent event = factory.createEvent();
 		XAttributeMap attributeMap = factory.createAttributeMap();
 		// event
+		if (logTags.size() == logContents.size()) {
+			System.out.print("\nthe size is the same");
+			System.out.print("\nlog tags:" + logTags);
+			System.out.print("\nlog content:" + logContents);
+		} else {
+			if (logTags.size() == logContents.size()) {
+				System.out.print("\nthe size is not the same");
+				System.out.print("\nlog tags:" + logTags);
+				System.out.print("\nlog content:" + logContents);
+			}
+		}
+
+		// put the log tags as attributes to attributeMap
 		for (int i = 0; i < logTags.size(); i++) {
+			if (logContents.get(i).toString().matches("")) {
+				String emptyString = new String("null");
+				logContents.set(i, emptyString);
+				// logContents.get(i)
+				System.out.print("\nnull at " + logTags.get(i));
+				System.out.print("\nlog content:" + logContents);
+
+			}
 			XAttribute attribute = factory.createAttributeLiteral(
 					logTags.get(i), (String) logContents.get(i), null);
 
 			attributeMap.put(attribute.getKey(), attribute);
 		}
+		// add logPath attribute to map
+		XAttribute attribute = factory.createAttributeLiteral("logPath",
+				logBuffer.getLogPath(), null);
+		attributeMap.put(attribute.getKey(), attribute);
+
+		// set event's AttributesMap
 		event.setAttributes(attributeMap);
-		return event;
+		return;
 
 	}
 

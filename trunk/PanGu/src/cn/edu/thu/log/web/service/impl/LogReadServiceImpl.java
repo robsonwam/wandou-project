@@ -74,6 +74,7 @@ public class LogReadServiceImpl implements LogReadService {
 		if (logList == null) {
 			System.out.print("\nlogList  is null");
 		} else {
+			
 			System.out.print("\nthe size of logList:" + logList.size());
 		}
 		// logContent.readFile(file, logUI);
@@ -83,6 +84,7 @@ public class LogReadServiceImpl implements LogReadService {
 		
 		logUI.setContent(logList);
 		
+		JOptionPane.showMessageDialog(logUI, "\nthe size of logList:" + logList.size());
 		return logList;
 
 	}

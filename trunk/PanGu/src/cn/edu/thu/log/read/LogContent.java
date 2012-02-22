@@ -304,9 +304,10 @@ public class LogContent {
 	 *            GUI for test/ it is not used here
 	 * @return
 	 */
-	public ArrayList<Log> getContent(File readfile) {
+	public ArrayList<Log> getContent(String filePath) {
 		// TODO Auto-generated method stub
 		// the List of log that represent the content that want to be read
+		File readfile=new File(filePath);
 		logList = new ArrayList<Log>();
 
 		LogFilesReader logfilesReader = new LogFilesReader();

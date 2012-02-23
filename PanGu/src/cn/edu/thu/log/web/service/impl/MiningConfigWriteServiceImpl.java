@@ -105,8 +105,8 @@ public class MiningConfigWriteServiceImpl implements MiningConfigWriteService {
 		 while(logcleanit.hasNext()){ 
 			 Element logtag=doc.createElement("logtag");
 			 Map.Entry<String, String> entry1=(Map.Entry<String, String>) logcleanit.next();
-			 logtag.setAttribute("字段名",entry1.getKey()); 
-			 logtag.setAttribute("格式规则",entry1.getValue());
+			 logtag.setAttribute("tagname",entry1.getKey()); 
+			 logtag.setAttribute("tagformat",entry1.getValue());
 			 System.out.println("\n读取logclean配置： "+entry1.getKey()+entry1.getValue());
 			 logclean.appendChild(logtag); 
 		 }
@@ -118,18 +118,18 @@ public class MiningConfigWriteServiceImpl implements MiningConfigWriteService {
 		 Iterator<String> noiseidentifyit=allnoiseidentifyrules.iterator();
 		 while(noiseidentifyit.hasNext()){ 
 			 Element noise=doc.createElement("noise");			 
-			 noise.setAttribute("噪声串",noiseidentifyit.next()); 			 
+			 noise.setAttribute("noiseformat",noiseidentifyit.next()); 			 
 			 noiseidentify.appendChild(noise); 
 			 System.out.println("\n读取noise配置： "+noiseidentifyit.next());
 		 }		
 		 //定义最小间隔时间mininternal
 		 Element mininternal=doc.createElement("mininternal");
-		 mininternal.setAttribute("最短间隔", mininternalvalue.toString());
+		 mininternal.setAttribute("mininternal", mininternalvalue.toString());
 		 noiseidentify.appendChild(mininternal); 
 		 System.out.println("\nnoise最小时间间隔： "+mininternalvalue);
 		 //最长访问时间maxtime
 		 Element maxtime=doc.createElement("maxtime"); 
-		 maxtime.setAttribute("最长时间", maxtimevalue.toString());
+		 maxtime.setAttribute("maxtime", maxtimevalue.toString());
 		 noiseidentify.appendChild(maxtime);
 		 System.out.println("\nnoise最长时间： "+maxtimevalue);
 		 
@@ -137,7 +137,7 @@ public class MiningConfigWriteServiceImpl implements MiningConfigWriteService {
 		 Element activityidentify=doc.createElement("activityidentify");
 		 //需要定义timestamp 
 		 Element timestamp=doc.createElement("timestamp");
-		 timestamp.setAttribute("时间戳", timestamptag); 
+		 timestamp.setAttribute("timestamp", timestamptag); 
 		 activityidentify.appendChild(timestamp);
 		 System.out.println("\nactivity时间戳： "+timestamptag);
 		 //需要定义活动，属性为字段名
@@ -147,8 +147,8 @@ public class MiningConfigWriteServiceImpl implements MiningConfigWriteService {
 		 while(activityidentifyit.hasNext()){ 
 			 Element activity=doc.createElement("activity");
 			 Map.Entry<String, String> entry3=(Map.Entry<String, String>) activityidentifyit.next();
-			 activity.setAttribute("活动字段名",entry3.getKey()); 
-			 activity.setAttribute("活动子串规则",entry3.getValue());
+			 activity.setAttribute("activityname",entry3.getKey()); 
+			 activity.setAttribute("activityformat",entry3.getValue());
 			 activityidentify.appendChild(activity); 
 			 System.out.println("\n读取activity配置： "+entry3.getKey()+entry3.getValue());
 		 }		 
@@ -157,7 +157,7 @@ public class MiningConfigWriteServiceImpl implements MiningConfigWriteService {
 		 Iterator<String> productsit=allanalyzedproducts.iterator();
 		 while(productsit.hasNext()){
 			 product=doc.createElement("product");	
-			 product.setAttribute("产品名称",productsit.next());
+			 product.setAttribute("productname",productsit.next());
 			 activityidentify.appendChild(product); 
 			 System.out.println("\n读取activity选取产品配置： "+productsit.next());
 		 }
@@ -171,8 +171,8 @@ public class MiningConfigWriteServiceImpl implements MiningConfigWriteService {
 		 while(caseidentifyit.hasNext()){ 
 			 Element caseid=doc.createElement("case");
 			 Map.Entry<String, String> entry2=(Map.Entry<String, String>) caseidentifyit.next();
-			 caseid.setAttribute("id类型",entry2.getKey()); 
-			 caseid.setAttribute("案例id",entry2.getValue());			
+			 caseid.setAttribute("type",entry2.getKey()); 
+			 caseid.setAttribute("caseid",entry2.getValue());			
 			 caseidentify.appendChild(caseid);
 			 System.out.println("\n读取case配置： "+entry2.getKey()+entry2.getValue());
 		 }				

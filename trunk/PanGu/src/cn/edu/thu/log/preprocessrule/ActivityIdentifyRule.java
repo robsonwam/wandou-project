@@ -34,16 +34,15 @@ public class ActivityIdentifyRule {
 	}
 
 	public void addActivityIdentifyRule(String activityname,
-			String actexpression) {
+			String actexpression) {				
+		//if (!activityIdentifyRules.containsKey(activityname)) {
+		activityIdentifyRules.put(activityname, actexpression);
 		this.activityname = activityname;
 		this.actexpression = actexpression;
-		activityIdentifyRules = new HashMap<String, String>();
-		if (!activityIdentifyRules.containsKey(activityname)) {
-			activityIdentifyRules.put(activityname, actexpression);
-		} else
+	/*	} else
 			System.out.println("Already give the format of the activity"
 					+ activityname);
-
+*/
 	}
 
 	public ArrayList<String> getAcitivityFormat() {

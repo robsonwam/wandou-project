@@ -47,7 +47,7 @@ public class testXESWriter {
 //		writer.write(resultFile);
 		//------
 		WebConfigReadService configRead=new WebConfigReadServiceImpl();
-		configRead.readWebConfig("miningconfig2.xml");
+		configRead.readWebConfig("miningconfig1.xml");
 		String readFilePath = new String(
 				"D:/imageclick_file/imageclick");
 		String resultFile="logXes.xml";

@@ -1,12 +1,18 @@
 package cn.edu.thu.log.web.service.impl;
 
 import cn.edu.thu.log.web.service.WebConfigReadService;
+import cn.edu.thu.log.web.service.XESConvertService;
 import cn.edu.thu.log.xes.XESWriter;
-
-public class XESConvertServiceImp {
+/**
+ * implementation of service XES Convert.
+ * @author meng
+ *
+ */
+public class XESConvertServiceImp implements XESConvertService{
+	@Override
 	public void convert(String readFilePath,String resultFile) {
 		WebConfigReadService configRead = new WebConfigReadServiceImpl();
-		configRead.readWebConfig("miningconfig2.xml");
+		configRead.readWebConfig("miningconfig1.xml");
 		//String readFilePath = new String("D:/imageclick_file/imageclick");
 		//String resultFile = "logXes.xml";
 		XESWriter writer = new XESWriter(configRead, readFilePath);

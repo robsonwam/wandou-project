@@ -41,6 +41,7 @@ public interface MiningConfigUIService {
 	public Map<String,String> getAllCaseIdentifyRules();
 	public void clearCaseIdentifyRules();
 	
+	/** 读取所有规则，写成配置文件 */
 	//读取界面的用户配置，写成doc形式
 	public void writeMiningConfig(String outfile);
 		

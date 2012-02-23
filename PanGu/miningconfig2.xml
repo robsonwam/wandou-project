@@ -13,10 +13,14 @@
 <activityidentify>
 <timestamp timestamp="TimeStamp"/>
 <activity activityformat="baidu" activityname="Referer"/>
+<activity activityformat="baidu" activityname="Referer"/>
+<activity activityformat="baidu" activityname="Referer"/>
+<activity activityformat="baidu" activityname="Referer"/>
+
 <product productname="page"/>
 </activityidentify>
 <caseidentify>
 <case caseid="OriginateIP" type="secondid"/>
-<case caseid="RemoteIP" type="secondid"/>
+<case caseid="UA" type="secondid"/>
 </caseidentify>
 </miningconfig>

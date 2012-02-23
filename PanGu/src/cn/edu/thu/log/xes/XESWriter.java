@@ -29,6 +29,7 @@ import cn.edu.thu.log.read.Log;
 import cn.edu.thu.log.read.LogBuffer;
 import cn.edu.thu.log.read.LogConfig;
 import cn.edu.thu.log.read.LogFilesReader;
+import cn.edu.thu.log.web.service.WebConfigReadService;
 
 import com.thoughtworks.xstream.XStream;
 
@@ -47,13 +48,17 @@ public class XESWriter {
 	public static XFactory factory = XFactoryRegistry.instance()
 			.currentDefault();
 	private final String LOGCONFIGFILE = "config_1.4.xml";
-	XESConfig xesConfig;
+	private final String TIMEOUT="00000000003000";
+	//XESConfig xesConfig;
+	WebConfigReadService xesConfig;
 	String filePath;
 	String resultFilePath;
 	XLog log;
+	String timeOutString;
+	Date timeOut;
 	/** map of laster arrival time in one case */
 	Hashtable<String, String> lastestArrivalMap;
-	/** map of earliest arrival time in one case */
+	/** map of earliest arrival time . one case */
 	Hashtable<String, String> earliestArrivalMap;
 	// from logContent
 	ArrayList<String> cateList;
@@ -62,13 +67,20 @@ public class XESWriter {
 	// ArrayList<ArrayList<String>> existCaseIDList;
 
 	// WebConfigReadServiceImpl configRead; 应该有一个接口可以读取关于设置的参数
-	public XESWriter(XESConfig xesConfig, String filePath) {
-		this.xesConfig = xesConfig;
-		this.filePath = filePath;
-		logConfig = new LogConfig();
+//	public XESWriter(XESConfig xesConfig, String filePath) {
+//		this.xesConfig = xesConfig;
+//		this.filePath = filePath;
+//		logConfig = new LogConfig();
+//
+//	}
+//	WebConfigReadService
+	// WebConfigReadServiceImpl configRead; 应该有一个接口可以读取关于设置的参数
+		public XESWriter(WebConfigReadService xesConfig, String filePath) {
+			this.xesConfig = xesConfig;
+			this.filePath = filePath;
+			logConfig = new LogConfig();
 
-	}
-
+		}
 	/**
 	 * 
 	 * @param readfile
@@ -143,9 +155,10 @@ public class XESWriter {
 		logConfig.config(LOGCONFIGFILE, file.getAbsolutePath());
 		ArrayList<String> logTagList = logConfig.getLogTags();
 		// read timeput from config
-		String timeOutString = xesConfig.getTimeOut();
-		Date timeOut = this.StringToTimeStamp(timeOutString);
-		System.out.print("\ntimeout:" + timeOut);
+		timeOutString = TIMEOUT;
+		timeOut=StringToTimeStamp(timeOutString);
+		// Date timeOut = this.StringToTimeStamp(timeOutString);
+		// System.out.print("\ntimeout:" + timeOut);
 		BufferedReader reader;
 		String record;
 		String logHeadTokenizer = logConfig.getLogHeadTokenizer();
@@ -393,7 +406,9 @@ public class XESWriter {
 							// check if it is already timeout,if timeout,create
 							// new instance
 							boolean ifTimeOut = checkTimeOut(logBuffer);
-							lastestArrivalMap.put();
+							if(ifTimeOut){
+							
+							System.out.print("\n need to create new instance");}
 
 							eachTrace.add(event);
 							System.out.print("\nadd event:"
@@ -449,6 +464,7 @@ public class XESWriter {
 			OutputStream oStream = new BufferedOutputStream(
 					new FileOutputStream(sFile));
 			xstream.toXML(log, oStream);
+			oStream.close();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -467,7 +483,10 @@ public class XESWriter {
 	// traceNew.setAttributes(traceAttributeMapNew);
 	// }
 	private boolean checkTimeOut(LogBuffer logBuffer) {
-		boolean timeOut = false;
+		//Time time=new  Time();
+		
+		System.out.print("\ncheck if timeout");
+		boolean ifTimeOut = false;
 		String lasterTimeString = lastestArrivalMap.get(logBuffer
 				.getCaseIDString());
 		String earliestTimeString = earliestArrivalMap.get(logBuffer
@@ -476,21 +495,38 @@ public class XESWriter {
 		Date lasterTime = StringToTimeStamp(lasterTimeString);
 		Date earliestTime = StringToTimeStamp(earliestTimeString);
 		Date arriveTime = StringToTimeStamp(arriveTimeString);
-
+//		System.out.print("\nlasterTime:"
+//				+ (lasterTime.getTime()));
+//		System.out.print("\n earliest time different:"
+//				+ (arriveTime.getTime() - earliestTime.getTime()));
+//		System.out.print("\ntimeOut:"+timeOut.getTime());
 		if (arriveTime.after(lasterTime)) {
 			lastestArrivalMap
 					.put(logBuffer.getCaseIDString(), arriveTimeString);
-			if(arriveTime.getTime()-lasterTime.getTime()>40){timeOut=true;
+			if (lasterTime.getTime() - arriveTime.getTime() > timeOut.getTime()) {
+				ifTimeOut = true;
+				System.out.print("\nlatest time different:"
+						+ (lasterTime.getTime() - arriveTime.getTime()));
+			} else {
+				lastestArrivalMap.put(logBuffer.getCaseIDString(),
+						arriveTimeString);
 			}
 
 		}
+		//lasterTime.
 		if (arriveTime.before(earliestTime)) {
-			earliestArrivalMap.put(logBuffer.getCaseIDString(),
-					arriveTimeString);
-			if(){timeOut=true;}
+
+			if (arriveTime.getTime() - earliestTime.getTime()> timeOut.getTime()) {
+				ifTimeOut = true;
+				System.out.print("\n earliest time different:"
+						+ (arriveTime.getTime() - earliestTime.getTime()));
+			} else {
+				earliestArrivalMap.put(logBuffer.getCaseIDString(),
+						arriveTimeString);
+			}
 		}
 
-		return timeOut;
+		return ifTimeOut;
 	}
 
 	/**

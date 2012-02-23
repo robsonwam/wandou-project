@@ -20,24 +20,24 @@ public class LogClean {
 	// private LogBuffer logbuffer;
 	private ArrayList<String> logTagList;
 	private ArrayList<Object> logContentList;
-	private Map<String, String> rule;
+	private Map<String, String> crule;
     private int flag=1;//默认符合格式要求
     
 	public LogClean() {
 
 		// logbuffer=new LogBuffer();
-		rule = new HashMap<String, String>();
+		crule = new HashMap<String, String>();
 		logTagList = new ArrayList<String>();
 		logContentList = new ArrayList<Object>();
 	}
 
-	public boolean logclean(LogBuffer record, LogCleanRule cleanrule) {
+	public boolean logClean(LogBuffer record, LogCleanRule cleanrule) {
 		// 接收全部日志清洗规则及记录
-		rule.putAll(cleanrule.getAllLogCleanRules());
+		crule.putAll(cleanrule.getAllLogCleanRules());
 		logTagList.addAll(record.getLogTagList());
 		logContentList.addAll(record.getLogContent());
 
-		Iterator it = rule.entrySet().iterator();
+		Iterator it = crule.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry entry = (Map.Entry) it.next();
 			// 获得每一个需要清洗的tag

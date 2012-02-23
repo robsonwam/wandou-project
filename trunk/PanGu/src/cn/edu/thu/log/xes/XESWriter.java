@@ -43,10 +43,12 @@ public class XESWriter {
 	XESConfig xesConfig;
 	String filePath;
 	String resultFilePath;
+	XLog log;
 	// from logContent
 	ArrayList<String> cateList;
 	LogConfig logConfig;
-	ArrayList<ArrayList<String>> existCaseIDList;
+
+	// ArrayList<ArrayList<String>> existCaseIDList;
 
 	// WebConfigReadServiceImpl configRead; 应该有一个接口可以读取关于设置的参数
 	public XESWriter(XESConfig xesConfig, String filePath) {
@@ -71,8 +73,10 @@ public class XESWriter {
 		LogFilesReader logfilesReader = new LogFilesReader();
 		cateList = new ArrayList<String>();
 		cateList = logfilesReader.getCateList(filePath);
-		existCaseIDList = new ArrayList<ArrayList<String>>();
+		// existCaseIDList = new ArrayList<ArrayList<String>>();
 		File readfile = new File(filePath);
+		// write to one xes file =one log
+		log = factory.createLog();
 		readFile(readfile);
 		// if(cateList.size()>1)
 		// {
@@ -135,13 +139,14 @@ public class XESWriter {
 		LogBuffer logBuffer = new LogBuffer();
 		// XES Elemet
 		XEvent event = factory.createEvent();
-		XTrace trace = factory.createTrace();
-		XLog log = factory.createLog();
+		;
+		// XTrace trace = factory.createTrace();
 
 		// read each log Record
 		try {
 			reader = new BufferedReader(new FileReader(file));
 			while ((record = reader.readLine()) != null) {
+				event = factory.createEvent();
 				// Log log = new Log();
 				// set up the file path and file name for this log
 				// log.setLogName(file.getName());
@@ -238,18 +243,15 @@ public class XESWriter {
 				logBuffer.setLogBodyContent(headparams);
 				logBuffer.setLogContent(params);
 				logBuffer.setLogTagList(logTagList);
-
+				// set up the event
 				writeEvent(event, logBuffer);
 				// set caseIDList(Content) of LogBuffer
 				ArrayList<String> caseIDContentList = new ArrayList<String>();
 				for (int i = 0; i < xesConfig.getCaseIDList().size(); i++) {
 					String caseID = xesConfig.getCaseIDList().get(i);
 					for (int j = 0; j < logBuffer.getLogTagList().size(); j++) {
-						if (xesConfig
-								.getCaseIDList()
-								.get(i)
-								.equalsIgnoreCase(
-										logBuffer.getLogTagList().get(j))) {
+						if (caseID.equalsIgnoreCase(logBuffer.getLogTagList()
+								.get(j))) {
 							caseIDContentList.add(logBuffer.getLogContent()
 									.get(j).toString());
 
@@ -257,74 +259,82 @@ public class XESWriter {
 					}
 				}
 				logBuffer.setCaseIDList(caseIDContentList);
-				// add caseIDList to existingCaseIDList
-				existCaseIDList.add(logBuffer.getCaseIDList());
 
-				// logBuffer.setActivityIDList(xesConfig.getActivityIDList());
-				// logBuffer.setTimeStamp(xesConfig.getTimeStamp());
+				// put trace into log
+				if (log.isEmpty())// if log still empty,add the first case
+				{
+					System.out
+							.print("\nthe case is still empty,add the first case");
+					XTrace traceNew = factory.createTrace();
+					// writeTrace(traceNew,logBuffer);
+					XAttributeMap traceAttributeMapNew = factory
+							.createAttributeMap();
+					XAttribute traceAttributeNew = factory
+							.createAttributeLiteral("caseID", logBuffer
+									.getCaseIDList().get(0),// ！！！！！！！！！！！！！！！！默认目前只有一个值确定caseID
+									null);
+					traceAttributeMapNew.put(traceAttributeNew.getKey(),
+							traceAttributeNew);
+					traceNew.setAttributes(traceAttributeMapNew);
+					traceNew.add(event);
+					System.out.print("\nadd event for first time:"
+							+ event.getAttributes().get("Query"));
+					// add new trace to log
 
-				// // add more null to fit the merged tags
-				// String category = file.getName().split("_")[0];
-				// int indexCate = 0;
-				// for (int i = 0; i < cateList.size(); i++) {
-				// if (cateList.get(i).matches(category)) {
-				// indexCate = i;
-				// }
-				// }
-				// int insertIndex = 0;
-				// int insertParamscount = 0;
-				// insertIndex += headparams.size();
-				//
-				// for (int i = 0; i < indexCate; i++) {
-				//
-				// int tempBodyParamCount = logConfig.getLogBodyByCate(
-				// cateList.get(i)).size();
-				// insertParamscount += tempBodyParamCount;
-				// // System.out.print("\nlog body size:" +
-				// // tempBodyParamCount);
-				//
-				// }
-				//
-				// logConfig.getLogBody().size();
-				// for (int j = 0; j < insertParamscount; j++) {
-				// params.add(insertIndex, null);
-				// }
-				// // System.out.print("\n params add:" + params);
-				// // logUI.addLog(params);
-				// log.setLogContent(params);
-				//
-				// // System.out.print("\nadd log:" + log.getLogContent());
-				// // logList.add(log);
+					log.add(traceNew);
 
-			}
-			reader.close();
-			// xes
+				} else {// the log is not empty,already contains trace
+					boolean caseIDExist = false;
+					for (int i = 0; i < log.size(); i++) {
 
-			for (int s = 0; s < existCaseIDList.size(); s++) {
-				for (int t = 0; t < existCaseIDList.get(s).size(); t++) {
-					for (int p = 0; p < logBuffer.getCaseIDList().size(); p++) {
-						if (logBuffer
-								.getCaseIDList()
-								.get(p)
-								.equalsIgnoreCase(existCaseIDList.get(s).get(t))) {
-//!!!!!!!
+						XTrace eachTrace = log.get(i);
+						// for(XTrace eachTrace:log){
+						String caseIDValue = eachTrace.getAttributes()
+								.get("caseID").toString();
+						System.out.print("\ncaseID in one search:"
+								+ caseIDValue);
+						boolean caseIDMatch=true;
+						 for (int p = 0; p < logBuffer.getCaseIDList().size();
+						 p++) {
+						if (logBuffer.getCaseIDList().get(p)
+								.equalsIgnoreCase(caseIDValue)) {// the caseID
+																	// already
+																	// exist
+							System.out.print("\nthe caseID already existed");
+							eachTrace.add(event);
+							System.out.print("\nadd event:"
+									+ event.getAttributes().get("Query"));
+							caseIDExist = true;
+
 						}
+						
+					}
+						 if(caseIDMatch){
+							 
+							 }
+						 }
+					if (!caseIDExist) {
+						System.out.print("\nthe caseID does not exist");
+						// set up trace
+						XTrace traceNew = factory.createTrace();
+						// writeTrace(traceNew,logBuffer);
+						XAttributeMap traceAttributeMapNew = factory
+								.createAttributeMap();
+						XAttribute traceAttributeNew = factory
+								.createAttributeLiteral("caseID", logBuffer
+										.getCaseIDList().get(0), null);
+						traceAttributeMapNew.put(traceAttributeNew.getKey(),
+								traceAttributeNew);
+						traceNew.setAttributes(traceAttributeMapNew);
+						traceNew.add(event);
+						System.out.print("\nadd event:"
+								+ event.getAttributes().get("Query"));
+						// add new trace to log
+						log.add(traceNew);
 					}
 				}
 			}
-
-			XAttributeMap traceAttributeMap = factory.createAttributeMap();
-			XAttribute traceAttribute1 = factory.createAttributeLiteral(
-					"Indentifier", xesConfig.getActivityIDList().toString(),
-					null);
-			// XAttribute traceAttribute2=factory.createAttributeLiteral("ID",
-			// logBuffer.g, null);
-			// existCaseIDList.add(e)
-			traceAttributeMap.put(traceAttribute1.getKey(), traceAttribute1);
-			// traceAttributeMap.put(traceAttribute2.getKey(), traceAttribute2);
-			trace.setAttributes(traceAttributeMap);
-			log.add(trace);
-			trace.add(event);
+			reader.close();
 			// write to XES
 			File sFile = new File(resultFilePath);
 			if (sFile.exists()) {
@@ -348,6 +358,16 @@ public class XESWriter {
 
 	}
 
+	// private void writeTrace(XTrace trace, LogBuffer logBuffer)
+	// {XAttributeMap traceAttributeMapNew = factory.createAttributeMap();
+	// XAttribute traceAttributeNew = factory.createAttributeLiteral(
+	// "caseID",logBuffer
+	// .getCaseIDList()
+	// .get(p),
+	// null);
+	// traceAttributeMapNew.put(traceAttributeNew.getKey(), traceAttributeNew);
+	// traceNew.setAttributes(traceAttributeMapNew);
+	// }
 	private void writeEvent(XEvent event, LogBuffer logBuffer) {
 		// get the tags of loghead and logbody from one record
 		// logConfig.config(logconfigFile, logBuffer.getLogPath());
@@ -377,8 +397,8 @@ public class XESWriter {
 				String emptyString = new String("null");
 				logContents.set(i, emptyString);
 				// logContents.get(i)
-				System.out.print("\nnull at " + logTags.get(i));
-				System.out.print("\nlog content:" + logContents);
+				// System.out.print("\nnull at " + logTags.get(i));
+				// System.out.print("\nlog content:" + logContents);
 
 			}
 			XAttribute attribute = factory.createAttributeLiteral(

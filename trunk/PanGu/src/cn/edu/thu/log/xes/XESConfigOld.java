@@ -2,18 +2,18 @@ package cn.edu.thu.log.xes;
 
 import java.util.ArrayList;
 
-public class XESConfig {
+public class XESConfigOld {
 	ArrayList<String> caseIDList;
 	ArrayList<String> activityIDList;
 	String timeStamp;
 	String configFile;
 
 	// for test
-	public XESConfig() {
+	public XESConfigOld() {
 		setupConfig();
 	}
 
-	public XESConfig(String configFile) {
+	public XESConfigOld(String configFile) {
 		this.configFile = configFile;
 		setupConfig();
 	}

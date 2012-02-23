@@ -9,7 +9,7 @@ public class testReadMiningConfig {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		WebConfigReadService configRead=new WebConfigReadServiceImpl();
-		configRead.readWebConfig("miningconfig1.xml");
+		configRead.readWebConfig("miningconfig2.xml");
 		//configRead.getActivityIDList();
 		//configRead.getCaseIDList();
 		//configRead.getTimeStamp();

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<miningconfig>
+<logclean>
+<logtag tagformat="23" tagname="TimeStamp"/>
+<logtag tagformat="4546" tagname="TransactionID"/>
+</logclean>
+<noiseidentify>
+<noise noiseformat=""/>
+<noise noiseformat="seo"/>
+<mininternal mininternal="666"/>
+<maxtime maxtime="72"/>
+</noiseidentify>
+<activityidentify>
+<timestamp timestamp="TimeStamp"/>
+<activity activityformat="baidu" activityname="Referer"/>
+<product productname="page"/>
+</activityidentify>
+<caseidentify>
+<case caseid="OriginateIP" type="secondid"/>
+<case caseid="RemoteIP" type="secondid"/>
+</caseidentify>
+</miningconfig>

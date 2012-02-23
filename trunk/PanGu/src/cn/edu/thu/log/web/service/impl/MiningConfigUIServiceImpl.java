@@ -199,8 +199,8 @@ public class MiningConfigUIServiceImpl implements MiningConfigUIService {
 		 while(logcleanit.hasNext()){ 
 			 Element logtag=doc.createElement("logtag");
 			 Map.Entry<String, String> entry1=(Map.Entry<String, String>) logcleanit.next();
-			 logtag.setAttribute("字段名",entry1.getKey()); 
-			 logtag.setAttribute("格式规则",entry1.getValue());
+			 logtag.setAttribute("tagname",entry1.getKey()); 
+			 logtag.setAttribute("tagformat",entry1.getValue());
 			 System.out.println("\n读取logclean配置： "+entry1.getKey()+entry1.getValue());
 			 logclean.appendChild(logtag); 
 		 }
@@ -213,18 +213,18 @@ public class MiningConfigUIServiceImpl implements MiningConfigUIService {
 		 while(noiseidentifyit.hasNext()){ 
 			 Element noise=doc.createElement("noise");	
 			 String noisestr=noiseidentifyit.next();
-			 noise.setAttribute("噪声串",noisestr); 			 
+			 noise.setAttribute("noiseformat",noisestr); 			 
 			 noiseidentify.appendChild(noise); 
 			 System.out.println("\n读取noise配置： "+noisestr);
 		 }		
 		 //定义最小间隔时间mininternal
 		 Element mininternal=doc.createElement("mininternal");
-		 mininternal.setAttribute("最短间隔", noiserule.getMininternal().toString());
+		 mininternal.setAttribute("mininternal", noiserule.getMininternal().toString());
 		 noiseidentify.appendChild(mininternal); 
 		 System.out.println("\nnoise最小时间间隔： "+noiserule.getMininternal());
 		 //最长访问时间maxtime
 		 Element maxtime=doc.createElement("maxtime"); 
-		 maxtime.setAttribute("最长时间", noiserule.getMaxtime().toString());
+		 maxtime.setAttribute("maxtime", noiserule.getMaxtime().toString());
 		 noiseidentify.appendChild(maxtime);
 		 System.out.println("\nnoise最长时间： "+noiserule.getMaxtime());
 		 
@@ -232,7 +232,7 @@ public class MiningConfigUIServiceImpl implements MiningConfigUIService {
 		 Element activityidentify=doc.createElement("activityidentify");
 		 //需要定义timestamp 
 		 Element timestamp=doc.createElement("timestamp");
-		 timestamp.setAttribute("时间戳", activityrule.getTimestamp()); 
+		 timestamp.setAttribute("timestamp", activityrule.getTimestamp()); 
 		 activityidentify.appendChild(timestamp);
 		 System.out.println("\nactivity时间戳： "+activityrule.getTimestamp());
 		 //需要定义活动，属性为字段名
@@ -242,8 +242,8 @@ public class MiningConfigUIServiceImpl implements MiningConfigUIService {
 		 while(activityidentifyit.hasNext()){ 
 			 Element activity=doc.createElement("activity");
 			 Map.Entry<String, String> entry3=(Map.Entry<String, String>) activityidentifyit.next();
-			 activity.setAttribute("活动字段名",entry3.getKey()); 
-			 activity.setAttribute("活动子串规则",entry3.getValue());
+			 activity.setAttribute("activityname",entry3.getKey()); 
+			 activity.setAttribute("activityformat",entry3.getValue());
 			 activityidentify.appendChild(activity); 
 			 System.out.println("\n读取activity配置： "+entry3.getKey()+entry3.getValue());
 		 }		 
@@ -253,7 +253,7 @@ public class MiningConfigUIServiceImpl implements MiningConfigUIService {
 		 while(productsit.hasNext()){
 			 product=doc.createElement("product");	
 			 String productStr=productsit.next();
-			 product.setAttribute("产品名称",productStr);
+			 product.setAttribute("productname",productStr);
 			 activityidentify.appendChild(product); 
 			 System.out.println("\n读取activity选取产品配置： "+productStr);
 		 }
@@ -267,8 +267,8 @@ public class MiningConfigUIServiceImpl implements MiningConfigUIService {
 		 while(caseidentifyit.hasNext()){ 
 			 Element caseid=doc.createElement("case");
 			 Map.Entry<String, String> entry2=(Map.Entry<String, String>) caseidentifyit.next();
-			 caseid.setAttribute("id类型",entry2.getKey()); 
-			 caseid.setAttribute("案例id",entry2.getValue());			
+			 caseid.setAttribute("caseid",entry2.getKey()); 
+			 caseid.setAttribute("type",entry2.getValue());			
 			 caseidentify.appendChild(caseid);
 			 System.out.println("\n读取case配置： "+entry2.getKey()+entry2.getValue());
 		 }				

@@ -3,6 +3,11 @@ package cn.edu.thu.log.preprocessrule;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * define how to identify cases
+ * @author wan
+ *
+ */
 public class CaseIdentifyRule {
 	private String type=null;
 	private Map<String,String> caseIdentifyRules;

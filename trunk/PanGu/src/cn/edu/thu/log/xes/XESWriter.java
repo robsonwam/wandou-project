@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.Iterator;
 
+import org.deckfour.xes.classification.XEventAttributeClassifier;
 import org.deckfour.xes.factory.XFactory;
 import org.deckfour.xes.factory.XFactoryNaiveImpl;
 import org.deckfour.xes.factory.XFactoryRegistry;
@@ -63,6 +64,7 @@ public class XESWriter {
 	// from logContent
 	ArrayList<String> cateList;
 	LogConfig logConfig;
+	XEventAttributeClassifier 	 classifier;
 
 	// ArrayList<ArrayList<String>> existCaseIDList;
 
@@ -103,6 +105,7 @@ public class XESWriter {
 		/** map<caseID,latest/earlisest arrival time> */
 		lastestArrivalMap = new Hashtable<String, String>();
 		earliestArrivalMap = new Hashtable<String, String>();
+		setupClassifier();
 		readFile(readfile);
 		// if(cateList.size()>1)
 		// {
@@ -114,6 +117,13 @@ public class XESWriter {
 		// }
 
 		return;
+	}
+	private void setupClassifier()
+	{
+		//String[] keys= (String[]) xesConfig.getActivityIDList().toArray();
+		String[] keys={"Source","ContentType"};
+	 classifier =new XEventAttributeClassifier("activity classifier",keys);
+		
 	}
 
 	/**
@@ -170,7 +180,7 @@ public class XESWriter {
 		LogBuffer logBuffer = new LogBuffer();
 		// XES Elemet
 		XEvent event = factory.createEvent();
-		;
+		
 		// XTrace trace = factory.createTrace();
 
 		// read each log Record
@@ -335,7 +345,7 @@ public class XESWriter {
 
 				// only write activities,logPath,caseID to event
 				writeEvent(event, logBuffer);
-
+				classifier.getClassIdentity(event);
 				// put trace into log
 				if (log.isEmpty())// if log still empty,add the first case
 				{
@@ -383,8 +393,8 @@ public class XESWriter {
 						// for(XTrace eachTrace:log){
 						String caseIDValue = eachTrace.getAttributes()
 								.get("caseID").toString();
-						System.out.print("\ncaseID in one search:"
-								+ caseIDValue);
+//						System.out.print("\ncaseID in one search:"
+//								+ caseIDValue);
 						boolean caseIDMatch = true;
 						// for (int p = 0; p < logBuffer.getCaseIDList().size();
 						// p++) {

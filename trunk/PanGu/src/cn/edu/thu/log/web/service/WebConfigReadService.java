@@ -1,9 +1,7 @@
 package cn.edu.thu.log.web.service;
 
 import java.util.ArrayList;
-
-import cn.edu.thu.log.preprocessrule.LogCleanRule;
-import cn.edu.thu.log.test.testUI;
+import java.util.Map;
 
 /**
  * read user config from the web page
@@ -12,6 +10,9 @@ import cn.edu.thu.log.test.testUI;
  */
 public interface WebConfigReadService {
 	
-	public ArrayList<LogCleanRule> readWebConfig();
-	
+	public ArrayList<String> getCaseIDList();
+	public ArrayList<String> getActivityIDList();
+	public String getTimeStamp();
+	public Map<String,String> getFormatActivityIDList();
+	public void readWebConfig(String filename);
 }

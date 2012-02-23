@@ -6,6 +6,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * define how to identify activites
+ * @author wan
+ *
+ */
 public class ActivityIdentifyRule {
 	private String activityname;
 	private String actexpression;

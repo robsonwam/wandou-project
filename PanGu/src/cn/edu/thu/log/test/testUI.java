@@ -777,10 +777,10 @@ public class testUI extends JFrame {
 						+ actExpression);
 				System.out.println("\nactivity format is:"
 						+ miningconfigservice.getActivityFormat());
-
+				System.out.println("all selected activites are: "+ miningconfigservice.getAllActivityIdentifyRules().size());
 			}
 		});
-
+		
 		operationBox.add(Box.createVerticalStrut(20));
 		operationBox.add(addTimestampButton);
 		operationBox.add(Box.createVerticalStrut(20));// 创建一个不可见的30单位的组件

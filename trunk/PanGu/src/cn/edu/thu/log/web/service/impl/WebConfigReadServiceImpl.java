@@ -78,7 +78,7 @@ public class WebConfigReadServiceImpl implements WebConfigReadService{
 		*/
 		for(int i=0;i<activityruleList.getLength();i++){			
 			Element temp=(Element) activityruleList.item(i);			
-			activityIDList.add(temp.getAttribute("activityformat"));			
+			activityIDList.add(temp.getAttribute("activityname"));			
 		}
 		Element time=(Element) timestampList.item(0);
 		timestamp=new String(time.getAttribute("timestamp"));			

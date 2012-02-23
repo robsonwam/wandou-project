@@ -22,9 +22,10 @@ public class XESConfigOld {
 	// class
 	private void setupConfig() {
 		caseIDList = new ArrayList<String>();
-		caseIDList.add("sessionID");
-//		caseIDList.add("UA");
-//		caseIDList.add("OriginateIP");
+	//	caseIDList.add("sessionID");
+		caseIDList.add("UA");
+		caseIDList.add("OriginateIP");
+		//caseIDList.add("RemoteIP");
 		activityIDList = new ArrayList<String>();
 		activityIDList.add("contentType");
 

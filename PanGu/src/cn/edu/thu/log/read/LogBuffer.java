@@ -17,6 +17,37 @@ public class LogBuffer {
 	String logName;
 	/**config info*/
 	ArrayList<String> caseIDList;
+	String CaseIDString;
+	ArrayList<Object> activityIDContentList;
+	ArrayList<String> activityIDTagList;
+	String timeStamp;
+	
+	public ArrayList<Object> getActivityIDContentList() {
+		return activityIDContentList;
+	}
+
+	public void setActivityIDContentList(ArrayList<Object> activityIDContentList) {
+		this.activityIDContentList = activityIDContentList;
+	}
+
+	public ArrayList<String> getActivityIDTagList() {
+		return activityIDTagList;
+	}
+
+	public void setActivityIDTagList(ArrayList<String> activityIDTagList) {
+		this.activityIDTagList = activityIDTagList;
+	}
+
+	
+	
+	public String getCaseIDString() {
+		return CaseIDString;
+	}
+
+	public void setCaseIDString(String caseIDString) {
+		CaseIDString = caseIDString;
+	}
+
 	public ArrayList<String> getCaseIDList() {
 		return caseIDList;
 	}
@@ -25,13 +56,7 @@ public class LogBuffer {
 		this.caseIDList = caseIDList;
 	}
 
-	public ArrayList<String> getActivityIDList() {
-		return activityIDList;
-	}
-
-	public void setActivityIDList(ArrayList<String> activityIDList) {
-		this.activityIDList = activityIDList;
-	}
+	
 
 	public String getTimeStamp() {
 		return timeStamp;
@@ -41,8 +66,7 @@ public class LogBuffer {
 		this.timeStamp = timeStamp;
 	}
 
-	ArrayList<String> activityIDList;
-	String timeStamp;
+	
 
 	/** get and set functions */
 	public ArrayList<String> getLogHeadTagList() {

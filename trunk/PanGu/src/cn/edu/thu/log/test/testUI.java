@@ -49,6 +49,7 @@ import cn.edu.thu.log.web.service.MiningConfigWriteService;
 import cn.edu.thu.log.web.service.impl.LogReadServiceImpl;
 import cn.edu.thu.log.web.service.impl.MiningConfigUIServiceImpl;
 import cn.edu.thu.log.web.service.impl.MiningConfigWriteServiceImpl;
+import cn.edu.thu.log.web.service.impl.XESConvertServiceImp;
 
 /**
  * applicationUI for test
@@ -126,8 +127,8 @@ public class testUI extends JFrame {
 	// 事件处理部分所需变量
 	LogReadService readlogservice;
 	MiningConfigUIService miningconfigservice;
-	//MiningConfigWriteService miningconfigwriteservice;
-	ArrayList<String> allProducts = new ArrayList<String>();	
+	// MiningConfigWriteService miningconfigwriteservice;
+	ArrayList<String> allProducts = new ArrayList<String>();
 	DefaultTableModel tagModel;
 	DefaultListModel noiseResultModel;
 	JList noiseResultList;
@@ -155,7 +156,7 @@ public class testUI extends JFrame {
 
 		// initiate the UI
 		miningconfigservice = new MiningConfigUIServiceImpl();
-		//miningconfigwriteservice=new MiningConfigWriteServiceImpl();
+		// miningconfigwriteservice=new MiningConfigWriteServiceImpl();
 		// readlogservice=new LogReadServiceImpl();
 		productsname = new HashMap<String, String>();
 		productsname.put("新闻", "news");
@@ -258,13 +259,13 @@ public class testUI extends JFrame {
 				}
 
 			});
-			saveAsItem = new JMenuItem("saveAs");
+			saveAsItem = new JMenuItem("exportXES");
 			saveAsItem.addActionListener(new ActionListener() {
 
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					// TODO Auto-generated method stub
-					saveAs();
+					exportXES();
 				}
 
 			});
@@ -827,18 +828,18 @@ public class testUI extends JFrame {
 		caseChooseModePanel.add(secondIdButton, BorderLayout.SOUTH);
 		JButton caseIDButton = new JButton("添加案例ID");
 		caseChooseModePanel.add(caseIDButton);
-		JButton saveAllButton=new JButton("保存所有配置信息");
-		//miningconfigwriteservice=new MiningConfigWriteServiceImpl();
-		saveAllButton.addActionListener(new ActionListener(){
+		JButton saveAllButton = new JButton("保存所有配置信息");
+		// miningconfigwriteservice=new MiningConfigWriteServiceImpl();
+		saveAllButton.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
-				//miningconfigwriteservice=new MiningConfigWriteServiceImpl();
-				//miningconfigwriteservice.writeMiningConfig("miningconfig.xml");
+				// miningconfigwriteservice=new MiningConfigWriteServiceImpl();
+				// miningconfigwriteservice.writeMiningConfig("miningconfig.xml");
 				miningconfigservice.writeMiningConfig("miningconfig1.xml");
 			}
-			
+
 		});
 		caseChooseModePanel.add(saveAllButton);
 		caseIDButton.addActionListener(new ActionListener() {
@@ -853,19 +854,21 @@ public class testUI extends JFrame {
 						caseResultList.setModel(caseResultModel);
 						miningconfigservice.addCaseIdentifyRule(caseList
 								.getSelectedValue().toString(), "mainid");
-					}
-					else
-						JOptionPane.showMessageDialog(container, "主案例ID只能选择一个字段！");
-					System.out.println("\nallcaseIdentifyRules: "+miningconfigservice.getAllCaseIdentifyRules());
+					} else
+						JOptionPane.showMessageDialog(container,
+								"主案例ID只能选择一个字段！");
+					System.out.println("\nallcaseIdentifyRules: "
+							+ miningconfigservice.getAllCaseIdentifyRules());
 				}
-				if(secondIdButton.isSelected()){
+				if (secondIdButton.isSelected()) {
 					caseResultModel.addElement(caseList.getSelectedValue());
 					caseResultList.setModel(caseResultModel);
-					miningconfigservice.addCaseIdentifyRule(caseList.getSelectedValue().toString(), "secondid");
+					miningconfigservice.addCaseIdentifyRule(caseList
+							.getSelectedValue().toString(), "secondid");
 				}
-				System.out.println("\nallcaseIdentifyRules: "+miningconfigservice.getAllCaseIdentifyRules());
+				System.out.println("\nallcaseIdentifyRules: "
+						+ miningconfigservice.getAllCaseIdentifyRules());
 			}
-			
 
 		});
 		mainIdButton.addItemListener(new ItemListener() {
@@ -874,7 +877,7 @@ public class testUI extends JFrame {
 			public void itemStateChanged(ItemEvent e) {
 				// TODO Auto-generated method stub
 				if (e.getStateChange() == e.SELECTED) {
-					buttoncount=0;
+					buttoncount = 0;
 					miningconfigservice.clearCaseIdentifyRules();
 					caseResultModel.clear();
 					caseResultList.setModel(caseResultModel);
@@ -888,7 +891,7 @@ public class testUI extends JFrame {
 			public void itemStateChanged(ItemEvent e) {
 				// TODO Auto-generated method stub
 				if (e.getStateChange() == e.SELECTED) {
-					buttoncount=0;
+					buttoncount = 0;
 					miningconfigservice.clearCaseIdentifyRules();
 					caseResultModel.clear();
 					caseResultList.setModel(caseResultModel);
@@ -951,6 +954,39 @@ public class testUI extends JFrame {
 			tableModel.removeRow(i);
 			// System.out.print("\nremove row " + i);
 		}
+	}
+
+	private void exportXES() {
+
+		// chooser file
+		JFileChooser chooser = new JFileChooser();
+		File savedFile = null;
+		chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+		chooser.setMultiSelectionEnabled(true);
+		chooser.setCurrentDirectory(new File("D://"));
+		// chooser.setSelectedFile(new File(chosenfile.getName()));
+		int returnVal = chooser.showOpenDialog(this);
+
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			if (chooser.getSelectedFile() != null) {
+				savedFile = new File(chooser.getSelectedFile().getPath());
+
+				System.out.print("\n file(has selevted)" + savedFile
+						+ " has been saved");
+			} else {
+				savedFile = new File(chooser.getCurrentDirectory(),
+						chooser.getDialogTitle());
+				System.out.print("\n file(no seected)" + savedFile
+						+ " has been saved");
+				// File savedFile = new
+				// File(chooser.getCurrentDirectory()+chooser.get);
+			}
+
+		}
+	
+		XESConvertServiceImp XESConvert = new XESConvertServiceImp();
+		XESConvert.convert(chosenfile.getAbsolutePath(),savedFile.getAbsolutePath());
+		JOptionPane.showMessageDialog(this, "xes has been save to "+savedFile.getAbsolutePath());
 	}
 
 	/**

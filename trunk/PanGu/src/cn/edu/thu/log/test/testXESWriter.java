@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import cn.edu.thu.log.read.Log;
 import cn.edu.thu.log.read.LogConfig;
 import cn.edu.thu.log.read.LogContent;
+import cn.edu.thu.log.web.service.WebConfigReadService;
+import cn.edu.thu.log.web.service.impl.WebConfigReadServiceImpl;
 import cn.edu.thu.log.xes.XESConfig;
 import cn.edu.thu.log.xes.XESWriter;
 
@@ -29,20 +31,30 @@ public class testXESWriter {
 //		XESConfig xesConfig=new XESConfig();
 //		XESWriter writer = new XESWriter(xesConfig,readFilePath);
 //		writer.writeTest(logList);
-		
+		//-------
+////		String readFilePath = new String(
+////				"D:/imageclick_file/imageclick_201111290129_0.log");
 //		String readFilePath = new String(
-//				"D:/imageclick_file/imageclick_201111290129_0.log");
+//				"D:/imageclick_file/imageclick");
+////		String readFilePath = new String(
+////				"D:/imageclick_file/imageclick/imagesearch_201111290000_0.log");
+////		LogConfig config = new LogConfig();
+////		config.config("config.xml", readFilePath);// 设置了config中的各种参数
+//		String resultFile="logXes.xml";
+//		XESConfig xesConfig=new XESConfig();
+//	
+//		XESWriter writer = new XESWriter(xesConfig,readFilePath);
+//		writer.write(resultFile);
+		//------
+		WebConfigReadService configRead=new WebConfigReadServiceImpl();
+		configRead.readWebConfig("miningconfig2.xml");
 		String readFilePath = new String(
 				"D:/imageclick_file/imageclick");
-//		String readFilePath = new String(
-//				"D:/imageclick_file/imageclick/imagesearch_201111290000_0.log");
-//		LogConfig config = new LogConfig();
-//		config.config("config.xml", readFilePath);// 设置了config中的各种参数
 		String resultFile="logXes.xml";
-		XESConfig xesConfig=new XESConfig();
-	
-		XESWriter writer = new XESWriter(xesConfig,readFilePath);
+		XESWriter writer = new XESWriter(configRead,readFilePath);
 		writer.write(resultFile);
+		
+		
 	}
 
 }

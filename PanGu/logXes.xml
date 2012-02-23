@@ -6,27 +6,289 @@
   <XEventClassifiers/>
   <XTrace>
     <XAttributeMap lazy="false" buffered="true">
-      <XAttribute key="Indentifier" type="LITERAL" value="[contentType]"/>
+      <XAttribute key="caseID" type="LITERAL" value="Mozilla/4.0 (compatible\; MSIE 7.0\; Windows NT 5.1\; Trident/4.0\; .NET CLR 2.0.50727\; SE 2.X MetaSr 1.0)"/>
     </XAttributeMap>
-    <XEvent xid="7077E8BA-768A-4C23-80D9-C1CA8CC2EEA8">
+    <XEvent xid="23C8DAAE-306E-4936-AB05-D690A27FB564">
       <XAttributeMap lazy="false" buffered="false">
         <XAttribute key="Ptn" type="LITERAL" value="null"/>
         <XAttribute key="Encoding" type="LITERAL" value="null"/>
-        <XAttribute key="Start" type="LITERAL" value="sa:20"/>
-        <XAttribute key="Query" type="LITERAL" value="q:人体艺术"/>
+        <XAttribute key="Rank" type="LITERAL" value="rk:0"/>
+        <XAttribute key="Query" type="LITERAL" value="q:淘宝事件"/>
         <XAttribute key="MobileNo" type="LITERAL" value="null"/>
-        <XAttribute key="TransactionID" type="LITERAL" value="4338044891175025"/>
-        <XAttribute key="RemoteIP" type="LITERAL" value="10.10.128.58"/>
-        <XAttribute key="OriginateIP" type="LITERAL" value="123.171.68.138"/>
-        <XAttribute key="SessionID" type="LITERAL" value="DE972AB8A97D0B45DA472A6C39EF3906"/>
-        <XAttribute key="RespTime" type="LITERAL" value="rt:5.319"/>
-        <XAttribute key="logPath" type="LITERAL" value="D:\imageclick_file\imageclick\imagesearch_201111290000_0.log"/>
+        <XAttribute key="TransactionID" type="LITERAL" value="4338383181302658"/>
+        <XAttribute key="URL" type="LITERAL" value="url:http\://www.spforum.net/xinwen/?351658.html"/>
+        <XAttribute key="RemoteIP" type="LITERAL" value="10.10.128.56"/>
+        <XAttribute key="OriginateIP" type="LITERAL" value="202.196.16.169"/>
+        <XAttribute key="SessionID" type="LITERAL" value="0D7B9FCF02F5B6382FE1DEF2B412D328"/>
+        <XAttribute key="logPath" type="LITERAL" value="D:\imageclick_file\imageclick\imageclick_201111290006_0.log"/>
+        <XAttribute key="PageNum" type="LITERAL" value=";pn:10"/>
+        <XAttribute key="Source" type="LITERAL" value="www"/>
+        <XAttribute key="TimeStamp" type="LITERAL" value="20111129000626411"/>
+        <XAttribute key="UA" type="LITERAL" value="Mozilla/4.0 (compatible\; MSIE 7.0\; Windows NT 5.1\; Trident/4.0\; .NET CLR 2.0.50727\; SE 2.X MetaSr 1.0)"/>
+        <XAttribute key="Referer" type="LITERAL" value="http://image.panguso.com/imagesearch.htm?q=%E6%B7%98%E5%AE%9D%E4%BA%8B%E4%BB%B6&amp;n=20&amp;p=26&amp;extType=&amp;sizeType="/>
+        <XAttribute key="Uid" type="LITERAL" value="null"/>
+        <XAttribute key="ContentType" type="LITERAL" value="image"/>
+      </XAttributeMap>
+    </XEvent>
+    <XEvent xid="C32C6B10-9CE5-49A7-B02E-C498C68A74FB">
+      <XAttributeMap lazy="false" buffered="false">
+        <XAttribute key="Ptn" type="LITERAL" value="null"/>
+        <XAttribute key="Encoding" type="LITERAL" value="null"/>
+        <XAttribute key="Rank" type="LITERAL" value="rk:0"/>
+        <XAttribute key="Query" type="LITERAL" value="q:淘宝事件多人失业"/>
+        <XAttribute key="MobileNo" type="LITERAL" value="null"/>
+        <XAttribute key="TransactionID" type="LITERAL" value="4339031603361576"/>
+        <XAttribute key="URL" type="LITERAL" value="url:http\://finance.eastday.com/Business/m2/20111014/u1a6151115.html"/>
+        <XAttribute key="RemoteIP" type="LITERAL" value="10.10.128.56"/>
+        <XAttribute key="OriginateIP" type="LITERAL" value="202.196.16.169"/>
+        <XAttribute key="SessionID" type="LITERAL" value="0D7B9FCF02F5B6382FE1DEF2B412D328"/>
+        <XAttribute key="logPath" type="LITERAL" value="D:\imageclick_file\imageclick\imageclick_201111290017_0.log"/>
+        <XAttribute key="PageNum" type="LITERAL" value=";pn:10"/>
+        <XAttribute key="Source" type="LITERAL" value="www"/>
+        <XAttribute key="TimeStamp" type="LITERAL" value="20111129001711510"/>
+        <XAttribute key="UA" type="LITERAL" value="Mozilla/4.0 (compatible\; MSIE 7.0\; Windows NT 5.1\; Trident/4.0\; .NET CLR 2.0.50727\; SE 2.X MetaSr 1.0)"/>
+        <XAttribute key="Referer" type="LITERAL" value="http://image.panguso.com/imagesearch.htm?q=%E6%B7%98%E5%AE%9D%E4%BA%8B%E4%BB%B6%E5%A4%9A%E4%BA%BA%E5%A4%B1%E4%B8%9A"/>
+        <XAttribute key="Uid" type="LITERAL" value="null"/>
+        <XAttribute key="ContentType" type="LITERAL" value="image"/>
+      </XAttributeMap>
+    </XEvent>
+    <XEvent xid="A718E6D3-D44A-41C0-946D-D616E04CB7EB">
+      <XAttributeMap lazy="false" buffered="false">
+        <XAttribute key="Ptn" type="LITERAL" value="null"/>
+        <XAttribute key="Encoding" type="LITERAL" value="null"/>
+        <XAttribute key="Rank" type="LITERAL" value="rk:0"/>
+        <XAttribute key="Query" type="LITERAL" value="q:淘宝事件多人失业"/>
+        <XAttribute key="MobileNo" type="LITERAL" value="null"/>
+        <XAttribute key="TransactionID" type="LITERAL" value="4339031603361576"/>
+        <XAttribute key="URL" type="LITERAL" value="url:http\://www.spforum.net/xinwen/?350204.html"/>
+        <XAttribute key="RemoteIP" type="LITERAL" value="10.10.128.56"/>
+        <XAttribute key="OriginateIP" type="LITERAL" value="202.196.16.169"/>
+        <XAttribute key="SessionID" type="LITERAL" value="0D7B9FCF02F5B6382FE1DEF2B412D328"/>
+        <XAttribute key="logPath" type="LITERAL" value="D:\imageclick_file\imageclick\imageclick_201111290017_0.log"/>
+        <XAttribute key="PageNum" type="LITERAL" value=";pn:10"/>
+        <XAttribute key="Source" type="LITERAL" value="www"/>
+        <XAttribute key="TimeStamp" type="LITERAL" value="20111129001739484"/>
+        <XAttribute key="UA" type="LITERAL" value="Mozilla/4.0 (compatible\; MSIE 7.0\; Windows NT 5.1\; Trident/4.0\; .NET CLR 2.0.50727\; SE 2.X MetaSr 1.0)"/>
+        <XAttribute key="Referer" type="LITERAL" value="http://image.panguso.com/imagesearch.htm?q=%E6%B7%98%E5%AE%9D%E4%BA%8B%E4%BB%B6%E5%A4%9A%E4%BA%BA%E5%A4%B1%E4%B8%9A"/>
+        <XAttribute key="Uid" type="LITERAL" value="null"/>
+        <XAttribute key="ContentType" type="LITERAL" value="image"/>
+      </XAttributeMap>
+    </XEvent>
+  </XTrace>
+  <XTrace>
+    <XAttributeMap lazy="false" buffered="true">
+      <XAttribute key="caseID" type="LITERAL" value="Mozilla/4.0 (compatible\; MSIE 6.0\; Windows NT 5.1\; SV1\; GTB6\; .NET CLR 2.0.50727\; SE 2.X MetaSr 1.0)"/>
+    </XAttributeMap>
+    <XEvent xid="F072E173-14BC-4685-8B89-1843BF95F1CF">
+      <XAttributeMap lazy="false" buffered="false">
+        <XAttribute key="Ptn" type="LITERAL" value="null"/>
+        <XAttribute key="Encoding" type="LITERAL" value="null"/>
+        <XAttribute key="Rank" type="LITERAL" value="rk:0"/>
+        <XAttribute key="Query" type="LITERAL" value="q:奔驰s级"/>
+        <XAttribute key="MobileNo" type="LITERAL" value="null"/>
+        <XAttribute key="TransactionID" type="LITERAL" value="4350387436932028"/>
+        <XAttribute key="URL" type="LITERAL" value="url:http\://www.wuhunews.cn/auto/sjtg/201111/326235.html"/>
+        <XAttribute key="RemoteIP" type="LITERAL" value="10.10.128.56"/>
+        <XAttribute key="OriginateIP" type="LITERAL" value="123.149.144.236"/>
+        <XAttribute key="SessionID" type="LITERAL" value="025F6DB220D9D3A9B641BA898AFF9CDF"/>
+        <XAttribute key="logPath" type="LITERAL" value="D:\imageclick_file\imageclick\imageclick_201111290326_0.log"/>
+        <XAttribute key="PageNum" type="LITERAL" value=";pn:10"/>
+        <XAttribute key="Source" type="LITERAL" value="www"/>
+        <XAttribute key="TimeStamp" type="LITERAL" value="20111129032618546"/>
+        <XAttribute key="UA" type="LITERAL" value="Mozilla/4.0 (compatible\; MSIE 6.0\; Windows NT 5.1\; SV1\; GTB6\; .NET CLR 2.0.50727\; SE 2.X MetaSr 1.0)"/>
+        <XAttribute key="Referer" type="LITERAL" value="http://image.panguso.com/imagesearch.htm?q=%E5%A5%94%E9%A9%B0s%E7%BA%A7&amp;n=20&amp;p=22&amp;extType=&amp;sizeType="/>
+        <XAttribute key="Uid" type="LITERAL" value="null"/>
+        <XAttribute key="ContentType" type="LITERAL" value="image"/>
+      </XAttributeMap>
+    </XEvent>
+  </XTrace>
+  <XTrace>
+    <XAttributeMap lazy="false" buffered="true">
+      <XAttribute key="caseID" type="LITERAL" value="Mozilla/4.0 (compatible\; MSIE 6.0\; Windows NT 5.1\; SV1\; .NET CLR 2.0.50727\; .NET CLR 3.0.04506.30)"/>
+    </XAttributeMap>
+    <XEvent xid="FAB90732-10BE-47B4-B986-E28572DAFCD0">
+      <XAttributeMap lazy="false" buffered="false">
+        <XAttribute key="Ptn" type="LITERAL" value="null"/>
+        <XAttribute key="Encoding" type="LITERAL" value="null"/>
+        <XAttribute key="Rank" type="LITERAL" value="rk:0"/>
+        <XAttribute key="Query" type="LITERAL" value="q:美脚"/>
+        <XAttribute key="MobileNo" type="LITERAL" value="null"/>
+        <XAttribute key="TransactionID" type="LITERAL" value="4354887491542367"/>
+        <XAttribute key="URL" type="LITERAL" value="url:http\://www.efu.com.cn/data/2010/2010-08-27/320957.shtml"/>
+        <XAttribute key="RemoteIP" type="LITERAL" value="10.10.128.56"/>
+        <XAttribute key="OriginateIP" type="LITERAL" value="123.131.131.50"/>
+        <XAttribute key="SessionID" type="LITERAL" value="DF220AF5C85D4490B0BCC1CD39C14F07"/>
+        <XAttribute key="logPath" type="LITERAL" value="D:\imageclick_file\imageclick\imageclick_201111290441_0.log"/>
+        <XAttribute key="PageNum" type="LITERAL" value=";pn:10"/>
+        <XAttribute key="Source" type="LITERAL" value="www"/>
+        <XAttribute key="TimeStamp" type="LITERAL" value="20111129044121134"/>
+        <XAttribute key="UA" type="LITERAL" value="Mozilla/4.0 (compatible\; MSIE 6.0\; Windows NT 5.1\; SV1\; .NET CLR 2.0.50727\; .NET CLR 3.0.04506.30)"/>
+        <XAttribute key="Referer" type="LITERAL" value="http://image.panguso.com/imagesearch.htm?q=%E7%BE%8E%E8%84%9A"/>
+        <XAttribute key="Uid" type="LITERAL" value="null"/>
+        <XAttribute key="ContentType" type="LITERAL" value="image"/>
+      </XAttributeMap>
+    </XEvent>
+    <XEvent xid="C5CDEBA5-B68C-4CF7-8745-27A76C06B49E">
+      <XAttributeMap lazy="false" buffered="false">
+        <XAttribute key="Ptn" type="LITERAL" value="null"/>
+        <XAttribute key="Encoding" type="LITERAL" value="null"/>
+        <XAttribute key="Rank" type="LITERAL" value="rk:0"/>
+        <XAttribute key="Query" type="LITERAL" value="q:美脚"/>
+        <XAttribute key="MobileNo" type="LITERAL" value="null"/>
+        <XAttribute key="TransactionID" type="LITERAL" value="4354887491542367"/>
+        <XAttribute key="URL" type="LITERAL" value="url:http\://sports.eastday.com/s/20070611/u1a2899658.html"/>
+        <XAttribute key="RemoteIP" type="LITERAL" value="10.10.128.56"/>
+        <XAttribute key="OriginateIP" type="LITERAL" value="123.131.131.50"/>
+        <XAttribute key="SessionID" type="LITERAL" value="DF220AF5C85D4490B0BCC1CD39C14F07"/>
+        <XAttribute key="logPath" type="LITERAL" value="D:\imageclick_file\imageclick\imageclick_201111290441_0.log"/>
+        <XAttribute key="PageNum" type="LITERAL" value=";pn:10"/>
+        <XAttribute key="Source" type="LITERAL" value="www"/>
+        <XAttribute key="TimeStamp" type="LITERAL" value="20111129044147254"/>
+        <XAttribute key="UA" type="LITERAL" value="Mozilla/4.0 (compatible\; MSIE 6.0\; Windows NT 5.1\; SV1\; .NET CLR 2.0.50727\; .NET CLR 3.0.04506.30)"/>
+        <XAttribute key="Referer" type="LITERAL" value="http://image.panguso.com/imagesearch.htm?q=%E7%BE%8E%E8%84%9A"/>
+        <XAttribute key="Uid" type="LITERAL" value="null"/>
+        <XAttribute key="ContentType" type="LITERAL" value="image"/>
+      </XAttributeMap>
+    </XEvent>
+  </XTrace>
+  <XTrace>
+    <XAttributeMap lazy="false" buffered="true">
+      <XAttribute key="caseID" type="LITERAL" value="Mozilla/5.0 (compatible\; Baiduspider/2.0\; +http\://www.baidu.com/search/spider.html)"/>
+    </XAttributeMap>
+    <XEvent xid="55BBE188-531C-4E2F-9CFB-C12ECA2470C9">
+      <XAttributeMap lazy="false" buffered="false">
+        <XAttribute key="Ptn" type="LITERAL" value="null"/>
+        <XAttribute key="Encoding" type="LITERAL" value="null"/>
+        <XAttribute key="Start" type="LITERAL" value="sa:120"/>
+        <XAttribute key="Query" type="LITERAL" value="q:大连经济技术开发区黄海"/>
+        <XAttribute key="MobileNo" type="LITERAL" value="null"/>
+        <XAttribute key="TransactionID" type="LITERAL" value="4339633418763409"/>
+        <XAttribute key="RemoteIP" type="LITERAL" value="10.10.128.56"/>
+        <XAttribute key="OriginateIP" type="LITERAL" value="220.181.108.173"/>
+        <XAttribute key="SessionID" type="LITERAL" value="B34EEEFA81CC4E306389AD106179CD30"/>
+        <XAttribute key="RespTime" type="LITERAL" value="rt:0.906"/>
+        <XAttribute key="logPath" type="LITERAL" value="D:\imageclick_file\imageclick\imagesearch_201111290023_0.log"/>
         <XAttribute key="PageNum" type="LITERAL" value="pn:20"/>
         <XAttribute key="Source" type="LITERAL" value="www"/>
-        <XAttribute key="TimeStamp" type="LITERAL" value="20111129000036999"/>
-        <XAttribute key="UA" type="LITERAL" value="Mozilla/4.0 (compatible\; MSIE 8.0\; Windows NT 5.1\; Trident/4.0\; QQDownload 677\; doyo 2.0.0)"/>
-        <XAttribute key="Hits" type="LITERAL" value=";hit:25989"/>
-        <XAttribute key="Referer" type="LITERAL" value="http://image.panguso.com/imagesearch.htm?q=%E4%BA%BA%E4%BD%93%E8%89%BA%E6%9C%AF"/>
+        <XAttribute key="TimeStamp" type="LITERAL" value="20111129002345626"/>
+        <XAttribute key="UA" type="LITERAL" value="Mozilla/5.0 (compatible\; Baiduspider/2.0\; +http\://www.baidu.com/search/spider.html)"/>
+        <XAttribute key="Hits" type="LITERAL" value=";hit:232"/>
+        <XAttribute key="Referer" type="LITERAL" value="null"/>
+        <XAttribute key="Uid" type="LITERAL" value="null"/>
+        <XAttribute key="ContentType" type="LITERAL" value="image"/>
+      </XAttributeMap>
+    </XEvent>
+    <XEvent xid="AA7AA6C6-59AB-4E0D-9F3B-2645382C6F77">
+      <XAttributeMap lazy="false" buffered="false">
+        <XAttribute key="Ptn" type="LITERAL" value="null"/>
+        <XAttribute key="Encoding" type="LITERAL" value="null"/>
+        <XAttribute key="Start" type="LITERAL" value="sa:180"/>
+        <XAttribute key="Query" type="LITERAL" value="q:大巴山"/>
+        <XAttribute key="MobileNo" type="LITERAL" value="null"/>
+        <XAttribute key="TransactionID" type="LITERAL" value="4339635674401441"/>
+        <XAttribute key="RemoteIP" type="LITERAL" value="10.10.128.56"/>
+        <XAttribute key="OriginateIP" type="LITERAL" value="220.181.108.168"/>
+        <XAttribute key="SessionID" type="LITERAL" value="FDB867530726F77DA69F49A478AA6E60"/>
+        <XAttribute key="RespTime" type="LITERAL" value="rt:0.377"/>
+        <XAttribute key="logPath" type="LITERAL" value="D:\imageclick_file\imageclick\imagesearch_201111290023_0.log"/>
+        <XAttribute key="PageNum" type="LITERAL" value="pn:20"/>
+        <XAttribute key="Source" type="LITERAL" value="www"/>
+        <XAttribute key="TimeStamp" type="LITERAL" value="20111129002347352"/>
+        <XAttribute key="UA" type="LITERAL" value="Mozilla/5.0 (compatible\; Baiduspider/2.0\; +http\://www.baidu.com/search/spider.html)"/>
+        <XAttribute key="Hits" type="LITERAL" value=";hit:3054"/>
+        <XAttribute key="Referer" type="LITERAL" value="null"/>
+        <XAttribute key="Uid" type="LITERAL" value="null"/>
+        <XAttribute key="ContentType" type="LITERAL" value="image"/>
+      </XAttributeMap>
+    </XEvent>
+    <XEvent xid="2740DA4C-D28F-4831-801E-63C8ECFF5B8D">
+      <XAttributeMap lazy="false" buffered="false">
+        <XAttribute key="Ptn" type="LITERAL" value="null"/>
+        <XAttribute key="Encoding" type="LITERAL" value="null"/>
+        <XAttribute key="Start" type="LITERAL" value="sa:40"/>
+        <XAttribute key="Query" type="LITERAL" value="q:大连经济技术开发区黄海"/>
+        <XAttribute key="MobileNo" type="LITERAL" value="null"/>
+        <XAttribute key="TransactionID" type="LITERAL" value="4339637965047862"/>
+        <XAttribute key="RemoteIP" type="LITERAL" value="10.10.128.56"/>
+        <XAttribute key="OriginateIP" type="LITERAL" value="220.181.108.118"/>
+        <XAttribute key="SessionID" type="LITERAL" value="19D8337D1E3F258F87CF3B354D073992"/>
+        <XAttribute key="RespTime" type="LITERAL" value="rt:0.363"/>
+        <XAttribute key="logPath" type="LITERAL" value="D:\imageclick_file\imageclick\imagesearch_201111290023_0.log"/>
+        <XAttribute key="PageNum" type="LITERAL" value="pn:20"/>
+        <XAttribute key="Source" type="LITERAL" value="www"/>
+        <XAttribute key="TimeStamp" type="LITERAL" value="20111129002349623"/>
+        <XAttribute key="UA" type="LITERAL" value="Mozilla/5.0 (compatible\; Baiduspider/2.0\; +http\://www.baidu.com/search/spider.html)"/>
+        <XAttribute key="Hits" type="LITERAL" value=";hit:232"/>
+        <XAttribute key="Referer" type="LITERAL" value="null"/>
+        <XAttribute key="Uid" type="LITERAL" value="null"/>
+        <XAttribute key="ContentType" type="LITERAL" value="image"/>
+      </XAttributeMap>
+    </XEvent>
+    <XEvent xid="87C32A35-850A-4E7C-B7D5-22546411B2F1">
+      <XAttributeMap lazy="false" buffered="false">
+        <XAttribute key="Ptn" type="LITERAL" value="null"/>
+        <XAttribute key="Encoding" type="LITERAL" value="null"/>
+        <XAttribute key="Start" type="LITERAL" value="sa:60"/>
+        <XAttribute key="Query" type="LITERAL" value="q:大连经济技术开发区黄海"/>
+        <XAttribute key="MobileNo" type="LITERAL" value="null"/>
+        <XAttribute key="TransactionID" type="LITERAL" value="4339640218198727"/>
+        <XAttribute key="RemoteIP" type="LITERAL" value="10.10.128.58"/>
+        <XAttribute key="OriginateIP" type="LITERAL" value="220.181.108.161"/>
+        <XAttribute key="SessionID" type="LITERAL" value="9EAD91478B88BF5D794AE1E50F2C304B"/>
+        <XAttribute key="RespTime" type="LITERAL" value="rt:0.292"/>
+        <XAttribute key="logPath" type="LITERAL" value="D:\imageclick_file\imageclick\imagesearch_201111290023_0.log"/>
+        <XAttribute key="PageNum" type="LITERAL" value="pn:20"/>
+        <XAttribute key="Source" type="LITERAL" value="www"/>
+        <XAttribute key="TimeStamp" type="LITERAL" value="20111129002351805"/>
+        <XAttribute key="UA" type="LITERAL" value="Mozilla/5.0 (compatible\; Baiduspider/2.0\; +http\://www.baidu.com/search/spider.html)"/>
+        <XAttribute key="Hits" type="LITERAL" value=";hit:232"/>
+        <XAttribute key="Referer" type="LITERAL" value="null"/>
+        <XAttribute key="Uid" type="LITERAL" value="null"/>
+        <XAttribute key="ContentType" type="LITERAL" value="image"/>
+      </XAttributeMap>
+    </XEvent>
+    <XEvent xid="2C3F62D8-D016-40EF-8823-831C7DFF5635">
+      <XAttributeMap lazy="false" buffered="false">
+        <XAttribute key="Ptn" type="LITERAL" value="null"/>
+        <XAttribute key="Encoding" type="LITERAL" value="null"/>
+        <XAttribute key="Start" type="LITERAL" value="sa:160"/>
+        <XAttribute key="Query" type="LITERAL" value="q:大连经济技术开发区黄海"/>
+        <XAttribute key="MobileNo" type="LITERAL" value="null"/>
+        <XAttribute key="TransactionID" type="LITERAL" value="4339642503863812"/>
+        <XAttribute key="RemoteIP" type="LITERAL" value="10.10.128.58"/>
+        <XAttribute key="OriginateIP" type="LITERAL" value="220.181.108.97"/>
+        <XAttribute key="SessionID" type="LITERAL" value="ADF13072D90BFC5AEDC0CF83222049BA"/>
+        <XAttribute key="RespTime" type="LITERAL" value="rt:0.471"/>
+        <XAttribute key="logPath" type="LITERAL" value="D:\imageclick_file\imageclick\imagesearch_201111290023_0.log"/>
+        <XAttribute key="PageNum" type="LITERAL" value="pn:20"/>
+        <XAttribute key="Source" type="LITERAL" value="www"/>
+        <XAttribute key="TimeStamp" type="LITERAL" value="20111129002354276"/>
+        <XAttribute key="UA" type="LITERAL" value="Mozilla/5.0 (compatible\; Baiduspider/2.0\; +http\://www.baidu.com/search/spider.html)"/>
+        <XAttribute key="Hits" type="LITERAL" value=";hit:232"/>
+        <XAttribute key="Referer" type="LITERAL" value="null"/>
+        <XAttribute key="Uid" type="LITERAL" value="null"/>
+        <XAttribute key="ContentType" type="LITERAL" value="image"/>
+      </XAttributeMap>
+    </XEvent>
+    <XEvent xid="BC6E007B-F03E-4ADB-80DD-8314D5ED1605">
+      <XAttributeMap lazy="false" buffered="false">
+        <XAttribute key="Ptn" type="LITERAL" value="null"/>
+        <XAttribute key="Encoding" type="LITERAL" value="null"/>
+        <XAttribute key="Start" type="LITERAL" value="sa:80"/>
+        <XAttribute key="Query" type="LITERAL" value="q:大连经济技术开发区黄海"/>
+        <XAttribute key="MobileNo" type="LITERAL" value="null"/>
+        <XAttribute key="TransactionID" type="LITERAL" value="4339644777831627"/>
+        <XAttribute key="RemoteIP" type="LITERAL" value="10.10.128.58"/>
+        <XAttribute key="OriginateIP" type="LITERAL" value="220.181.108.177"/>
+        <XAttribute key="SessionID" type="LITERAL" value="1F9239D58D1255DEB8E94E8F363CE1C5"/>
+        <XAttribute key="RespTime" type="LITERAL" value="rt:0.33"/>
+        <XAttribute key="logPath" type="LITERAL" value="D:\imageclick_file\imageclick\imagesearch_201111290023_0.log"/>
+        <XAttribute key="PageNum" type="LITERAL" value="pn:20"/>
+        <XAttribute key="Source" type="LITERAL" value="www"/>
+        <XAttribute key="TimeStamp" type="LITERAL" value="20111129002356403"/>
+        <XAttribute key="UA" type="LITERAL" value="Mozilla/5.0 (compatible\; Baiduspider/2.0\; +http\://www.baidu.com/search/spider.html)"/>
+        <XAttribute key="Hits" type="LITERAL" value=";hit:232"/>
+        <XAttribute key="Referer" type="LITERAL" value="null"/>
         <XAttribute key="Uid" type="LITERAL" value="null"/>
         <XAttribute key="ContentType" type="LITERAL" value="image"/>
       </XAttributeMap>

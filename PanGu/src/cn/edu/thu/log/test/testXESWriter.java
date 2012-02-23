@@ -33,7 +33,9 @@ public class testXESWriter {
 //		String readFilePath = new String(
 //				"D:/imageclick_file/imageclick_201111290129_0.log");
 		String readFilePath = new String(
-				"D:/imageclick_file/imageclick/imagesearch_201111290000_0.log");
+				"D:/imageclick_file/imageclick");
+//		String readFilePath = new String(
+//				"D:/imageclick_file/imageclick/imagesearch_201111290000_0.log");
 //		LogConfig config = new LogConfig();
 //		config.config("config.xml", readFilePath);// 设置了config中的各种参数
 		String resultFile="logXes.xml";

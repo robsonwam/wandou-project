@@ -9,6 +9,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Hashtable;
 import java.util.Iterator;
 
 import org.deckfour.xes.factory.XFactory;
@@ -23,8 +25,6 @@ import org.deckfour.xes.model.impl.XAttributeLiteralImpl;
 import org.deckfour.xes.model.impl.XAttributeMapImpl;
 import org.deckfour.xes.xstream.XesXStreamPersistency;
 
-import sun.security.krb5.Config;
-
 import cn.edu.thu.log.read.Log;
 import cn.edu.thu.log.read.LogBuffer;
 import cn.edu.thu.log.read.LogConfig;
@@ -32,6 +32,13 @@ import cn.edu.thu.log.read.LogFilesReader;
 
 import com.thoughtworks.xstream.XStream;
 
+/**
+ * class XES Writer. based on configuration, write logs from file to one XES
+ * file
+ * 
+ * @author meng
+ * 
+ */
 public class XESWriter {
 	// for test
 	ArrayList<String> caseIDTagList;
@@ -44,6 +51,10 @@ public class XESWriter {
 	String filePath;
 	String resultFilePath;
 	XLog log;
+	/** map of laster arrival time in one case */
+	Hashtable<String, String> lastestArrivalMap;
+	/** map of earliest arrival time in one case */
+	Hashtable<String, String> earliestArrivalMap;
 	// from logContent
 	ArrayList<String> cateList;
 	LogConfig logConfig;
@@ -77,6 +88,9 @@ public class XESWriter {
 		File readfile = new File(filePath);
 		// write to one xes file =one log
 		log = factory.createLog();
+		/** map<caseID,latest/earlisest arrival time> */
+		lastestArrivalMap = new Hashtable<String, String>();
+		earliestArrivalMap = new Hashtable<String, String>();
 		readFile(readfile);
 		// if(cateList.size()>1)
 		// {
@@ -128,6 +142,10 @@ public class XESWriter {
 	private void readFileContent(File file) {
 		logConfig.config(LOGCONFIGFILE, file.getAbsolutePath());
 		ArrayList<String> logTagList = logConfig.getLogTags();
+		// read timeput from config
+		String timeOutString = xesConfig.getTimeOut();
+		Date timeOut = this.StringToTimeStamp(timeOutString);
+		System.out.print("\ntimeout:" + timeOut);
 		BufferedReader reader;
 		String record;
 		String logHeadTokenizer = logConfig.getLogHeadTokenizer();
@@ -243,13 +261,27 @@ public class XESWriter {
 				logBuffer.setLogBodyContent(headparams);
 				logBuffer.setLogContent(params);
 				logBuffer.setLogTagList(logTagList);
-				// set up the event
-				writeEvent(event, logBuffer);
+
+				// set timeStamp(content) to logBuffer
+				String timeStampIndentifier = xesConfig.getTimeStamp();
+				String timeStampContent = null;
+				for (int j = 0; j < logBuffer.getLogTagList().size(); j++) {
+					// 判断设置的CaseIDList是否为tag中
+					if (timeStampIndentifier.equalsIgnoreCase(logBuffer
+							.getLogTagList().get(j))) {
+						timeStampContent = logBuffer.getLogContent().get(j)
+								.toString();
+					}
+
+				}
+				logBuffer.setTimeStamp(timeStampContent);
+
 				// set caseIDList(Content) of LogBuffer
 				ArrayList<String> caseIDContentList = new ArrayList<String>();
 				for (int i = 0; i < xesConfig.getCaseIDList().size(); i++) {
 					String caseID = xesConfig.getCaseIDList().get(i);
 					for (int j = 0; j < logBuffer.getLogTagList().size(); j++) {
+						// 判断设置的CaseIDList是否为tag中
 						if (caseID.equalsIgnoreCase(logBuffer.getLogTagList()
 								.get(j))) {
 							caseIDContentList.add(logBuffer.getLogContent()
@@ -259,6 +291,37 @@ public class XESWriter {
 					}
 				}
 				logBuffer.setCaseIDList(caseIDContentList);
+				String logCaseIDString = null;
+				for (int s = 0; s < caseIDContentList.size(); s++) {
+					logCaseIDString += caseIDContentList.get(s) + ",";
+				}
+				logBuffer.setCaseIDString(logCaseIDString);
+
+				// set activityIDList(Content) of LogBuffer
+				ArrayList<Object> activityIDContentList = new ArrayList<Object>();
+				ArrayList<String> activityIDTagList = new ArrayList<String>();
+				// 判断activityID是否在tag里面的原因是，不同产品有不同logBodyTag，所以一个产品不包括另外一个产品的tag
+				for (int i = 0; i < xesConfig.getActivityIDList().size(); i++) {
+					String activityID = xesConfig.getActivityIDList().get(i);
+					for (int j = 0; j < logBuffer.getLogTagList().size(); j++) {
+						// 判断设置的CaseIDList是否为tag中
+						if (activityID.equalsIgnoreCase(logBuffer
+								.getLogTagList().get(j))) {
+							activityIDTagList.add(logBuffer.getLogTagList()
+									.get(j));
+							activityIDContentList.add(logBuffer.getLogContent()
+									.get(j).toString());
+
+						}
+					}
+				}
+				logBuffer.setActivityIDContentList(activityIDContentList);
+				logBuffer.setActivityIDTagList(activityIDTagList);
+				// write whole content of log to event
+				// writeEventContent(event, logBuffer);
+
+				// only write activities,logPath,caseID to event
+				writeEvent(event, logBuffer);
 
 				// put trace into log
 				if (log.isEmpty())// if log still empty,add the first case
@@ -269,12 +332,23 @@ public class XESWriter {
 					// writeTrace(traceNew,logBuffer);
 					XAttributeMap traceAttributeMapNew = factory
 							.createAttributeMap();
-					XAttribute traceAttributeNew = factory
-							.createAttributeLiteral("caseID", logBuffer
-									.getCaseIDList().get(0),// ！！！！！！！！！！！！！！！！默认目前只有一个值确定caseID
+					// XAttribute traceAttributeNew = factory
+					// .createAttributeLiteral("caseID", logBuffer
+					// .getCaseIDList().get(0),//
+					// ！！！！！！！！！！！！！！！！默认目前只有一个值确定caseID
+					// null);
+					// String caseIDString=null;
+					// for(int i=0;i<logBuffer.getCaseIDList().size();i++)
+					// {
+					// caseIDString+=logBuffer.getCaseIDList().get(i)+",";}
+					// String caseIDString = event.getAttributes().get("caseID")
+					// .toString();
+					String caseIDString = logBuffer.getCaseIDString();
+					XAttribute traceAttributeID = factory
+							.createAttributeLiteral("caseID", caseIDString,
 									null);
-					traceAttributeMapNew.put(traceAttributeNew.getKey(),
-							traceAttributeNew);
+					traceAttributeMapNew.put(traceAttributeID.getKey(),
+							traceAttributeID);
 					traceNew.setAttributes(traceAttributeMapNew);
 					traceNew.add(event);
 					System.out.print("\nadd event for first time:"
@@ -282,6 +356,11 @@ public class XESWriter {
 					// add new trace to log
 
 					log.add(traceNew);
+					// set Arrival time boundary for this case
+					lastestArrivalMap.put(caseIDString,
+							logBuffer.getTimeStamp());
+					earliestArrivalMap.put(caseIDString,
+							logBuffer.getTimeStamp());
 
 				} else {// the log is not empty,already contains trace
 					boolean caseIDExist = false;
@@ -293,36 +372,51 @@ public class XESWriter {
 								.get("caseID").toString();
 						System.out.print("\ncaseID in one search:"
 								+ caseIDValue);
-						boolean caseIDMatch=true;
-						 for (int p = 0; p < logBuffer.getCaseIDList().size();
-						 p++) {
-						if (logBuffer.getCaseIDList().get(p)
-								.equalsIgnoreCase(caseIDValue)) {// the caseID
-																	// already
-																	// exist
+						boolean caseIDMatch = true;
+						// for (int p = 0; p < logBuffer.getCaseIDList().size();
+						// p++) {
+						// if (logBuffer.getCaseIDList().get(0)//the caseID exit
+						// .equalsIgnoreCase(caseIDValue)) {
+						// System.out.print("\nthe caseID already existed");
+						// eachTrace.add(event);
+						// System.out.print("\nadd event:"
+						// + event.getAttributes().get("Query"));
+						// caseIDExist = true;
+						// }
+						// }
+						if (logBuffer.getCaseIDString()// the
+														// caseID
+														// exit
+								.equalsIgnoreCase(caseIDValue)) {
 							System.out.print("\nthe caseID already existed");
+
+							// check if it is already timeout,if timeout,create
+							// new instance
+							boolean ifTimeOut = checkTimeOut(logBuffer);
+							lastestArrivalMap.put();
+
 							eachTrace.add(event);
 							System.out.print("\nadd event:"
 									+ event.getAttributes().get("Query"));
 							caseIDExist = true;
-
 						}
-						
+						// if (caseIDMatch) {
+						//
+						// }
 					}
-						 if(caseIDMatch){
-							 
-							 }
-						 }
-					if (!caseIDExist) {
+					if (!caseIDExist) {// the caseID does not exist yet
 						System.out.print("\nthe caseID does not exist");
 						// set up trace
 						XTrace traceNew = factory.createTrace();
 						// writeTrace(traceNew,logBuffer);
 						XAttributeMap traceAttributeMapNew = factory
 								.createAttributeMap();
+						// XAttribute traceAttributeNew = factory
+						// .createAttributeLiteral("caseID", logBuffer
+						// .getCaseIDList().get(0), null);
 						XAttribute traceAttributeNew = factory
-								.createAttributeLiteral("caseID", logBuffer
-										.getCaseIDList().get(0), null);
+								.createAttributeLiteral("caseID",
+										logBuffer.getCaseIDString(), null);
 						traceAttributeMapNew.put(traceAttributeNew.getKey(),
 								traceAttributeNew);
 						traceNew.setAttributes(traceAttributeMapNew);
@@ -331,6 +425,10 @@ public class XESWriter {
 								+ event.getAttributes().get("Query"));
 						// add new trace to log
 						log.add(traceNew);
+						lastestArrivalMap.put(logBuffer.getCaseIDString(),
+								logBuffer.getTimeStamp());
+						earliestArrivalMap.put(logBuffer.getCaseIDString(),
+								logBuffer.getTimeStamp());
 					}
 				}
 			}
@@ -368,7 +466,131 @@ public class XESWriter {
 	// traceAttributeMapNew.put(traceAttributeNew.getKey(), traceAttributeNew);
 	// traceNew.setAttributes(traceAttributeMapNew);
 	// }
+	private boolean checkTimeOut(LogBuffer logBuffer) {
+		boolean timeOut = false;
+		String lasterTimeString = lastestArrivalMap.get(logBuffer
+				.getCaseIDString());
+		String earliestTimeString = earliestArrivalMap.get(logBuffer
+				.getCaseIDString());
+		String arriveTimeString = logBuffer.getTimeStamp();
+		Date lasterTime = StringToTimeStamp(lasterTimeString);
+		Date earliestTime = StringToTimeStamp(earliestTimeString);
+		Date arriveTime = StringToTimeStamp(arriveTimeString);
+
+		if (arriveTime.after(lasterTime)) {
+			lastestArrivalMap
+					.put(logBuffer.getCaseIDString(), arriveTimeString);
+			if(arriveTime.getTime()-lasterTime.getTime()>40){timeOut=true;
+			}
+
+		}
+		if (arriveTime.before(earliestTime)) {
+			earliestArrivalMap.put(logBuffer.getCaseIDString(),
+					arriveTimeString);
+			if(){timeOut=true;}
+		}
+
+		return timeOut;
+	}
+
+	/**
+	 * write activities,logPath,caseID to event
+	 * 
+	 * @param event
+	 * @param logBuffer
+	 */
 	private void writeEvent(XEvent event, LogBuffer logBuffer) {
+		// get the tags of loghead and logbody from one record
+		// logConfig.config(logconfigFile, logBuffer.getLogPath());
+		// ArrayList<String> logTags = logConfig.getLogTags();
+		ArrayList<String> logTags = logBuffer.getActivityIDTagList();
+		// get content of this event
+		ArrayList<Object> logContents = logBuffer.getActivityIDContentList();
+		// create a event
+		// XEvent event = factory.createEvent();
+		XAttributeMap attributeMap = factory.createAttributeMap();
+		// event
+		if (logTags.size() == logContents.size()) {
+			System.out.print("\nthe size is the same");
+			System.out.print("\nlog activity tags:" + logTags);
+			System.out.print("\nlog activity content:" + logContents);
+		} else {
+			if (logTags.size() == logContents.size()) {
+				System.out.print("\nthe size is not the same");
+				System.out.print("\nlog activity tags:" + logTags);
+				System.out.print("\nlog activity content:" + logContents);
+			}
+		}
+
+		// put the log tags as attributes to attributeMap
+		for (int i = 0; i < logTags.size(); i++) {
+			if (logContents.get(i).toString().matches("")) {
+				String emptyString = new String("null");
+				logContents.set(i, emptyString);
+				// logContents.get(i)
+				// System.out.print("\nnull at " + logTags.get(i));
+				// System.out.print("\nlog content:" + logContents);
+
+			}
+			XAttribute attribute = factory.createAttributeLiteral(
+					logTags.get(i), (String) logContents.get(i), null);
+
+			attributeMap.put(attribute.getKey(), attribute);
+		}
+		// add logPath attribute to map
+		XAttribute attribute = factory.createAttributeLiteral("logPath",
+				logBuffer.getLogPath(), null);
+		attributeMap.put(attribute.getKey(), attribute);
+		// add caseID Content to event
+		// String caseIDContent = null;
+		// for (int i = 0; i < logBuffer.getCaseIDList().size(); i++) {
+		// caseIDContent += logBuffer.getCaseIDList().get(i) + ",";
+		// }
+		// XAttribute attributeID = factory.createAttributeLiteral("caseID",
+		// caseIDContent, null);
+		// attributeMap.put(attributeID.getKey(), attributeID);
+		// add timeStamp Content to event(format:yyyymmddkkmmSS)
+		// XAttribute attributeTime =
+		// factory.createAttributeLiteral("timeStamp",
+		// logBuffer.getTimeStamp(), null);
+		String timeString = logBuffer.getTimeStamp();
+		Date timeStamp = StringToTimeStamp(timeString);
+
+		XAttribute attributeTime = factory.createAttributeTimestamp(
+				"timeStamp", timeStamp, null);
+		attributeMap.put(attributeTime.getKey(), attributeTime);
+		// XTimeExtension timeExtention = XTimeExtension.instance();
+		// timeExtention.assignTimestamp(event, timeStamp);
+		// set event's AttributesMap
+		event.setAttributes(attributeMap);
+		return;
+
+	}
+
+	private Date StringToTimeStamp(String timeString) {
+		Date timeStamp = new Date();
+		// XsDateTimeFormat timeFormat=new XsDateTimeFormat();
+		timeString = timeString.trim();
+		timeStamp.setYear(Integer.parseInt(timeString.substring(0, 4)));
+		timeStamp.setMonth(Integer.parseInt(timeString.substring(4, 6)));
+		timeStamp.setDate(Integer.parseInt(timeString.substring(6, 8)));
+		timeStamp.setHours(Integer.parseInt(timeString.substring(8, 10)));
+		timeStamp.setMinutes(Integer.parseInt(timeString.substring(10, 12)));
+		timeStamp.setSeconds(Integer.parseInt(timeString.substring(12, 14)));
+		// System.out.print("\ntimeString:"+timeString);
+		// System.out.print("\nsecond:"+timeString.substring(12, 14));
+		// System.out.print("\nmonth:"+timeString.substring(8, 10));
+		// System.out.print("\nyear:"+timeString.substring(6, 8));
+		return timeStamp;
+	}
+
+	/**
+	 * write all whole log to event
+	 * 
+	 * @param event
+	 * @param logBuffer
+	 */
+	private void writeEventContent(XEvent event, LogBuffer logBuffer) {
 		// get the tags of loghead and logbody from one record
 		// logConfig.config(logconfigFile, logBuffer.getLogPath());
 		// ArrayList<String> logTags = logConfig.getLogTags();
@@ -410,7 +632,30 @@ public class XESWriter {
 		XAttribute attribute = factory.createAttributeLiteral("logPath",
 				logBuffer.getLogPath(), null);
 		attributeMap.put(attribute.getKey(), attribute);
+		// add caseID Content to event
+		// String caseIDContent = null;
+		// for (int i = 0; i < logBuffer.getCaseIDList().size(); i++) {
+		// caseIDContent += logBuffer.getCaseIDList().get(i) + ",";
+		// }
+		// XAttribute attributeID = factory.createAttributeLiteral("caseID",
+		// caseIDContent, null);
+		// attributeMap.put(attributeID.getKey(), attributeID);
+		// add timeStamp Content to event(format:yyyymmddkkmmSS)
+		// XAttribute attributeTime =
+		// factory.createAttributeLiteral("timeStamp",
+		// logBuffer.getTimeStamp(), null);
+		String timeString = logBuffer.getTimeStamp();
+		Date timeStamp = StringToTimeStamp(timeString);
 
+		// try {
+		// timeStamp=timeFormat.parseObject(timeString);
+		// } catch (ParseException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
+		XAttribute attributeTime = factory.createAttributeTimestamp(
+				"timeStamp", timeStamp, null);
+		attributeMap.put(attributeTime.getKey(), attributeTime);
 		// set event's AttributesMap
 		event.setAttributes(attributeMap);
 		return;

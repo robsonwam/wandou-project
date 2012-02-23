@@ -40,6 +40,7 @@ public class testXESWriter {
 //		config.config("config.xml", readFilePath);// 设置了config中的各种参数
 		String resultFile="logXes.xml";
 		XESConfig xesConfig=new XESConfig();
+	
 		XESWriter writer = new XESWriter(xesConfig,readFilePath);
 		writer.write(resultFile);
 	}

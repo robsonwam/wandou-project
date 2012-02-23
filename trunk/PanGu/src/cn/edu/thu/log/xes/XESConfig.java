@@ -7,6 +7,7 @@ public class XESConfig {
 	ArrayList<String> activityIDList;
 	String timeStamp;
 	String configFile;
+	String timeOut;
 
 	// for test
 	public XESConfig() {
@@ -22,13 +23,24 @@ public class XESConfig {
 	// class
 	private void setupConfig() {
 		caseIDList = new ArrayList<String>();
-		caseIDList.add("sessionID");
-//		caseIDList.add("UA");
-//		caseIDList.add("OriginateIP");
+	//	caseIDList.add("sessionID");
+		caseIDList.add("UA");
+		caseIDList.add("OriginateIP");
+		//caseIDList.add("RemoteIP");
 		activityIDList = new ArrayList<String>();
 		activityIDList.add("contentType");
-
+		activityIDList.add("Source");
+		activityIDList.add("Query");
+		timeOut="00000000003000";//time format :yyyymmddhhmmss
 		timeStamp = "timestamp";
+	}
+
+	public String getTimeOut() {
+		return timeOut;
+	}
+
+	public void setTimeOut(String timeOut) {
+		this.timeOut = timeOut;
 	}
 
 	public ArrayList<String> getCaseIDList() {

@@ -1,0 +1,19 @@
+<XLog>
+  <XExtensions/>
+  <XAttributeMap lazy="true" buffered="true"/>
+  <XGlobalTraceAttributes/>
+  <XGlobalEventAttributes/>
+  <XEventClassifiers/>
+  <XTrace>
+    <XAttributeMap lazy="false" buffered="true">
+      <XAttribute key="caseID" type="LITERAL" value="null10.10.128.58,"/>
+    </XAttributeMap>
+    <XEvent xid="2DC2E803-D6AF-411B-A12E-B275912C7B81">
+      <XAttributeMap lazy="false" buffered="false">
+        <XAttribute key="SessionID" type="LITERAL" value="DE972AB8A97D0B45DA472A6C39EF3906"/>
+        <XAttribute key="timeStamp" type="TIMESTAMP" value="3911-12-29T00:00:20.208+08:00"/>
+        <XAttribute key="logPath" type="LITERAL" value="E:\for pangu\tmp_201111129~30\imageclick\10.10.160.22\imageclick_201111290000_0.log"/>
+      </XAttributeMap>
+    </XEvent>
+  </XTrace>
+</XLog>

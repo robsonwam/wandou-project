@@ -1,5 +1,6 @@
 package cn.edu.thu.log.web.service.impl;
 
+import cn.edu.thu.log.read.LogBuffer;
 import cn.edu.thu.log.web.service.WebConfigReadService;
 import cn.edu.thu.log.web.service.XESConvertService;
 import cn.edu.thu.log.xes.XESWriter;
@@ -17,5 +18,15 @@ public class XESConvertServiceImp implements XESConvertService{
 		//String resultFile = "logXes.xml";
 		XESWriter writer = new XESWriter(configRead, readFilePath);
 		writer.write(resultFile);
+	}
+	public LogBuffer getLogBuffer (String readFilePath) {
+		WebConfigReadService configRead = new WebConfigReadServiceImpl();
+		configRead.readWebConfig("miningconfig1.xml");
+		//String readFilePath = new String("D:/imageclick_file/imageclick");
+		//String resultFile = "logXes.xml";
+		XESWriter writer = new XESWriter(configRead, readFilePath);
+		writer.write("a.xml");
+		LogBuffer logBuffer=writer.getTestLogBuffer();
+		return logBuffer;
 	}
 }

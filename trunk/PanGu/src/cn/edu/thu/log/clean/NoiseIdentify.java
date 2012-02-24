@@ -9,6 +9,8 @@ import java.util.regex.Pattern;
 
 import cn.edu.thu.log.preprocessrule.NoiseIdentifyRule;
 import cn.edu.thu.log.read.LogBuffer;
+import cn.edu.thu.log.web.service.WebConfigReadService;
+import cn.edu.thu.log.web.service.impl.WebConfigReadServiceImpl;
 
 public class NoiseIdentify {
 
@@ -16,8 +18,9 @@ public class NoiseIdentify {
 	private ArrayList<String> logTagList;
 	private ArrayList<Object> logContentList;
 	private int flag = 1;
-
+	private WebConfigReadService webconfigreadservice;
 	public NoiseIdentify() {
+		webconfigreadservice=new WebConfigReadServiceImpl();
 		// logCleanRules=new HashSet<Map<String,String>>();
 		nrule = new HashSet<String>();
 		logTagList = new ArrayList<String>();
@@ -25,9 +28,8 @@ public class NoiseIdentify {
 	}
 
 	// 判断一个或多个字段中是否出现指定的noise规则
-	public boolean noiseStrIdentify(LogBuffer record,
-			NoiseIdentifyRule noiserule) {
-		nrule.addAll(noiserule.getAllNoiseIdentifyRules());
+	public boolean noiseStrIdentify(LogBuffer record) {
+		nrule.addAll(webconfigreadservice.getNoiseStringList());
 		logTagList.addAll(record.getLogTagList());
 		logContentList.addAll(record.getLogContent());
 
@@ -72,7 +74,7 @@ public class NoiseIdentify {
 
 	// 综合判断，三条都符合则保留这条记录，返回true
 	public boolean noiseIdentify(LogBuffer record, NoiseIdentifyRule noiserule) {
-		if (noiseStrIdentify(record, noiserule) && minIdentify()
+		if (noiseStrIdentify(record) && minIdentify()
 				&& maxIdentify())
 			return true;
 		return false;

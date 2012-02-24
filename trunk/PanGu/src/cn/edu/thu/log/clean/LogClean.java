@@ -7,8 +7,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import cn.edu.thu.log.preprocessrule.LogCleanRule;
 import cn.edu.thu.log.read.LogBuffer;
+import cn.edu.thu.log.web.service.WebConfigReadService;
+import cn.edu.thu.log.web.service.impl.WebConfigReadServiceImpl;
 
 /**
  * clean the log record
@@ -18,22 +19,24 @@ import cn.edu.thu.log.read.LogBuffer;
  */
 public class LogClean {
 	// private LogBuffer logbuffer;
+	private WebConfigReadService webconfigreadservice;
 	private ArrayList<String> logTagList;
 	private ArrayList<Object> logContentList;
 	private Map<String, String> crule;
     private int flag=1;//默认符合格式要求
     
 	public LogClean() {
-
+		webconfigreadservice=new WebConfigReadServiceImpl();
 		// logbuffer=new LogBuffer();
 		crule = new HashMap<String, String>();
 		logTagList = new ArrayList<String>();
 		logContentList = new ArrayList<Object>();
 	}
 
-	public boolean logClean(LogBuffer record, LogCleanRule cleanrule) {
+	public boolean logClean(LogBuffer record) {
 		// 接收全部日志清洗规则及记录
-		crule.putAll(cleanrule.getAllLogCleanRules());
+		crule.putAll(webconfigreadservice.getLogCleanList());		//crule=webconfigreadservice.getLogCleanRules();
+		
 		logTagList.addAll(record.getLogTagList());
 		logContentList.addAll(record.getLogContent());
 

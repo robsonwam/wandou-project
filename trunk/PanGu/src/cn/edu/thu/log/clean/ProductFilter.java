@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 import cn.edu.thu.log.preprocessrule.ActivityIdentifyRule;
 import cn.edu.thu.log.read.LogBuffer;
+import cn.edu.thu.log.web.service.WebConfigReadService;
+import cn.edu.thu.log.web.service.impl.WebConfigReadServiceImpl;
 
 /**
  * use the productlist to filter the loading log
@@ -13,14 +15,16 @@ import cn.edu.thu.log.read.LogBuffer;
 public class ProductFilter {
 	private ArrayList<String> allproducts;
 	private ArrayList<String> logTagList;
+	private WebConfigReadService webconfigreadservice;
 	//private ArrayList<Object> logContentList;
 	public ProductFilter(){
+		webconfigreadservice=new WebConfigReadServiceImpl();
 		allproducts=new ArrayList<String>();
 		logTagList=new ArrayList<String>();
 	}
 	
-	public boolean profilter(LogBuffer record, ActivityIdentifyRule activityrule){
-		allproducts.addAll(activityrule.getAllAnalyzedProducts());
+	public boolean profilter(LogBuffer record){
+		allproducts.addAll(webconfigreadservice.getProductsList());
 		logTagList.addAll(record.getLogTagList());
 		
 		//第8个tag记录的就是产品名称

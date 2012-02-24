@@ -3,13 +3,16 @@ package cn.edu.thu.log.web.service.impl;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.w3c.dom.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import cn.edu.thu.log.web.service.WebConfigReadService;
@@ -20,13 +23,21 @@ import cn.edu.thu.log.web.service.WebConfigReadService;
  *
  */
 public class WebConfigReadServiceImpl implements WebConfigReadService{
+	private Map<String,String> logCleanList;
+	private ArrayList<String> noisestringList;
+	private String min=null;
+	private String max=null;
 	private ArrayList<String> activityIDList;
-	private ArrayList<String> caseIDList;
 	private String timestamp=null;
+	private ArrayList<String> productList;	
+	private ArrayList<String> caseIDList;
 	
 	public WebConfigReadServiceImpl(){
 		activityIDList=new ArrayList<String>();
 		caseIDList=new ArrayList<String>();		
+		productList=new ArrayList<String>();
+		logCleanList=new HashMap<String,String>();
+		noisestringList=new ArrayList<String>();
 	}
 
 	public void readWebConfig(String filename){
@@ -57,31 +68,50 @@ public class WebConfigReadServiceImpl implements WebConfigReadService{
 		//NodeList configrule=root.getChildNodes();
 		//System.out.println("rootlist:"+ root.getElementsByTagName("logtag"));
 		//System.out.println("configrule length: "+ root.getElementsByTagName("logtag").getLength());
-		//Element logclean=(Element) root.getElementsByTagName("logtag").item(0);
-		//Element noiseidentify= (Element) root.getElementsByTagName("noiseidentify").item(0);
+		Element logclean=(Element) root.getElementsByTagName("logclean").item(0);
+		Element noiseidentify= (Element) root.getElementsByTagName("noiseidentify").item(0);
 		Element activityidentify= (Element) root.getElementsByTagName("activityidentify").item(0);
 		Element caseidentfy=(Element) root.getElementsByTagName("caseidentify").item(0);
 		
-		//NodeList cleanruleList=logclean.getChildNodes();
-		//NodeList noiseruleList=noiseidentify.getChildNodes();
+		NodeList cleanruleList=logclean.getElementsByTagName("logtag");
+		NodeList noisestrList=noiseidentify.getElementsByTagName("noise");
+		NodeList minList=noiseidentify.getElementsByTagName("mininternal");
+		NodeList maxList=noiseidentify.getElementsByTagName("maxtime");
 		NodeList activityruleList=activityidentify.getElementsByTagName("activity");
 		NodeList timestampList=activityidentify.getElementsByTagName("timestamp");
+		NodeList proList=activityidentify.getElementsByTagName("product");
 		NodeList caseruleList=caseidentfy.getElementsByTagName("case");
 		
-	/*	for(int i=0;i<cleanruleList.getLength();i++){
-			Element logtag=(Element) cleanruleList.item(i);
-		}
+	
+		for(int i=0;i<cleanruleList.getLength();i++){
+			Element tag =(Element) cleanruleList.item(i);
+			logCleanList.put(tag.getAttribute("tagname"),tag.getAttribute("tagformat"));
+			System.out.println("tagname="+tag.getAttribute("tagname")+" tagformat="+tag.getAttribute("tagformat"));
+		}			
 		
-		for(int i=0;i<noiseruleList.getLength();i++){
-			Element noise=(Element) noiseruleList.item(i);
-		}
-		*/
+		for(int i=0;i<noisestrList.getLength();i++){			
+			Element no=(Element) noisestrList.item(i);			
+			noisestringList.add(no.getAttribute("noiseformat"));			
+		}		
+		
+		Element mi=(Element) minList.item(0);
+		min=new String(mi.getAttribute("mininternal"));	
+		
+		Element ma=(Element) maxList.item(0);
+		max=new String(ma.getAttribute("maxtime"));	
+		
 		for(int i=0;i<activityruleList.getLength();i++){			
 			Element temp=(Element) activityruleList.item(i);			
 			activityIDList.add(temp.getAttribute("activityname"));			
-		}
+		}		
+		
 		Element time=(Element) timestampList.item(0);
 		timestamp=new String(time.getAttribute("timestamp"));			
+		
+		for(int i=0;i<proList.getLength();i++){
+			Element products=(Element) proList.item(i);
+			productList.add(products.getAttribute("productname"));
+		}
 		
 		for(int i=0;i<caseruleList.getLength();i++){
 			Element cases=(Element) caseruleList.item(i);
@@ -111,5 +141,35 @@ public class WebConfigReadServiceImpl implements WebConfigReadService{
 	public Map<String, String> getFormatActivityIDList() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public ArrayList<String> getProductsList() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Map<String, String> getLogCleanList() {
+		// TODO Auto-generated method stub
+		return logCleanList;
+	}
+
+	@Override
+	public ArrayList<String> getNoiseStringList() {
+		// TODO Auto-generated method stub
+		return noisestringList;
+	}
+
+	@Override
+	public String getMin() {
+		// TODO Auto-generated method stub
+		return min;
+	}
+
+	@Override
+	public String getMax() {
+		// TODO Auto-generated method stub
+		return max;
 	}	
 }

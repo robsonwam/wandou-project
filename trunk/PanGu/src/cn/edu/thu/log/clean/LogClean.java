@@ -55,7 +55,7 @@ public class LogClean {
 			Matcher matcher = pattern.matcher(content);
 			
 			//如果不匹配，则后面的字段不用检查，直接返回整个记录不符合要求，false
-			if(!matcher.find()){				
+			if(!matcher.matches()){				
 				flag=0;
 				break;		
 			}

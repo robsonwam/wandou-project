@@ -42,7 +42,9 @@ public class NoiseIdentify {
 		while (ruleit.hasNext() && flag == 1) {
 			Entry<String, NoiseFormat> entry=ruleit.next();
 			// content是要分析的字段对应的内容
-			String content = entry.getKey();			
+			String tagname = entry.getKey();
+			int index = logTagList.indexOf(tagname);
+			String content = (String) logContentList.get(index);
 			// 对每个字段分别识别是否存在指定rule			
 			for(String str:entry.getValue().getStrList()){
 					
@@ -52,8 +54,8 @@ public class NoiseIdentify {
 				// 如果匹配，则这个字段后面的noise规则不用检查，跳出这条noise规则的检查
 				
 				System.out.println("\n当前噪音串是："+str);
-				System.out.println("\n当前字段是： "+content);
-				
+				System.out.println("\n当前字段是： "+tagname);
+				System.out.println("\n要匹配的字段是："+content);
 				//System.out.println("\nmatcher.find()结果1："+matcher.find());
 				//System.out.println("\nmatcher.find()结果2："+matcher.find());
 				if (matcher.find()) {

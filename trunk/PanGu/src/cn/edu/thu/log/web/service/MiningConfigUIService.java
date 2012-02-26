@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.w3c.dom.Document;
-
+import cn.edu.thu.log.preprocessrule.NoiseFormat;
 /** 
  * serve for the UI to save and get all the configuration rules
  * @author wan
@@ -19,13 +19,14 @@ public interface MiningConfigUIService {
 	public ArrayList<String> getTagFormat(); 
 	
 	/** 为噪声识别规则界面提供服务 */
-	public void addNoiseIdentifyRule(String noisestr);
-	public Set<String> getAllNoiseIdentifyRules();
+	public void addNoiseIdentifyRule(String noisetag,String noisestr);
+	public Map<String, NoiseFormat> getAllNoiseIdentifyRules();
 	public Integer getMinInternal();
 	public void setMinIternal(String min);
 	public Integer getMaxTime();
 	public void setMaxTime(String max);
 	public String getNoiseIdentifyRule();
+	public ArrayList<String> getNoiseFormat();
 	
 	/** 为活动识别规则界面提供服务 */
 	public void addAnalyzedProduct(String productname);

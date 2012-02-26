@@ -56,8 +56,8 @@ public class LogClean {
 			String tagformat = entry.getValue().toString();
 			
 			//最終將content按照正則表達式tagformat的形式進行匹配,必须全匹配，否则删除		
-			//Pattern pattern=Pattern.compile(tagformat);
-			Pattern pattern = Pattern.compile("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
+			Pattern pattern=Pattern.compile(tagformat);
+			//Pattern pattern = Pattern.compile("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
 			Matcher matcher = pattern.matcher(content);
 			System.out.println("正则表达式: "+tagformat);
 			System.out.println("要匹配的字段: "+tagname);

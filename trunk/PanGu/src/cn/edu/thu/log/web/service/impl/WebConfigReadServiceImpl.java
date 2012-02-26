@@ -4,7 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -15,6 +19,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import cn.edu.thu.log.preprocessrule.NoiseFormat;
 import cn.edu.thu.log.web.service.WebConfigReadService;
 
 /**
@@ -24,20 +29,22 @@ import cn.edu.thu.log.web.service.WebConfigReadService;
  */
 public class WebConfigReadServiceImpl implements WebConfigReadService{
 	private Map<String,String> logCleanList;
-	private ArrayList<String> noisestringList;
+	private Map<String,NoiseFormat> noisestringList;
 	private String min=null;
 	private String max=null;
 	private ArrayList<String> activityIDList;
 	private String timestamp=null;
 	private ArrayList<String> productList;	
 	private ArrayList<String> caseIDList;
+	private NoiseFormat temp;
 	
 	public WebConfigReadServiceImpl(){
 		activityIDList=new ArrayList<String>();
 		caseIDList=new ArrayList<String>();		
 		productList=new ArrayList<String>();
 		logCleanList=new HashMap<String,String>();
-		noisestringList=new ArrayList<String>();
+		noisestringList=new HashMap<String,NoiseFormat>();
+		temp=new NoiseFormat();
 	}
 
 	public void readWebConfig(String filename){
@@ -90,8 +97,27 @@ public class WebConfigReadServiceImpl implements WebConfigReadService{
 		}			
 		
 		for(int i=0;i<noisestrList.getLength();i++){			
-			Element no=(Element) noisestrList.item(i);			
-			noisestringList.add(no.getAttribute("noiseformat"));			
+			Element no=(Element) noisestrList.item(i);	
+			String tagname=no.getAttribute("noisetag");
+			String noiseformat=no.getAttribute("noiseformat");
+			Set<String> strList=new HashSet<String>();
+			
+			if(!noisestringList.containsKey(tagname)){
+				strList.add(noiseformat);
+				temp.setTagname(tagname);
+				temp.setStrList(strList);				
+			}
+			else{
+				Iterator<Entry<String, NoiseFormat>> it=noisestringList.entrySet().iterator();
+				while(it.hasNext()){
+					Entry<String, NoiseFormat> entry=it.next();
+					strList.addAll(entry.getValue().getStrList());
+					strList.add(noiseformat);
+					temp.setTagname(tagname);
+					temp.setStrList(strList);
+				}
+			}				
+			noisestringList.put(tagname, temp);					
 		}		
 		
 		Element mi=(Element) minList.item(0);
@@ -156,7 +182,7 @@ public class WebConfigReadServiceImpl implements WebConfigReadService{
 	}
 
 	@Override
-	public ArrayList<String> getNoiseStringList() {
+	public Map<String,NoiseFormat> getNoiseStringList() {
 		// TODO Auto-generated method stub
 		return noisestringList;
 	}

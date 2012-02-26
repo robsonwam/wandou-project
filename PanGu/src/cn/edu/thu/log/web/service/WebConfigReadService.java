@@ -3,6 +3,8 @@ package cn.edu.thu.log.web.service;
 import java.util.ArrayList;
 import java.util.Map;
 
+import cn.edu.thu.log.preprocessrule.NoiseFormat;
+
 /**
  * read user config from the web page
  * @author wan
@@ -20,7 +22,7 @@ public interface WebConfigReadService {
 	//读取logclean
 	public Map<String,String> getLogCleanList();		
 	//读取noise
-	public ArrayList<String> getNoiseStringList();
+	public Map<String,NoiseFormat> getNoiseStringList();
 	public String getMin();
 	public String getMax();
 	

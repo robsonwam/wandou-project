@@ -9,14 +9,14 @@ public class NoiseIdentifyTest {
 	public static void main(String[] args) {
 		XESConvertServiceImp configRead=new XESConvertServiceImp();
 		String readFilePath = new String(
-				"E:/for pangu/tmp_201111129~30/imageclick/10.10.160.22/imageclick_201111290005_0.log");
+				"E:/for pangu/tmp_201111129~30/imageclick/10.10.160.22/imageclick_201111290000_0.log");
 		
 		LogBuffer logBuffer=configRead.getLogBuffer(readFilePath);
-		//NoiseIdentify noise=new NoiseIdentify();
+		NoiseIdentify noise=new NoiseIdentify();
 		
 		System.out.println("\nlogBufferTag: "+logBuffer.getLogTagList());
 		System.out.print("logBufferContent:"+logBuffer.getLogContent());
-		//System.out.println("\n是否出现指定噪音噪音串？"+noise.noiseStrIdentify(logBuffer));
+		System.out.println("\n是否出现指定噪音噪音串？"+noise.noiseStrIdentify(logBuffer));
 		
 	}
 }

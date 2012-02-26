@@ -15,7 +15,9 @@ import java.io.File;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -42,6 +44,7 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableModel;
 
+import cn.edu.thu.log.preprocessrule.NoiseFormat;
 import cn.edu.thu.log.read.Log;
 import cn.edu.thu.log.web.service.LogReadService;
 import cn.edu.thu.log.web.service.MiningConfigUIService;
@@ -128,10 +131,11 @@ public class testUI extends JFrame {
 	LogReadService readlogservice;
 	MiningConfigUIService miningconfigservice;
 	// MiningConfigWriteService miningconfigwriteservice;
-	ArrayList<String> allProducts = new ArrayList<String>();
-	DefaultTableModel tagModel;
-	DefaultListModel noiseResultModel;
-	JList noiseResultList;
+	ArrayList<String> allProducts = new ArrayList<String>();	
+	DefaultTableModel noiseResultModel;
+	JTable noiseResultTable;
+	JList allnoiseList;
+	//JList noiseResultList;
 	JComboBox productCombo;
 	JList productList;
 	DefaultListModel productResultModel;
@@ -139,9 +143,10 @@ public class testUI extends JFrame {
 	DefaultTableModel activityResultModel;
 	JTable activityResultTable;
 	Map<String, String> productsname;
-	DefaultListModel caseResultModel;
+	DefaultListModel caseResultModel;		
 	JList caseList;
 	JList caseResultList;
+	DefaultTableModel tagModel;
 	int flag = -1;
 	int buttoncount = 0;
 	ArrayList<String> tempList;
@@ -514,6 +519,7 @@ public class testUI extends JFrame {
 		// logCleanPanel.setBackground(Color.BLACK);
 		// logCleanPanel.setLayout(new BorderLayout());
 		logCleanPanel.setBorder(BorderFactory.createTitledBorder("日志清洗规则"));
+		
 		JPanel chooseCleanPanel = new JPanel();
 		JPanel resultPanel1 = new JPanel();
 		String[] cols = { "字段", "字段格式" };
@@ -568,10 +574,24 @@ public class testUI extends JFrame {
 		// noiseIdentifyPanel.setBackground(Color.RED);
 		noiseIdentifyPanel
 				.setBorder(BorderFactory.createTitledBorder("噪声识别规则"));
-		noiseIdentifyPanel.setLayout(new GridLayout(1, 2));
-		// noiseResultModel=new DefaultListModel();
+		noiseIdentifyPanel.setLayout(new GridLayout(1, 3));
+		noiseResultModel=new DefaultTableModel();
+		noiseResultTable=new JTable(noiseResultModel);
 		// noiseResultList.setModel(noiseResultModel);
-		noiseResultList = new JList();
+		JPanel alltagPanel=new JPanel();		
+		allnoiseList=new JList();
+		allnoiseList.setBorder(BorderFactory.createTitledBorder("选择要设定噪音穿的列"));
+		allnoiseList.setListData(logreadservice.getLogTagsByProducts(
+				allProducts).toArray());
+		JScrollPane noisetagPane=new JScrollPane(allnoiseList);
+		allnoiseList.setPreferredSize(getPreferredSize());
+		allnoiseList.setVisibleRowCount(27);		
+		alltagPanel.add(noisetagPane);	
+		
+		String[] cols = { "噪声字段", "噪音串" };
+		String[][] attr = null;
+		noiseResultModel = new DefaultTableModel(attr, cols);
+		
 		JPanel chooseNoisePanel = new JPanel();
 		JPanel resultPanel2 = new JPanel(new BorderLayout());
 
@@ -589,19 +609,27 @@ public class testUI extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
 				String noiseStr = noiseAttr.getText();
-				miningconfigservice.addNoiseIdentifyRule(noiseStr);
-				// noiseResultModel.addElement(miningconfigservice.getNoiseIdentifyRule());
-				noiseResultList.setListData(miningconfigservice
-						.getAllNoiseIdentifyRules().toArray());
+				String noisename= allnoiseList.getSelectedValue().toString();
+				miningconfigservice.addNoiseIdentifyRule(noisename,noiseStr);
+				noiseResultModel.addRow(miningconfigservice.getNoiseFormat().toArray());
+				noiseResultTable.setModel(noiseResultModel);
+				
 				System.out.println("\nnoise rule is " + noiseStr);
-				System.out.println("all noise rule are: "
-						+ miningconfigservice.getAllNoiseIdentifyRules());
+				System.out.println("\nall noise rule are: ");
+				Iterator<Entry<String, NoiseFormat>> it=miningconfigservice.getAllNoiseIdentifyRules().entrySet().iterator();
+				while(it.hasNext()){
+					Entry<String, NoiseFormat> entry=it.next();
+					System.out.println("\nnoisekey: "+entry.getKey());
+					System.out.println("noisetag"+entry.getValue().getTagname());
+					System.out.println("noiseformat: "+entry.getValue().getStrList());
+				}
+				
 			}
 
 		});
 		p1.add(noiseAttr);
 		p1.add(addNoiseButton);
-
+		
 		// 第二行用于配置连续访问动作间最小时间间隔
 		JPanel p2 = new JPanel();
 		p2.setLayout(new FlowLayout(FlowLayout.LEFT));
@@ -644,13 +672,15 @@ public class testUI extends JFrame {
 
 		/** 噪声识别规则1中定义的正则表达式结果列表 */
 
-		noiseResultList.setVisibleRowCount(30);
-		noiseResultList.setPreferredSize(getPreferredSize());
-		JScrollPane scrollNoisePane = new JScrollPane(noiseResultList);
-
+		noiseResultModel.setColumnIdentifiers(cols);
+		noiseResultTable = new JTable(noiseResultModel);		
+		JScrollPane scrollNoisePane = new JScrollPane(noiseResultTable);
+		scrollNoisePane.setPreferredSize(getPreferredSize());
+		
 		resultPanel2.add(scrollNoisePane);
 		resultPanel2.setBorder(BorderFactory.createTitledBorder("噪音表达式结果"));
 
+		noiseIdentifyPanel.add(alltagPanel);
 		noiseIdentifyPanel.add(chooseNoisePanel);
 		noiseIdentifyPanel.add(resultPanel2);
 

@@ -4,11 +4,13 @@ import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -28,9 +30,10 @@ import org.w3c.dom.Element;
 import cn.edu.thu.log.preprocessrule.ActivityIdentifyRule;
 import cn.edu.thu.log.preprocessrule.CaseIdentifyRule;
 import cn.edu.thu.log.preprocessrule.LogCleanRule;
+import cn.edu.thu.log.preprocessrule.NoiseFormat;
 import cn.edu.thu.log.preprocessrule.NoiseIdentifyRule;
 import cn.edu.thu.log.web.service.MiningConfigWriteService;
-
+import cn.edu.thu.log.preprocessrule.NoiseFormat;
 
 /**
  * realize writing web config into mining config file
@@ -40,13 +43,13 @@ import cn.edu.thu.log.web.service.MiningConfigWriteService;
 public class MiningConfigWriteServiceImpl implements MiningConfigWriteService {
 
 	private LogCleanRule logclean;
-	private NoiseIdentifyRule noiseidentify;
+	private NoiseIdentifyRule noiseidentifyrule;
 	private ActivityIdentifyRule activityidentify;
 	private CaseIdentifyRule caseidentify;
 	
 	private Map<String,String> alllogcleanrules;
 	private Map<String,String> allcaseidentifyrules;	
-	private Set<String> allnoiseidentifyrules;
+	private NoiseFormat allnoiseidentifyrules;
 	private Integer mininternalvalue=0;
 	private Integer maxtimevalue=0;	
 	private String timestamptag=null;
@@ -58,13 +61,13 @@ public class MiningConfigWriteServiceImpl implements MiningConfigWriteService {
 			ActivityIdentifyRule activityidentifyrule,
 			CaseIdentifyRule caseidentifyrule){
 		this.logclean=logcleanrule;
-		this.noiseidentify=noiseidentifyrule;
+		this.noiseidentifyrule=noiseidentifyrule;
 		this.activityidentify=activityidentifyrule;
 		this.caseidentify=caseidentifyrule;
 		
 		alllogcleanrules=new HashMap<String,String>();
 		allcaseidentifyrules=new HashMap<String,String>();
-		allnoiseidentifyrules=new HashSet<String>();
+		allnoiseidentifyrules=new NoiseFormat();
 		allanalyzedproducts=new HashSet<String>();
 		allactivityidentifyrules=new HashMap<String,String>();
 		alllogcleanrules=logclean.getAllLogCleanRules();		
@@ -74,9 +77,9 @@ public class MiningConfigWriteServiceImpl implements MiningConfigWriteService {
 	public void writeMiningConfig(String outfile) {
 		alllogcleanrules=logclean.getAllLogCleanRules();
         allcaseidentifyrules=caseidentify.getAllCaseIdentifyRules();		
-		allnoiseidentifyrules=noiseidentify.getAllNoiseIdentifyRules();
-		mininternalvalue=noiseidentify.getMininternal();
-		maxtimevalue=noiseidentify.getMaxtime();		
+		//??????allnoiseidentifyrules=noiseidentify.getAllNoiseIdentifyRules();
+		mininternalvalue=noiseidentifyrule.getMininternal();
+		maxtimevalue=noiseidentifyrule.getMaxtime();		
 		timestamptag=activityidentify.getTimestamp();
 		allanalyzedproducts=activityidentify.getAllAnalyzedProducts();
 		allactivityidentifyrules=activityidentify.getAllActivityIdentifyRules();
@@ -115,13 +118,25 @@ public class MiningConfigWriteServiceImpl implements MiningConfigWriteService {
 		 Element noiseidentify=doc.createElement("noiseidentify");
 		 //需要定义规则的noise，属性是定义的噪声串； 
 		 		 
-		 Iterator<String> noiseidentifyit=allnoiseidentifyrules.iterator();
-		 while(noiseidentifyit.hasNext()){ 
-			 Element noise=doc.createElement("noise");			 
-			 noise.setAttribute("noiseformat",noiseidentifyit.next()); 			 
-			 noiseidentify.appendChild(noise); 
-			 System.out.println("\n读取noise配置： "+noiseidentifyit.next());
-		 }		
+		 Iterator<Entry<String, NoiseFormat>> noiseidentifyit = noiseidentifyrule
+					.getAllNoiseIdentifyRules().entrySet().iterator();
+			while (noiseidentifyit.hasNext()) {
+				Entry<String, NoiseFormat> entry = noiseidentifyit.next();
+				String tagname = entry.getKey();
+				ArrayList<String> strList = new ArrayList<String>(entry.getValue()
+						.getStrList());
+				Iterator<String> it = strList.iterator();
+				while (it.hasNext()) {
+					Element noise = doc.createElement("noise");
+					noise.setAttribute("noisetag", tagname);
+					System.out.println("\n读取noise字段： " + tagname);
+					String str = it.next();
+					noise.setAttribute("noiseformat", str);
+					noiseidentify.appendChild(noise);
+					System.out.println("\n读取noise格式： " + str);
+				}
+
+			}	
 		 //定义最小间隔时间mininternal
 		 Element mininternal=doc.createElement("mininternal");
 		 mininternal.setAttribute("mininternal", mininternalvalue.toString());

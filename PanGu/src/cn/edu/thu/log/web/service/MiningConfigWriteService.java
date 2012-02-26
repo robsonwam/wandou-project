@@ -2,7 +2,7 @@ package cn.edu.thu.log.web.service;
 import java.io.Writer;
 
 import org.w3c.dom.Document;
-
+import cn.edu.thu.log.preprocessrule.NoiseFormat;
 /**
  * write web config into mining config file
  * @author wan

@@ -29,7 +29,7 @@ public class NoiseIdentify {
 		nrule = new HashMap<String,NoiseFormat>();
 		logTagList = new ArrayList<String>();
 		logContentList = new ArrayList<Object>();
-		webconfigreadservice.readWebConfig("miningconfig1.xml");
+		webconfigreadservice.readWebConfig(webconfigreadservice.getMiningconfigfilename());
 	}
 
 	// 判断一个或多个字段中是否出现指定的noise规则

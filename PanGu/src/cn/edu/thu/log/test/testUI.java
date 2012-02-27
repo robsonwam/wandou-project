@@ -49,9 +49,11 @@ import cn.edu.thu.log.read.Log;
 import cn.edu.thu.log.web.service.LogReadService;
 import cn.edu.thu.log.web.service.MiningConfigUIService;
 import cn.edu.thu.log.web.service.MiningConfigWriteService;
+import cn.edu.thu.log.web.service.WebConfigReadService;
 import cn.edu.thu.log.web.service.impl.LogReadServiceImpl;
 import cn.edu.thu.log.web.service.impl.MiningConfigUIServiceImpl;
 import cn.edu.thu.log.web.service.impl.MiningConfigWriteServiceImpl;
+import cn.edu.thu.log.web.service.impl.WebConfigReadServiceImpl;
 import cn.edu.thu.log.web.service.impl.XESConvertServiceImp;
 
 /**
@@ -1487,14 +1489,10 @@ public class testUI extends JFrame {
 
 		}
 		miningconfigfilename=savedFile.getAbsolutePath();
-		miningconfigservice.writeMiningConfig(miningconfigfilename);				
+		miningconfigservice.writeMiningConfig(miningconfigfilename);		
+		//WebConfigReadService webconfigreadservice=new WebConfigReadServiceImpl();		
 		JOptionPane.showMessageDialog(this, "配置信息已经保存于"+savedFile.getAbsolutePath());
-	}
-
-	public String getMiningconfigfilename() {
-		return miningconfigfilename;
-	}
-	
+	}	
 	
 	// public int ifMerge() {
 	// // TODO Auto-generated method stub

@@ -25,6 +25,5 @@ public interface WebConfigReadService {
 	public Map<String,NoiseFormat> getNoiseStringList();
 	public String getMin();
 	public String getMax();
-	
-	public String getMiningconfigfilename();
+
 }

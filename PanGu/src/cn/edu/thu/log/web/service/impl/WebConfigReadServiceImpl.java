@@ -37,7 +37,7 @@ public class WebConfigReadServiceImpl implements WebConfigReadService{
 	private ArrayList<String> productList;	
 	private ArrayList<String> caseIDList;
 	private NoiseFormat temp;
-	private String miningconfigfilename=null;
+	//private String miningconfigfilename=null;
 	
 	public WebConfigReadServiceImpl(){
 		activityIDList=new ArrayList<String>();
@@ -46,6 +46,7 @@ public class WebConfigReadServiceImpl implements WebConfigReadService{
 		logCleanList=new HashMap<String,String>();
 		noisestringList=new HashMap<String,NoiseFormat>();
 		temp=new NoiseFormat();
+		
 	}
 
 	public void readWebConfig(String filename){
@@ -200,8 +201,5 @@ public class WebConfigReadServiceImpl implements WebConfigReadService{
 		return max;
 	}
 
-	public String getMiningconfigfilename() {
-		return miningconfigfilename;
-	}	
-	
+		
 }

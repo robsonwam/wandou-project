@@ -2,10 +2,10 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib_OpenXES/OpenXES-XStream.jar"/>
 	<classpathentry kind="lib" path="lib_OpenXES/OpenXES.jar"/>
 	<classpathentry kind="lib" path="lib_OpenXES/Spex.jar"/>
 	<classpathentry kind="lib" path="lib_OpenXES/xpp3_min-1.1.4c.jar"/>
 	<classpathentry kind="lib" path="lib_OpenXES/xstream-1.3.1.jar"/>
+	<classpathentry kind="lib" path="lib_OpenXES/OpenXES_xstreamXES.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

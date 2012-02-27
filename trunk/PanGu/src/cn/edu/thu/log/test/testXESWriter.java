@@ -1,15 +1,10 @@
 package cn.edu.thu.log.test;
 
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 
-import cn.edu.thu.log.read.Log;
-import cn.edu.thu.log.read.LogConfig;
-import cn.edu.thu.log.read.LogContent;
 import cn.edu.thu.log.web.service.WebConfigReadService;
 import cn.edu.thu.log.web.service.impl.WebConfigReadServiceImpl;
-import cn.edu.thu.log.xes.XESConfig;
-import cn.edu.thu.log.xes.XESWriter;
+import cn.edu.thu.log.web.service.impl.XESConvertServiceImp;
 
 public class testXESWriter {
 
@@ -49,10 +44,10 @@ public class testXESWriter {
 		WebConfigReadService configRead=new WebConfigReadServiceImpl();
 		configRead.readWebConfig("miningconfig1.xml");
 		String readFilePath = new String(
-				"D:/imageclick_file/imageclick");
-		String resultFile="logXes.xml";
-		XESWriter writer = new XESWriter(configRead,readFilePath);
-		writer.write(resultFile);
+				"D:/pagesearch_testeach.txt");
+		String resultFile="2012021500XES.xml";
+		XESConvertServiceImp writer = new XESConvertServiceImp();
+		writer.convert(readFilePath, resultFile);
 		
 		
 	}

@@ -37,6 +37,7 @@ public class WebConfigReadServiceImpl implements WebConfigReadService{
 	private ArrayList<String> productList;	
 	private ArrayList<String> caseIDList;
 	private NoiseFormat temp;
+	private String miningconfigfilename=null;
 	
 	public WebConfigReadServiceImpl(){
 		activityIDList=new ArrayList<String>();
@@ -197,5 +198,10 @@ public class WebConfigReadServiceImpl implements WebConfigReadService{
 	public String getMax() {
 		// TODO Auto-generated method stub
 		return max;
+	}
+
+	public String getMiningconfigfilename() {
+		return miningconfigfilename;
 	}	
+	
 }

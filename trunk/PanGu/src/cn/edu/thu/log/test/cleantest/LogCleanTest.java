@@ -19,7 +19,7 @@ public class LogCleanTest {
 		// TODO Auto-generated method stub
 		XESConvertServiceImp configRead=new XESConvertServiceImp();
 		String readFilePath = new String(
-				"E:/for pangu/tmp_201111129~30/imageclick/10.10.160.22/imageclick_201111290000_0.log");
+				"E:/任务/for pangu/tmp_201111129~30/imageclick/10.10.160.22/imageclick_201111290000_0.log");
 		
 		LogBuffer logBuffer=configRead.getLogBuffer(readFilePath);
 		LogClean clean=new LogClean();

@@ -31,7 +31,7 @@ public class LogClean {
 		crule = new HashMap<String, String>();
 		logTagList = new ArrayList<String>();
 		logContentList = new ArrayList<Object>();
-		webconfigreadservice.readWebConfig(webconfigreadservice.getMiningconfigfilename());
+		webconfigreadservice.readWebConfig("miningconfig1.xml");
 		System.out.print("\n\n\n初始化logclean");
 	}
 

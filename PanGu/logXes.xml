@@ -6,121 +6,45 @@
   <XEventClassifiers/>
   <XTrace>
     <XAttributeMap lazy="false" buffered="true">
-      <XAttribute key="caseID" type="LITERAL" value="nullMozilla/4.0 (compatible\; MSIE 7.0\; Windows NT 5.1\; Trident/4.0\; .NET CLR 2.0.50727\; SE 2.X MetaSr 1.0),10.10.128.56,"/>
+      <XAttribute key="caseID" type="LITERAL" value="nullMozilla/4.0 (compatible\; MSIE 8.0\; Windows NT 5.1\; Trident/4.0),10.10.128.58,"/>
     </XAttributeMap>
-    <XEvent xid="AF00D9CB-2E11-4019-9C07-813C8172EB2B">
+    <XEvent xid="4A12C342-8513-4F3B-A8F3-2769F2E1A57B">
       <XAttributeMap lazy="false" buffered="false">
-        <XAttribute key="Source" type="LITERAL" value="www"/>
-        <XAttribute key="timeStamp" type="TIMESTAMP" value="3911-12-29T00:17:11.747+08:00"/>
-        <XAttribute key="logPath" type="LITERAL" value="D:\imageclick_file\imageclick\imageclick_201111290017_0.log"/>
-        <XAttribute key="ContentType" type="LITERAL" value="image"/>
-      </XAttributeMap>
-    </XEvent>
-    <XEvent xid="B9D911FD-D7B2-4DA1-A66C-C6B816515639">
-      <XAttributeMap lazy="false" buffered="false">
-        <XAttribute key="Source" type="LITERAL" value="www"/>
-        <XAttribute key="timeStamp" type="TIMESTAMP" value="3911-12-29T00:17:39.760+08:00"/>
-        <XAttribute key="logPath" type="LITERAL" value="D:\imageclick_file\imageclick\imageclick_201111290017_0.log"/>
-        <XAttribute key="ContentType" type="LITERAL" value="image"/>
-      </XAttributeMap>
-    </XEvent>
-    <XEvent xid="58A0745A-A0E4-498D-9AC7-7DAE8901DB55">
-      <XAttributeMap lazy="false" buffered="false">
-        <XAttribute key="Source" type="LITERAL" value="www"/>
-        <XAttribute key="timeStamp" type="TIMESTAMP" value="3911-12-29T00:06:26.859+08:00"/>
-        <XAttribute key="logPath" type="LITERAL" value="D:\imageclick_file\imageclick\imageclick_201111290018_0.log"/>
+        <XAttribute key="Rank" type="LITERAL" value="rk:0"/>
+        <XAttribute key="timeStamp" type="TIMESTAMP" value="3911-12-29T00:58:13.978+08:00"/>
+        <XAttribute key="logPath" type="LITERAL" value="D:\imageclick_file\imageclick\imageclick_201111290058_0.log"/>
+        <XAttribute key="URL" type="LITERAL" value="url:http\://bjqn.ynet.com/mcomments.jsp?oid=20520908"/>
+        <XAttribute key="PageNum" type="LITERAL" value=";pn:10"/>
         <XAttribute key="ContentType" type="LITERAL" value="image"/>
       </XAttributeMap>
     </XEvent>
   </XTrace>
   <XTrace>
     <XAttributeMap lazy="false" buffered="true">
-      <XAttribute key="caseID" type="LITERAL" value="nullMozilla/4.0 (compatible\; MSIE 6.0\; Windows NT 5.1\; SV1\; GTB6\; .NET CLR 2.0.50727\; SE 2.X MetaSr 1.0),10.10.128.56,"/>
+      <XAttribute key="caseID" type="LITERAL" value="nullMozilla/4.0 (compatible\; MSIE 8.0\; Windows NT 6.1\; Trident/4.0\; SLCC2\; .NET CLR 2.0.50727\; .NET CLR 3.5.30729\; .NET CLR 3.0.30729\; InfoPath.1\; Tablet PC 2.0\; MALC\; 360SE),10.10.128.58,"/>
     </XAttributeMap>
-    <XEvent xid="27A7375A-1E40-4A38-8861-3D2ECA2131B7">
+    <XEvent xid="C0D1334E-7925-4583-856D-9DA4DE23C10E">
       <XAttributeMap lazy="false" buffered="false">
-        <XAttribute key="Source" type="LITERAL" value="www"/>
-        <XAttribute key="timeStamp" type="TIMESTAMP" value="3911-12-29T03:26:18.884+08:00"/>
-        <XAttribute key="logPath" type="LITERAL" value="D:\imageclick_file\imageclick\imageclick_201111290326_0.log"/>
+        <XAttribute key="Rank" type="LITERAL" value="rk:0"/>
+        <XAttribute key="timeStamp" type="TIMESTAMP" value="3911-12-29T01:27:02.013+08:00"/>
+        <XAttribute key="logPath" type="LITERAL" value="D:\imageclick_file\imageclick\imageclick_201111290127_0.log"/>
+        <XAttribute key="URL" type="LITERAL" value="url:http\://news.xinhuanet.com/fortune/2010-04/29/c_1263798.htm"/>
+        <XAttribute key="PageNum" type="LITERAL" value=";pn:10"/>
         <XAttribute key="ContentType" type="LITERAL" value="image"/>
       </XAttributeMap>
     </XEvent>
   </XTrace>
   <XTrace>
     <XAttributeMap lazy="false" buffered="true">
-      <XAttribute key="caseID" type="LITERAL" value="nullMozilla/4.0 (compatible\; MSIE 6.0\; Windows NT 5.1\; SV1\; .NET CLR 2.0.50727\; .NET CLR 3.0.04506.30),10.10.128.56,"/>
+      <XAttribute key="caseID" type="LITERAL" value="nullMozilla/4.0 (compatible\; MSIE 7.0\; Windows NT 5.1\; Maxthon 2.0),10.10.128.58,"/>
     </XAttributeMap>
-    <XEvent xid="5D6EE2A8-3E1A-4914-9840-03CD8114D6AD">
+    <XEvent xid="B5D152B6-63C0-4160-ADF8-F3FA1845A060">
       <XAttributeMap lazy="false" buffered="false">
-        <XAttribute key="Source" type="LITERAL" value="www"/>
-        <XAttribute key="timeStamp" type="TIMESTAMP" value="3911-12-29T04:41:21.899+08:00"/>
-        <XAttribute key="logPath" type="LITERAL" value="D:\imageclick_file\imageclick\imageclick_201111290441_0.log"/>
-        <XAttribute key="ContentType" type="LITERAL" value="image"/>
-      </XAttributeMap>
-    </XEvent>
-    <XEvent xid="8A586339-8120-41F7-854D-5069277FD82F">
-      <XAttributeMap lazy="false" buffered="false">
-        <XAttribute key="Source" type="LITERAL" value="www"/>
-        <XAttribute key="timeStamp" type="TIMESTAMP" value="3911-12-29T04:41:47.903+08:00"/>
-        <XAttribute key="logPath" type="LITERAL" value="D:\imageclick_file\imageclick\imageclick_201111290441_0.log"/>
-        <XAttribute key="ContentType" type="LITERAL" value="image"/>
-      </XAttributeMap>
-    </XEvent>
-  </XTrace>
-  <XTrace>
-    <XAttributeMap lazy="false" buffered="true">
-      <XAttribute key="caseID" type="LITERAL" value="nullMozilla/5.0 (compatible\; Baiduspider/2.0\; +http\://www.baidu.com/search/spider.html),10.10.128.56,"/>
-    </XAttributeMap>
-    <XEvent xid="762EDA04-88D0-4A29-80A9-6D5E5C982CB4">
-      <XAttributeMap lazy="false" buffered="false">
-        <XAttribute key="Source" type="LITERAL" value="www"/>
-        <XAttribute key="timeStamp" type="TIMESTAMP" value="3911-12-29T00:23:45.917+08:00"/>
-        <XAttribute key="logPath" type="LITERAL" value="D:\imageclick_file\imageclick\imagesearch_201111290023_0.log"/>
-        <XAttribute key="ContentType" type="LITERAL" value="image"/>
-      </XAttributeMap>
-    </XEvent>
-    <XEvent xid="227E2A67-168A-4010-96A0-CE5DB6948C80">
-      <XAttributeMap lazy="false" buffered="false">
-        <XAttribute key="Source" type="LITERAL" value="www"/>
-        <XAttribute key="timeStamp" type="TIMESTAMP" value="3911-12-29T00:23:47.920+08:00"/>
-        <XAttribute key="logPath" type="LITERAL" value="D:\imageclick_file\imageclick\imagesearch_201111290023_0.log"/>
-        <XAttribute key="ContentType" type="LITERAL" value="image"/>
-      </XAttributeMap>
-    </XEvent>
-    <XEvent xid="BCFA439F-4EB8-4F55-B747-32145618F046">
-      <XAttributeMap lazy="false" buffered="false">
-        <XAttribute key="Source" type="LITERAL" value="www"/>
-        <XAttribute key="timeStamp" type="TIMESTAMP" value="3911-12-29T00:23:49.922+08:00"/>
-        <XAttribute key="logPath" type="LITERAL" value="D:\imageclick_file\imageclick\imagesearch_201111290023_0.log"/>
-        <XAttribute key="ContentType" type="LITERAL" value="image"/>
-      </XAttributeMap>
-    </XEvent>
-  </XTrace>
-  <XTrace>
-    <XAttributeMap lazy="false" buffered="true">
-      <XAttribute key="caseID" type="LITERAL" value="nullMozilla/5.0 (compatible\; Baiduspider/2.0\; +http\://www.baidu.com/search/spider.html),10.10.128.58,"/>
-    </XAttributeMap>
-    <XEvent xid="F78ACB55-6CDF-4D02-B420-6CEF74CC0BA8">
-      <XAttributeMap lazy="false" buffered="false">
-        <XAttribute key="Source" type="LITERAL" value="www"/>
-        <XAttribute key="timeStamp" type="TIMESTAMP" value="3911-12-29T00:23:51.924+08:00"/>
-        <XAttribute key="logPath" type="LITERAL" value="D:\imageclick_file\imageclick\imagesearch_201111290023_0.log"/>
-        <XAttribute key="ContentType" type="LITERAL" value="image"/>
-      </XAttributeMap>
-    </XEvent>
-    <XEvent xid="886D030D-1654-4945-82C6-F446C00C7FA1">
-      <XAttributeMap lazy="false" buffered="false">
-        <XAttribute key="Source" type="LITERAL" value="www"/>
-        <XAttribute key="timeStamp" type="TIMESTAMP" value="3911-12-29T00:23:54.927+08:00"/>
-        <XAttribute key="logPath" type="LITERAL" value="D:\imageclick_file\imageclick\imagesearch_201111290023_0.log"/>
-        <XAttribute key="ContentType" type="LITERAL" value="image"/>
-      </XAttributeMap>
-    </XEvent>
-    <XEvent xid="A1C7C76B-BF4F-4BA2-82F8-E4E3500AB2D8">
-      <XAttributeMap lazy="false" buffered="false">
-        <XAttribute key="Source" type="LITERAL" value="www"/>
-        <XAttribute key="timeStamp" type="TIMESTAMP" value="3911-12-29T00:23:56.930+08:00"/>
-        <XAttribute key="logPath" type="LITERAL" value="D:\imageclick_file\imageclick\imagesearch_201111290023_0.log"/>
+        <XAttribute key="Rank" type="LITERAL" value="rk:0"/>
+        <XAttribute key="timeStamp" type="TIMESTAMP" value="3911-12-29T01:29:58.048+08:00"/>
+        <XAttribute key="logPath" type="LITERAL" value="D:\imageclick_file\imageclick\imageclick_201111290129_0.log"/>
+        <XAttribute key="URL" type="LITERAL" value="url:http\://news.gxnews.com.cn/staticpages/20090618/newgx4a3a5675-2113165.shtml"/>
+        <XAttribute key="PageNum" type="LITERAL" value=";pn:10"/>
         <XAttribute key="ContentType" type="LITERAL" value="image"/>
       </XAttributeMap>
     </XEvent>

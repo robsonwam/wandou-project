@@ -83,7 +83,7 @@ public class LogConfig {
 			// cateList = logFilesReader.getCateList(readfile);
 
 			logHead = readLogHead();
-			System.out.print("\nlogHead:" + logHead);
+		//	System.out.print("\nlogHead:" + logHead);
 			// logBody=readLogBody();
 			logTags.addAll(logHead);
 			logTags.addAll(logBody);
@@ -132,9 +132,9 @@ public class LogConfig {
 			// cateList = logFilesReader.getCateList(readfile);
 
 			logHead = readLogHead();
-			System.out.print("\nlogHead:" + logHead);
+			//System.out.print("\nlogHead:" + logHead);
 			logBody = readLogBody(logFile);
-			System.out.print("\nlogBody:" + logBody);
+			//System.out.print("\nlogBody:" + logBody);
 			logTags.addAll(logHead);
 			logTags.addAll(logBody);
 			// readTags("logHead");

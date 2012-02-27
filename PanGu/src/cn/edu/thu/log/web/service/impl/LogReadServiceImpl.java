@@ -21,8 +21,8 @@ import cn.edu.thu.log.web.service.LogReadService;
 public class LogReadServiceImpl implements LogReadService {
 	LogConfig logConfig;
 	LogContent logContent;
-	private final String CONFIGFILE = "config_1.4.xml";
-
+//	private final String CONFIGFILE = "config_1.4.xml";
+	private final String CONFIGFILE = "config.xml";
 	/**
 	 * Constructor
 	 */

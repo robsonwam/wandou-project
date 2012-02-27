@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <miningconfig>
 <logclean>
-<logtag tagformat="\\d{1,3}+\\.\\d{1,3}+\\.\\d{1,3}+\\.\\d{1,3}" tagname="TimeStamp"/>
+<logtag tagformat="\d{1,3}+\.\d{1,3}+\.\d{1,3}+\.\d{1,3}" tagname="TimeStamp"/>
 </logclean>
 <noiseidentify>
 <mininternal mininternal="300"/>

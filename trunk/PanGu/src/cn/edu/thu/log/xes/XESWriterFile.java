@@ -40,6 +40,8 @@ import org.deckfour.xes.out.XesXmlSerializer;
 import org.deckfour.xes.util.XsDateTimeConversion;
 import org.deckfour.xes.xstreamXES.XesXStreamPersistency;
 
+import cn.edu.thu.log.clean.LogClean;
+import cn.edu.thu.log.clean.NoiseIdentify;
 import cn.edu.thu.log.read.Log;
 import cn.edu.thu.log.read.LogBuffer;
 import cn.edu.thu.log.read.LogConfig;
@@ -65,7 +67,7 @@ public class XESWriterFile {
 	public static XFactory factory = XFactoryRegistry.instance()
 			.currentDefault();
 	private final String LOGCONFIGFILE = "config.xml";
-	//private final String TIMEOUT = "00000000003000";
+	// private final String TIMEOUT = "00000000003000";
 	private final long TIMEOUT_MINUTE = 30;
 	private final long MINUTE_MILLIS = 60000;
 	// XESConfig xesConfig;
@@ -84,6 +86,8 @@ public class XESWriterFile {
 	LogConfig logConfig;
 	XEventAttributeClassifier classifier;
 	XExtensionManager extensionManager;
+	LogClean logClean;
+	NoiseIdentify noiseIdentify;
 	// for test
 	LogBuffer testLogBuffer = new LogBuffer();
 
@@ -112,6 +116,8 @@ public class XESWriterFile {
 		this.xesConfig = xesConfig;
 		this.filePath = filePath;
 		logConfig = new LogConfig();
+		noiseIdentify = new NoiseIdentify();
+		logClean = new LogClean();
 
 	}
 
@@ -263,8 +269,8 @@ public class XESWriterFile {
 		logConfig.config(LOGCONFIGFILE, file.getAbsolutePath());
 		ArrayList<String> logTagList = logConfig.getLogTags();
 		// read timeput from config
-		//timeOutString = TIMEOUT;
-	//	timeOut = StringToTimeStamp(timeOutString);
+		// timeOutString = TIMEOUT;
+		// timeOut = StringToTimeStamp(timeOutString);
 		// System.out.print("\ntimeOutString::"+timeOutString);
 		// System.out.print("\ntimeout::"+timeOut);
 		// Date timeOut = this.StringToTimeStamp(timeOutString);
@@ -398,7 +404,6 @@ public class XESWriterFile {
 				logBuffer.setLogBodyContent(headparams);
 				logBuffer.setLogContent(params);
 				logBuffer.setLogTagList(logTagList);
-
 				// set timeStamp(content) to logBuffer
 				String timeStampIndentifier = xesConfig.getTimeStamp();
 				String timeStampContent = null;
@@ -437,24 +442,39 @@ public class XESWriterFile {
 				// set activityIDList(Content) of LogBuffer
 				ArrayList<Object> activityIDContentList = new ArrayList<Object>();
 				ArrayList<String> activityIDTagList = new ArrayList<String>();
+				
+				//cleaner
+				if ((!logClean.logClean(logBuffer)
+						)||(!noiseIdentify.noiseStrIdentify(logBuffer))) {
+					System.out.print("\nskip logbuffer");
+					continue;
+					
+				}
+				System.out.print("\ncorrect logBuffer");
 				// 判断activityID是否在tag里面的原因是，不同产品有不同logBodyTag，所以一个产品不包括另外一个产品的tag
 				for (int i = 0; i < xesConfig.getActivityIDList().size(); i++) {
 					String activityID = xesConfig.getActivityIDList().get(i);
-					
-					for (int j = 0; j < logBuffer.getLogContent().size(); j++) {
-						// 判断设置的CaseIDList是否为tag中
-						if (activityID.equalsIgnoreCase(logBuffer
-								.getLogTagList().get(j))) {
-							activityIDTagList.add(logBuffer.getLogTagList()
-									.get(j));
-							System.out.print(" "+logBuffer.getLogTagList().get(j));
-							System.out.print(":"+logBuffer.getLogContent().get(j));
-						
-							activityIDContentList.add(logBuffer.getLogContent()
-									.get(j).toString());
+//					if (logBuffer.getLogTagList().size() != logBuffer
+//							.getLogContent().size()) {
 
+//					} else {
+						for (int j = 0; j < logBuffer.getLogTagList().size(); j++) {
+							// 判断设置的CaseIDList是否为tag中
+							if (activityID.equalsIgnoreCase(logBuffer
+									.getLogTagList().get(j))) {
+								activityIDTagList.add(logBuffer.getLogTagList()
+										.get(j));
+//								System.out.print(" "
+//										+ logBuffer.getLogTagList().get(j));
+//								System.out.print(":"
+//										+ logBuffer.getLogContent().get(j));
+
+								activityIDContentList.add(logBuffer
+										.getLogContent().get(j).toString());
+
+							}
 						}
-					}
+//					}
 				}
 				logBuffer.setActivityIDContentList(activityIDContentList);
 				logBuffer.setActivityIDTagList(activityIDTagList);
@@ -477,6 +497,13 @@ public class XESWriterFile {
 
 				setTestLogBuffer(logBuffer);
 				classifier.getClassIdentity(event);
+				// test
+			
+//					continue;
+
+				
+//				System.out.print("\n after continue");
+
 				// put trace into log
 				timer.stop();
 				time2_SetEvent = timer.getDuration();
@@ -521,10 +548,10 @@ public class XESWriterFile {
 					// add new trace to log
 					log.add(traceNew);
 					// set Arrival time boundary for this case
-					lastestArrivalMap.put(caseIDString, logBuffer
-							.getTimeStamp());
-					earliestArrivalMap.put(caseIDString, logBuffer
-							.getTimeStamp());
+					lastestArrivalMap.put(caseIDString,
+							logBuffer.getTimeStamp());
+					earliestArrivalMap.put(caseIDString,
+							logBuffer.getTimeStamp());
 
 				} else {// the log is not empty,already contains trace
 					boolean caseIDExist = false;
@@ -533,8 +560,8 @@ public class XESWriterFile {
 
 						XTrace eachTrace = log.get(i);
 						// for(XTrace eachTrace:log){
-						String caseIDValue = eachTrace.getAttributes().get(
-								XConceptExtension.KEY_NAME).toString();
+						String caseIDValue = eachTrace.getAttributes()
+								.get(XConceptExtension.KEY_NAME).toString();
 						int indexOfBranch = caseIDValue.indexOf(BRANCH);
 						String caseIDValueWithoutBranch = caseIDValue
 								.substring(0, indexOfBranch);
@@ -574,20 +601,20 @@ public class XESWriterFile {
 										.createAttributeLiteral(
 												XConceptExtension.KEY_NAME,
 												caseIDValue, null);
-								traceAttributeMapNew.put(traceAttributeID
-										.getKey(), traceAttributeID);
+								traceAttributeMapNew.put(
+										traceAttributeID.getKey(),
+										traceAttributeID);
 								traceNew.setAttributes(traceAttributeMapNew);
 								traceNew.add(event);
 								log.add(traceNew);
 								// set Arrival time boundary for this case
-								lastestArrivalMap.put(caseIDValue, logBuffer
-										.getTimeStamp());
-								earliestArrivalMap.put(caseIDValue, logBuffer
-										.getTimeStamp());
+								lastestArrivalMap.put(caseIDValue,
+										logBuffer.getTimeStamp());
+								earliestArrivalMap.put(caseIDValue,
+										logBuffer.getTimeStamp());
 								// System.out
 								// .print("\ntimeout created new instance");
-							}
-							else{
+							} else {
 								eachTrace.add(event);
 							}
 							// System.out.print("\nadd event:"
@@ -625,13 +652,16 @@ public class XESWriterFile {
 						// add new trace to log
 
 						log.add(traceNew);
-						lastestArrivalMap.put(caseIDString, logBuffer
-								.getTimeStamp());
-						earliestArrivalMap.put(caseIDString, logBuffer
-								.getTimeStamp());
+						lastestArrivalMap.put(caseIDString,
+								logBuffer.getTimeStamp());
+						earliestArrivalMap.put(caseIDString,
+								logBuffer.getTimeStamp());
 					}
 				}
-
+//				}
+//				else{
+//					System.out.print("\n delete log");
+//				}
 				timer.stop();
 				time3_AddEventToLog = +timer.getDuration();
 				timerForRead.start();
@@ -693,7 +723,7 @@ public class XESWriterFile {
 	// }
 	private boolean checkTimeOut(LogBuffer logBuffer, String caseIDValue) {
 		// Time time=new Time();
-		long timeOut=MINUTE_MILLIS*TIMEOUT_MINUTE;
+		long timeOut = MINUTE_MILLIS * TIMEOUT_MINUTE;
 		// System.out.print("\ncheck if timeout");
 		boolean ifTimeOut = false;
 		String lasterTimeString = lastestArrivalMap.get(caseIDValue);
@@ -715,7 +745,8 @@ public class XESWriterFile {
 				System.out.print("\tlasterTime:" + lasterTime);
 				System.out.print("\tarriveTime:" + arriveTime);
 				System.out.print("\ttimeOut:" + timeOut);
-				System.out.print("\tdifference:" + (lasterTime.getTime() - arriveTime.getTime()));
+				System.out.print("\tdifference:"
+						+ (lasterTime.getTime() - arriveTime.getTime()));
 				ifTimeOut = true;
 				// System.out.print("\nlatest time different:"
 				// + (lasterTime.getTime() - arriveTime.getTime()));
@@ -733,7 +764,7 @@ public class XESWriterFile {
 				System.out.print("\tarriveTime:" + arriveTime);
 				System.out.print("\ttimeOut:" + timeOut);
 				ifTimeOut = true;
-				
+
 				// System.out.print("\n earliest time different:"
 				// + (arriveTime.getTime() - earliestTime.getTime()));
 			} else {
@@ -759,11 +790,11 @@ public class XESWriterFile {
 	 * @param logBuffer
 	 */
 	private void writeEvent(XEvent event, LogBuffer logBuffer) {
-//		System.out.println();
-//		for (int i = 0; i < logBuffer.getLogTagList().size(); i++) {
-//			System.out.print("	" + logBuffer.getLogTagList().get(i));
-//			System.out.print("	" + logBuffer.getLogContent().get(i));
-//		}
+		// System.out.println();
+		// for (int i = 0; i < logBuffer.getLogTagList().size(); i++) {
+		// System.out.print("	" + logBuffer.getLogTagList().get(i));
+		// System.out.print("	" + logBuffer.getLogContent().get(i));
+		// }
 		// get the tags of loghead and logbody from one record
 		// logConfig.config(logconfigFile, logBuffer.getLogPath());
 		// ArrayList<String> logTags = logConfig.getLogTags();
@@ -796,8 +827,8 @@ public class XESWriterFile {
 				// System.out.print("\nlog content:" + logContents);
 
 			}
-			XAttribute attribute = factory.createAttributeLiteral(logTags
-					.get(i), (String) logContents.get(i), null);
+			XAttribute attribute = factory.createAttributeLiteral(
+					logTags.get(i), (String) logContents.get(i), null);
 
 			attributeMap.put(attribute.getKey(), attribute);
 		}
@@ -846,13 +877,13 @@ public class XESWriterFile {
 				timeStamp
 						.setMonth(Integer.parseInt(timeString.substring(4, 6)) - 1);
 				timeStamp.setDate(Integer.parseInt(timeString.substring(6, 8)));
-				timeStamp.setHours(Integer
-						.parseInt(timeString.substring(8, 10)));
+				timeStamp
+						.setHours(Integer.parseInt(timeString.substring(8, 10)));
 				timeStamp.setMinutes(Integer.parseInt(timeString.substring(10,
 						12)));
 				timeStamp.setSeconds(Integer.parseInt(timeString.substring(12,
 						14)));
-				
+
 				// System.out.print("\ntimeString:"+timeString);
 				// System.out.print("\nsecond:"+timeString.substring(12, 14));
 				// System.out.print("\nmonth:"+timeString.substring(8, 10));
@@ -862,9 +893,9 @@ public class XESWriterFile {
 
 			}
 		}
-//		System.out.print("\ntimeString:" + timeString);
-//		System.out.print("\nDate:" + timeStamp);
-//		System.out.print("\nYear:" + timeStamp.getYear());
+		// System.out.print("\ntimeString:" + timeString);
+		// System.out.print("\nDate:" + timeStamp);
+		// System.out.print("\nYear:" + timeStamp.getYear());
 		return timeStamp;
 	}
 
@@ -907,8 +938,8 @@ public class XESWriterFile {
 				// System.out.print("\nlog content:" + logContents);
 
 			}
-			XAttribute attribute = factory.createAttributeLiteral(logTags
-					.get(i), (String) logContents.get(i), null);
+			XAttribute attribute = factory.createAttributeLiteral(
+					logTags.get(i), (String) logContents.get(i), null);
 
 			attributeMap.put(attribute.getKey(), attribute);
 		}

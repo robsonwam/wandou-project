@@ -151,6 +151,7 @@ public class testUI extends JFrame {
 	int buttoncount = 0;
 	ArrayList<String> tempList;
 
+	String miningconfigfilename=null;
 	/**
 	 * construction function
 	 * 
@@ -867,7 +868,7 @@ public class testUI extends JFrame {
 				// TODO Auto-generated method stub
 				// miningconfigwriteservice=new MiningConfigWriteServiceImpl();
 				// miningconfigwriteservice.writeMiningConfig("miningconfig.xml");
-				miningconfigservice.writeMiningConfig("miningconfig1.xml");
+				exportMiningConfigFile();
 			}
 
 		});
@@ -1459,7 +1460,42 @@ public class testUI extends JFrame {
 		return logList;
 
 	}
+	
+	private void exportMiningConfigFile() {
 
+		// chooser file
+		JFileChooser chooser = new JFileChooser();
+		File savedFile = null;
+		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		chooser.setMultiSelectionEnabled(true);
+		chooser.setCurrentDirectory(new File("D://"));
+		// chooser.setSelectedFile(new File(chosenfile.getName()));
+		int returnVal = chooser.showOpenDialog(this);
+
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			if (chooser.getSelectedFile() != null) {
+				savedFile = new File(chooser.getSelectedFile().getPath());
+
+				System.out.print("\n 配置信息已被保存于文件" + savedFile);
+			} else {
+				savedFile = new File(chooser.getCurrentDirectory(),
+						chooser.getDialogTitle());
+				System.out.print("\n 配置信息信息保存于文件" + savedFile);
+				// File savedFile = new
+				// File(chooser.getCurrentDirectory()+chooser.get);
+			}
+
+		}
+		miningconfigfilename=savedFile.getAbsolutePath();
+		miningconfigservice.writeMiningConfig(miningconfigfilename);				
+		JOptionPane.showMessageDialog(this, "配置信息已经保存于"+savedFile.getAbsolutePath());
+	}
+
+	public String getMiningconfigfilename() {
+		return miningconfigfilename;
+	}
+	
+	
 	// public int ifMerge() {
 	// // TODO Auto-generated method stub
 	// String question="different log format,merge files?";

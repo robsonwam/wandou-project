@@ -26,7 +26,7 @@ import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
 import org.deckfour.xes.model.impl.XAttributeLiteralImpl;
 import org.deckfour.xes.model.impl.XAttributeMapImpl;
-import org.deckfour.xes.xstream.XesXStreamPersistency;
+import org.deckfour.xes.xstreamXES.XesXStreamPersistency;
 
 import cn.edu.thu.log.read.Log;
 import cn.edu.thu.log.read.LogBuffer;

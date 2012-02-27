@@ -13,6 +13,8 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.Iterator;
 
+import javax.swing.JOptionPane;
+
 import org.deckfour.xes.classification.XEventAttributeClassifier;
 import org.deckfour.xes.extension.XExtension;
 import org.deckfour.xes.extension.XExtensionManager;
@@ -34,8 +36,7 @@ import org.deckfour.xes.model.impl.XAttributeLiteralImpl;
 import org.deckfour.xes.model.impl.XAttributeMapImpl;
 import org.deckfour.xes.model.impl.XLogImpl;
 import org.deckfour.xes.out.XesXmlGZIPSerializer;
-import org.deckfour.xes.out.XesXmlSerializer;
-import org.deckfour.xes.util.XTimer;
+import org.deckfour.xes.util.XsDateTimeConversion;
 import org.deckfour.xes.xstreamXES.XesXStreamPersistency;
 
 import cn.edu.thu.log.read.Log;
@@ -56,6 +57,7 @@ import com.thoughtworks.xstream.XStream;
  */
 public class XEZWriter {
 	// for test
+	final String BRANCH = "branch";
 	ArrayList<String> caseIDTagList;
 	ArrayList<String> activityIDTagList;
 	String timestampTag;
@@ -88,6 +90,7 @@ public class XEZWriter {
 	long time3_AddEventToLog;
 	long time4_WriteXES;
 	long time1_ReadRecordAsText;
+	long timeReadFileConrentTotal;
 
 	// long readFileContenttime;
 
@@ -165,13 +168,13 @@ public class XEZWriter {
 			File sFile = new File(resultFilePath);
 			System.out.print("\nxez file:" + sFile.getTotalSpace());
 			// System.out.print("\ntime1_SetLogBuffer:"+time1_SetLogBuffer);
-			//			
+			//
 			// System.out.print("\ntime2_SetEvent:"+time2_SetEvent);
-			//			
+			//
 			// System.out.print("\ntime3_AddEventToLog:"+time3_AddEventToLog);
 			// System.out.print("\ntime1_3_ReadFile:"+time1_3_ReadFile);
 			// System.out.print("\ntime4_WriteXES:"+time4_WriteXES);
-			;
+
 			System.out.print("\ntime1_ReadRecordAsText:"
 					+ Timer.formatDuration(time1_ReadRecordAsText));
 			System.out.print("\ntime1_SetLogBuffer:"
@@ -180,6 +183,8 @@ public class XEZWriter {
 					+ Timer.formatDuration(time2_SetEvent));
 			System.out.print("\ntime3_AddEventToLog:"
 					+ Timer.formatDuration(time3_AddEventToLog));
+			System.out.print("\ntimeReadFileConrentTotal:"
+					+ Timer.formatDuration(timeReadFileConrentTotal));
 			System.out.print("\ntime1_3_ReadFile:"
 					+ Timer.formatDuration(time1_3_ReadFile));
 			System.out.print("\ntime4_WriteXES:"
@@ -277,12 +282,13 @@ public class XEZWriter {
 		try {
 			reader = new BufferedReader(new FileReader(file));
 			Timer timerForRead = new Timer();
-			timerForRead.start();
 			record = reader.readLine();
-			timerForRead.stop();
-			time1_ReadRecordAsText = +timerForRead.getDuration();
-			while (record != null) {
+			Timer timeReadFile = new Timer();
+			timeReadFile.start();
 
+			while (record != null) {
+				Timer timer = new Timer();
+				timer.start();
 				event = factory.createEvent();
 				// Log log = new Log();
 				// set up the file path and file name for this log
@@ -290,8 +296,6 @@ public class XEZWriter {
 				// log.setLogPath(file.getPath());
 				// String temprecord = record.concat(logBodyTokenizer);
 
-				Timer timer = new Timer();
-				timer.start();
 				String temprecord = record;
 				// deal with each log record
 				ArrayList<Object> params = new ArrayList<Object>();
@@ -487,6 +491,7 @@ public class XEZWriter {
 					// String caseIDString = event.getAttributes().get("caseID")
 					// .toString();
 					String caseIDString = logBuffer.getCaseIDString();
+					caseIDString = caseIDString.concat(BRANCH + 1);
 					XAttribute traceAttributeID = factory
 							.createAttributeLiteral(XConceptExtension.KEY_NAME,
 									caseIDString, null);
@@ -506,10 +511,10 @@ public class XEZWriter {
 					// add new trace to log
 					log.add(traceNew);
 					// set Arrival time boundary for this case
-					lastestArrivalMap.put(caseIDString, logBuffer
-							.getTimeStamp());
-					earliestArrivalMap.put(caseIDString, logBuffer
-							.getTimeStamp());
+					lastestArrivalMap.put(caseIDString,
+							logBuffer.getTimeStamp());
+					earliestArrivalMap.put(caseIDString,
+							logBuffer.getTimeStamp());
 
 				} else {// the log is not empty,already contains trace
 					boolean caseIDExist = false;
@@ -517,8 +522,10 @@ public class XEZWriter {
 
 						XTrace eachTrace = log.get(i);
 						// for(XTrace eachTrace:log){
-						String caseIDValue = eachTrace.getAttributes().get(
-								XConceptExtension.KEY_NAME).toString();
+						String caseIDValue = eachTrace.getAttributes()
+								.get(XConceptExtension.KEY_NAME).toString();
+						int indexOfBranch = caseIDValue.indexOf(BRANCH);
+						caseIDValue = caseIDValue.substring(0, indexOfBranch);
 						// System.out.print("\ncaseID in one search:"
 						// + caseIDValue);
 						boolean caseIDMatch = true;
@@ -533,6 +540,7 @@ public class XEZWriter {
 						// caseIDExist = true;
 						// }
 						// }
+						
 						if (logBuffer.getCaseIDString()// the
 								// caseID
 								// exit
@@ -541,10 +549,40 @@ public class XEZWriter {
 
 							// check if it is already timeout,if timeout,create
 							// new instance
-							boolean ifTimeOut = checkTimeOut(logBuffer);
+							boolean ifTimeOut = checkTimeOut(logBuffer,caseIDValue);
 							if (ifTimeOut) {
+								String branchNumString = caseIDValue
+										.substring(indexOfBranch + BRANCH.length());
+								int branchNum=0;
+								try {
+									branchNum = Integer.parseInt(branchNumString);
+								} catch (Exception e) {
 
-								// System.out.print("\n need to create new instance");
+								}
+								caseIDValue=caseIDValue.concat(BRANCH+(branchNum+1));
+								
+								XTrace traceNew = factory.createTrace();
+								XAttributeMap traceAttributeMapNew = factory
+										.createAttributeMap();
+//								String caseIDString = logBuffer
+//										.getCaseIDString()+branchNum;
+								XAttribute traceAttributeID = factory
+										.createAttributeLiteral(
+												XConceptExtension.KEY_NAME,
+												caseIDValue, null);
+								traceAttributeMapNew.put(
+										traceAttributeID.getKey(),
+										traceAttributeID);
+								traceNew.setAttributes(traceAttributeMapNew);
+								traceNew.add(event);
+								log.add(traceNew);
+								// set Arrival time boundary for this case
+								lastestArrivalMap.put(caseIDValue,
+										logBuffer.getTimeStamp());
+								earliestArrivalMap.put(caseIDValue,
+										logBuffer.getTimeStamp());
+								System.out
+										.print("\ntimeout created new instance");
 							}
 							eachTrace.add(event);
 							// System.out.print("\nadd event:"
@@ -565,10 +603,12 @@ public class XEZWriter {
 						// XAttribute traceAttributeNew = factory
 						// .createAttributeLiteral("caseID", logBuffer
 						// .getCaseIDList().get(0), null);
+						String caseIDString =logBuffer.getCaseIDString(); 
+						caseIDString=caseIDString.concat(BRANCH + 1);
 						XAttribute traceAttributeNew = factory
 								.createAttributeLiteral(
-										XConceptExtension.KEY_NAME, logBuffer
-												.getCaseIDString(), null);
+										XConceptExtension.KEY_NAME,
+										caseIDString, null);
 						traceAttributeMapNew.put(traceAttributeNew.getKey(),
 								traceAttributeNew);
 						traceNew.setAttributes(traceAttributeMapNew);
@@ -579,16 +619,21 @@ public class XEZWriter {
 						// add new trace to log
 
 						log.add(traceNew);
-						lastestArrivalMap.put(logBuffer.getCaseIDString(),
+						lastestArrivalMap.put(caseIDString,
 								logBuffer.getTimeStamp());
-						earliestArrivalMap.put(logBuffer.getCaseIDString(),
+						earliestArrivalMap.put(caseIDString,
 								logBuffer.getTimeStamp());
 					}
 				}
 				timer.stop();
 				time3_AddEventToLog = +timer.getDuration();
+				timerForRead.start();
+				record = reader.readLine();
+				timerForRead.stop();
+				time1_ReadRecordAsText = +timerForRead.getDuration();
 			}
-
+			timeReadFile.stop();
+			timeReadFileConrentTotal = +timeReadFile.getDuration();
 			reader.close();
 			// write to XES
 
@@ -638,15 +683,13 @@ public class XEZWriter {
 	// traceAttributeMapNew.put(traceAttributeNew.getKey(), traceAttributeNew);
 	// traceNew.setAttributes(traceAttributeMapNew);
 	// }
-	private boolean checkTimeOut(LogBuffer logBuffer) {
+	private boolean checkTimeOut(LogBuffer logBuffer,String caseIDValue) {
 		// Time time=new Time();
 
 		// System.out.print("\ncheck if timeout");
 		boolean ifTimeOut = false;
-		String lasterTimeString = lastestArrivalMap.get(logBuffer
-				.getCaseIDString());
-		String earliestTimeString = earliestArrivalMap.get(logBuffer
-				.getCaseIDString());
+		String lasterTimeString = lastestArrivalMap.get(caseIDValue);
+		String earliestTimeString = earliestArrivalMap.get(caseIDValue);
 		String arriveTimeString = logBuffer.getTimeStamp();
 		Date lasterTime = StringToTimeStamp(lasterTimeString);
 		Date earliestTime = StringToTimeStamp(earliestTimeString);
@@ -658,13 +701,13 @@ public class XEZWriter {
 		// System.out.print("\ntimeOut:"+timeOut.getTime());
 		if (arriveTime.after(lasterTime)) {
 			lastestArrivalMap
-					.put(logBuffer.getCaseIDString(), arriveTimeString);
+					.put(caseIDValue, arriveTimeString);
 			if (lasterTime.getTime() - arriveTime.getTime() > timeOut.getTime()) {
 				ifTimeOut = true;
 				// System.out.print("\nlatest time different:"
 				// + (lasterTime.getTime() - arriveTime.getTime()));
 			} else {
-				lastestArrivalMap.put(logBuffer.getCaseIDString(),
+				lastestArrivalMap.put(caseIDValue,
 						arriveTimeString);
 			}
 
@@ -678,7 +721,7 @@ public class XEZWriter {
 				// System.out.print("\n earliest time different:"
 				// + (arriveTime.getTime() - earliestTime.getTime()));
 			} else {
-				earliestArrivalMap.put(logBuffer.getCaseIDString(),
+				earliestArrivalMap.put(caseIDValue,
 						arriveTimeString);
 			}
 		}
@@ -733,8 +776,8 @@ public class XEZWriter {
 				// System.out.print("\nlog content:" + logContents);
 
 			}
-			XAttribute attribute = factory.createAttributeLiteral(logTags
-					.get(i), (String) logContents.get(i), null);
+			XAttribute attribute = factory.createAttributeLiteral(
+					logTags.get(i), (String) logContents.get(i), null);
 
 			attributeMap.put(attribute.getKey(), attribute);
 		}
@@ -755,6 +798,9 @@ public class XEZWriter {
 		// factory.createAttributeLiteral("timeStamp",
 		// logBuffer.getTimeStamp(), null);
 		String timeString = logBuffer.getTimeStamp();
+		// XsDateTimeConversion timeFormatConvert=new XsDateTimeConversion();
+		// Date timeStamp=timeFormatConvert.parseXsDateTime(timeString);
+
 		Date timeStamp = StringToTimeStamp(timeString);
 		// XTimeExtension.KEY_TIMESTAMP;
 		XAttribute attributeTime = factory.createAttributeTimestamp(
@@ -771,17 +817,25 @@ public class XEZWriter {
 	private Date StringToTimeStamp(String timeString) {
 		Date timeStamp = new Date();
 		// XsDateTimeFormat timeFormat=new XsDateTimeFormat();
-		timeString = timeString.trim();
-		timeStamp.setYear(Integer.parseInt(timeString.substring(1, 5)));
-		timeStamp.setMonth(Integer.parseInt(timeString.substring(4, 6)));
-		timeStamp.setDate(Integer.parseInt(timeString.substring(6, 8)));
-		timeStamp.setHours(Integer.parseInt(timeString.substring(8, 10)));
-		timeStamp.setMinutes(Integer.parseInt(timeString.substring(10, 12)));
-		timeStamp.setSeconds(Integer.parseInt(timeString.substring(12, 14)));
-		// System.out.print("\ntimeString:"+timeString);
-		// System.out.print("\nsecond:"+timeString.substring(12, 14));
-		// System.out.print("\nmonth:"+timeString.substring(8, 10));
-		// System.out.print("\nyear:"+timeString.substring(6, 8));
+		try {
+			timeString = timeString.trim();
+			timeStamp.setYear(Integer.parseInt(timeString.substring(1, 5)));
+			timeStamp.setMonth(Integer.parseInt(timeString.substring(4, 6)));
+			timeStamp.setDate(Integer.parseInt(timeString.substring(6, 8)));
+			timeStamp.setHours(Integer.parseInt(timeString.substring(8, 10)));
+			timeStamp
+					.setMinutes(Integer.parseInt(timeString.substring(10, 12)));
+			timeStamp
+					.setSeconds(Integer.parseInt(timeString.substring(12, 14)));
+			// System.out.print("\ntimeString:"+timeString);
+			// System.out.print("\nsecond:"+timeString.substring(12, 14));
+			// System.out.print("\nmonth:"+timeString.substring(8, 10));
+			// System.out.print("\nyear:"+timeString.substring(6, 8));
+		} catch (Exception e) {
+			System.out.print("\ntime format wrong as:" + timeString);
+
+		}
+
 		return timeStamp;
 	}
 
@@ -824,8 +878,8 @@ public class XEZWriter {
 				// System.out.print("\nlog content:" + logContents);
 
 			}
-			XAttribute attribute = factory.createAttributeLiteral(logTags
-					.get(i), (String) logContents.get(i), null);
+			XAttribute attribute = factory.createAttributeLiteral(
+					logTags.get(i), (String) logContents.get(i), null);
 
 			attributeMap.put(attribute.getKey(), attribute);
 		}

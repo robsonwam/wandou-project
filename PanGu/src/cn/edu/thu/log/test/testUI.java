@@ -870,7 +870,8 @@ public class testUI extends JFrame {
 				// TODO Auto-generated method stub
 				// miningconfigwriteservice=new MiningConfigWriteServiceImpl();
 				// miningconfigwriteservice.writeMiningConfig("miningconfig.xml");
-				exportMiningConfigFile();
+				miningconfigservice.writeMiningConfig("miningconfig1.xml");
+				//exportMiningConfigFile();
 			}
 
 		});
@@ -1488,9 +1489,9 @@ public class testUI extends JFrame {
 			}
 
 		}
-		miningconfigfilename=savedFile.getAbsolutePath();
+		miningconfigfilename=savedFile.getAbsolutePath();		
 		miningconfigservice.writeMiningConfig(miningconfigfilename);		
-		//WebConfigReadService webconfigreadservice=new WebConfigReadServiceImpl();		
+		WebConfigReadService webconfigreadservice=new WebConfigReadServiceImpl();		
 		JOptionPane.showMessageDialog(this, "配置信息已经保存于"+savedFile.getAbsolutePath());
 	}	
 	

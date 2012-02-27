@@ -15,7 +15,7 @@ public class XESConvertServiceImp implements XESConvertService{
 	@Override
 	public void convert(String readFilePath,String resultFile) {
 		WebConfigReadService configRead = new WebConfigReadServiceImpl();
-		configRead.readWebConfig("miningconfig1.xml");
+		configRead.readWebConfig(configRead.getMiningconfigfilename());
 		//String readFilePath = new String("D:/imageclick_file/imageclick");
 		//String resultFile = "logXes.xml";
 		XEZWriter writer = new XEZWriter(configRead, readFilePath);
@@ -23,7 +23,7 @@ public class XESConvertServiceImp implements XESConvertService{
 	}
 	public LogBuffer getLogBuffer (String readFilePath) {
 		WebConfigReadService configRead = new WebConfigReadServiceImpl();
-		configRead.readWebConfig("miningconfig1.xml");
+		configRead.readWebConfig(configRead.getMiningconfigfilename());
 		//String readFilePath = new String("D:/imageclick_file/imageclick");
 		//String resultFile = "logXes.xml";
 		XEZWriter writer = new XEZWriter(configRead, readFilePath);

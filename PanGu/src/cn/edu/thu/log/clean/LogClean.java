@@ -42,6 +42,7 @@ public class LogClean {
 		logTagList.addAll(record.getLogTagList());
 		logContentList.addAll(record.getLogContent());
 
+		//判断标签和内容的字段数量是否一致
 		if(logTagList.size()!=logContentList.size())
 			return false;
 		

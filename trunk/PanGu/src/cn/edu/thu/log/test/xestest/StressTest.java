@@ -18,7 +18,7 @@ import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
 import org.deckfour.xes.util.XTimer;
-import org.deckfour.xes.xstream.XesXStreamPersistency;
+import org.deckfour.xes.xstreamXES.XesXStreamPersistency;
 
 import com.thoughtworks.xstream.XStream;
 

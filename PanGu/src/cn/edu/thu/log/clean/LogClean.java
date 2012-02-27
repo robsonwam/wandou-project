@@ -42,6 +42,9 @@ public class LogClean {
 		logTagList.addAll(record.getLogTagList());
 		logContentList.addAll(record.getLogContent());
 
+		if(logTagList.size()!=logContentList.size())
+			return false;
+		
 		Iterator it = crule.entrySet().iterator();
 		System.out.println("\nlogtag个数: "+crule.size());
 		

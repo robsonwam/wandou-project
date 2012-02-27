@@ -26,4 +26,5 @@ public interface WebConfigReadService {
 	public String getMin();
 	public String getMax();
 	
+	public String getMiningconfigfilename();
 }

@@ -46,6 +46,9 @@ public class LogClean {
 		if(logTagList.size()!=logContentList.size())
 			return false;
 		
+		System.out.println("\nlogTagList size : "+logTagList.size());
+		System.out.println("\nlogContentList size : "+logContentList.size());
+		
 		Iterator it = crule.entrySet().iterator();
 		System.out.println("\nlogtag个数: "+crule.size());
 		

@@ -19,16 +19,14 @@ public class LogCleanTest {
 		// TODO Auto-generated method stub
 		XESConvertServiceImp configRead=new XESConvertServiceImp();
 		String readFilePath = new String(
-				"E:/任务/for pangu/tmp_201111129~30/imageclick/10.10.160.22/imageclick_201111290000_0.log");
-		
-		LogBuffer logBuffer=configRead.getLogBuffer(readFilePath);
+				"E:/任务/for pangu/pagesearch_201202150000_0.log");
 		LogClean clean=new LogClean();
+		LogBuffer logBuffer=new LogBuffer();
+		//System.out.println("\nlogBufferTag: "+logBuffer.getLogTagList());
+		logBuffer=configRead.getLogBuffer(readFilePath);		
 		
 		System.out.println("\nlogBufferTag: "+logBuffer.getLogTagList());
 		System.out.print("logBufferContent:"+logBuffer.getLogContent());
 		System.out.println("\n日志清洗结果："+clean.logClean(logBuffer));
 	}
-	
-	
-
 }

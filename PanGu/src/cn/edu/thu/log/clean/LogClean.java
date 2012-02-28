@@ -1,9 +1,9 @@
 package cn.edu.thu.log.clean;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,50 +17,44 @@ import cn.edu.thu.log.web.service.impl.WebConfigReadServiceImpl;
  * @author wan
  * 
  */
-public class LogClean {
-	// private LogBuffer logbuffer;
+public class LogClean {	
 	private WebConfigReadService webconfigreadservice;
-	private ArrayList<String> logTagList;
-	private ArrayList<Object> logContentList;
 	private Map<String, String> crule;
-    private int flag=1;//默认符合格式要求
+    //private int flag=1;//默认符合格式要求
     
 	public LogClean() {
 		webconfigreadservice=new WebConfigReadServiceImpl();
-		// logbuffer=new LogBuffer();
-		crule = new HashMap<String, String>();
-	
 		webconfigreadservice.readWebConfig("miningconfig1.xml");
-		System.out.print("\n\n\n初始化logclean");
+		
+		crule = new HashMap<String, String>();
+		crule.putAll(webconfigreadservice.getLogCleanList());	
+		System.out.println(webconfigreadservice.getLogCleanList());		
+		System.out.print("\n\n\n初始化logclean");		
 	}
 
-	public boolean logClean(LogBuffer record) {
-		// 接收全部日志清洗规则及记录
-		crule.putAll(webconfigreadservice.getLogCleanList());		//crule=webconfigreadservice.getLogCleanRules();
-		logTagList = new ArrayList<String>();
-		logContentList = new ArrayList<Object>();
-		logTagList.addAll(record.getLogTagList());
-		logContentList.addAll(record.getLogContent());
-
+	public boolean logClean(LogBuffer record) {			
 		//判断标签和内容的字段数量是否一致
-		if(logTagList.size()!=logContentList.size())
+		
+		if(record.getLogTagList().size()!=record.getLogContent().size())
 			return false;
 		
-		System.out.println("\nlogTagList size : "+logTagList.size());
-		System.out.println("\nlogContentList size : "+logContentList.size());
-		
-		Iterator it = crule.entrySet().iterator();
+		int flag=1;
+//		System.out.println("\nlogTagList size : "+logTagList.size());
+//		System.out.println("\nlogContentList size : "+logContentList.size());
 		System.out.println("\nlogtag个数: "+crule.size());
+		
+		Iterator<Entry<String, String>> it = crule.entrySet().iterator();		
+		System.out.println(it.hasNext());
 		
 		while (it.hasNext()) {
 			System.out.println("进入logclean，遍历logtag");
-			Map.Entry entry = (Map.Entry) it.next();
+			Entry<String, String> entry = it.next();
 			// 获得每一个需要清洗的tag
-			String tagname = entry.getKey().toString();
+			String tagname = entry.getKey();
 			// 获取对应tag存储在logTagList中的位置，以便在logContent中找到对应的值
-			int index = logTagList.indexOf(tagname);
-			String content = (String) logContentList.get(index);
-			String tagformat = entry.getValue().toString();
+			int index = record.getLogTagList().indexOf(tagname);
+			String content =record.getLogContent().get(index).toString();
+			String tagformat = entry.getValue();
 			
 			//最終將content按照正則表達式tagformat的形式進行匹配,必须全匹配，否则删除		
 			Pattern pattern=Pattern.compile(tagformat);

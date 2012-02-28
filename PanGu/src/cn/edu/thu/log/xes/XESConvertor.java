@@ -47,7 +47,7 @@ import cn.edu.thu.log.web.service.WebConfigReadService;
  */
 public class XESConvertor {
 	// for test
-	final String BRANCH = "-";
+	final String BRANCH = "-bn";
 	// ArrayList<String> caseIDTagList;
 	// ArrayList<String> activityIDTagList;
 	String timestampTag;
@@ -68,6 +68,8 @@ public class XESConvertor {
 	Hashtable<String, String> lastestArrivalMap;
 	/** map of earliest arrival time . one case */
 	Hashtable<String, String> earliestArrivalMap;
+	/** map of latest branches from each case */
+	Hashtable<String, Integer> caseBranchMap;
 	// from logContent
 	ArrayList<String> cateList;
 	LogConfig logConfig;
@@ -130,7 +132,8 @@ public class XESConvertor {
 		/** map<caseID,latest/earlisest arrival time> */
 		lastestArrivalMap = new Hashtable<String, String>();
 		earliestArrivalMap = new Hashtable<String, String>();
-		// setupClassifier();
+		caseBranchMap = new Hashtable<String, Integer>();
+		setupClassifier();
 		Timer timer = new Timer();
 		timer.start();
 		readFile(readfile);
@@ -168,6 +171,13 @@ public class XESConvertor {
 					+ Timer.formatDuration(timeSetEvent1));
 			System.out.print("\n--timeSetEvent2:"
 					+ Timer.formatDuration(timeSetEvent2));
+		}
+		{
+			// caseBranchMap
+//			System.out.print("\ncaseBranchMap key:"
+//					+ caseBranchMap.keys().nextElement());
+			System.out.print("\nvalue:" + caseBranchMap.values());
+
 		}
 		{// performance test
 
@@ -313,7 +323,7 @@ public class XESConvertor {
 
 				}
 				logBuffer.setTimeStamp(timeStampContent);
-				
+
 				// set caseID tag and content to LogBuffer
 				ArrayList<String> caseIDContentList = new ArrayList<String>();
 				for (int i = 0; i < caseIDTagList.size(); i++) {
@@ -335,7 +345,7 @@ public class XESConvertor {
 				logBuffer.setCaseIDString(logCaseIDString);
 				logBuffer.setActivityIDTagList(activityIDTagList);
 				ArrayList<Object> activityIDContentList = new ArrayList<Object>();
-				
+
 				// set up activity tag and content to LogBuffer
 				for (int l = 0; l < locationList.size(); l++) {
 					int index = locationList.get(l);
@@ -349,142 +359,109 @@ public class XESConvertor {
 				timer.stop();
 				time1_SetLogBuffer += timer.getDuration();
 				timer.start();
-				//noise test and clean test for logBuffer
+				// noise test and clean test for logBuffer
 				setTestLogBuffer(logBuffer);
-				//set logBuffer to event
+				// set logBuffer to event
 				writeEvent(event, logBuffer);
 				timer.stop();
 				time2_SetEvent += timer.getDuration();
 				/*------- put event to trace,trace to log------------------------------------*/
 				timer.start();
-				if (log.isEmpty())// if log still empty,add the first case
-				{
-
-					XTrace traceNew = factory.createTrace();
-					// writeTrace(traceNew,logBuffer);
-					XAttributeMap traceAttributeMapNew = factory
-							.createAttributeMap();
-					String caseIDString = logBuffer.getCaseIDString();
-					caseIDString = caseIDString.concat(BRANCH + 1);
-					XAttribute traceAttributeID = factory
-							.createAttributeLiteral(XConceptExtension.KEY_NAME,
-									caseIDString, null);
-
-					traceAttributeMapNew.put(traceAttributeID.getKey(),
-							traceAttributeID);
-					traceNew.setAttributes(traceAttributeMapNew);
-					traceNew.add(event);
-					// add new trace to log
-					log.add(traceNew);
-					// set Arrival time boundary for this case
-					lastestArrivalMap.put(caseIDString, logBuffer
-							.getTimeStamp());
-					earliestArrivalMap.put(caseIDString, logBuffer
-							.getTimeStamp());
-
-				} else {// the log is not empty,already contains trace
+//				if (log.isEmpty())// if log still empty,add the first case
+//				{
+//
+//					XTrace traceNew = factory.createTrace();
+//					// writeTrace(traceNew,logBuffer);
+//					XAttributeMap traceAttributeMapNew = factory
+//							.createAttributeMap();
+//					String caseIDString = logBuffer.getCaseIDString();
+//					// add branch to case map
+//					caseBranchMap.put(caseIDString, 1);
+//					caseIDString = caseIDString.concat(BRANCH + 1);
+//					XAttribute traceAttributeID = factory
+//							.createAttributeLiteral(XConceptExtension.KEY_NAME,
+//									caseIDString, null);
+//
+//					traceAttributeMapNew.put(traceAttributeID.getKey(),
+//							traceAttributeID);
+//					traceNew.setAttributes(traceAttributeMapNew);
+//					traceNew.add(event);
+//					// add new trace to log
+//					log.add(traceNew);
+//					// set Arrival time boundary for this case
+//					lastestArrivalMap.put(caseIDString, logBuffer
+//							.getTimeStamp());
+//					earliestArrivalMap.put(caseIDString, logBuffer
+//							.getTimeStamp());
+//
+//				} else {// the log is not empty,already contains trace
 					Timer timer1 = new Timer();
 					Timer timer2 = new Timer();
-					boolean caseIDExist = false;
+//					boolean caseIDExist = false;
 					// timer1.start();
+					// ---new start--
+					// has caseID
+					if (caseBranchMap.containsKey(logCaseIDString)) {
+						int latsetBranchNum = caseBranchMap
+								.get(logCaseIDString);
+						String lastestCaseID = logCaseIDString + BRANCH
+								+ latsetBranchNum;
 
-					for (int i = 0; i < log.size(); i++) {
-
-						XTrace eachTrace = log.get(i);
-
-						// for(XTrace eachTrace:log){
-						XAttributeMap map = eachTrace.getAttributes();
-						XAttribute tempAttribute = map
-								.get(XConceptExtension.KEY_NAME);
-						timer1.start();
-						String caseIDValue = ((XAttributeLiteralImpl) tempAttribute)
-								.getValue();
-						timer1.stop();
-						timeSetEvent1 += timer1.getDuration();
-
-						timer2.start();
-						// the caseID exit
-						boolean equalCase = caseIDValue.startsWith(logBuffer
-								.getCaseIDString());
-						timer2.stop();
-						timeSetEvent2 += timer2.getDuration();
-
-						if (equalCase) {
-
-							// System.out.print("\nthe caseID already existed");
-
-							// check if it is already timeout,if timeout,create
-							// new instance
-							boolean ifTimeOut = checkTimeOut(logBuffer,
-									caseIDValue);
-
-							if (ifTimeOut) {
-
-								int indexOfBranch = caseIDValue
-										.lastIndexOf(BRANCH);
-								String caseIDValueWithoutBranch = caseIDValue
-										.substring(0, indexOfBranch);
-								// System.out.print("\ntime out:"+caseIDValue);
-								String branchNumString = caseIDValue
-										.substring(indexOfBranch
-												+ BRANCH.length());
-								int branchNum = 0;
-								try {
-									branchNum = Integer
-											.parseInt(branchNumString);
-								} catch (Exception e) {
-
+						// search log to see if there already exists this caseID
+						// with latest branch
+						for (int i = 0; i < log.size(); i++) {
+							XTrace eachTrace = log.get(i);
+							XAttributeMap map = eachTrace.getAttributes();
+							XAttribute tempAttribute = map
+									.get(XConceptExtension.KEY_NAME);
+							String caseIDValue = ((XAttributeLiteralImpl) tempAttribute)
+									.getValue();
+							boolean equalCase = caseIDValue
+									.equals(lastestCaseID);
+							if (equalCase) {
+								// found the lastest case ,check if it is
+								// already timeout
+								boolean ifTimeOut = checkTimeOut(logBuffer,
+										lastestCaseID);
+								// time out, so build a new trace with new
+								// branch
+								if (ifTimeOut) {
+									// add branch to case map
+									caseBranchMap.put(logCaseIDString,
+											latsetBranchNum + 1);
+									String newCaseID=logCaseIDString+BRANCH+(latsetBranchNum+1);
+									XTrace traceNew = factory.createTrace();
+									XAttributeMap traceAttributeMapNew = factory
+											.createAttributeMap();
+									XAttribute traceAttributeID = factory
+											.createAttributeLiteral(
+													XConceptExtension.KEY_NAME,
+													newCaseID, null);
+									traceAttributeMapNew.put(traceAttributeID
+											.getKey(), traceAttributeID);
+									traceNew
+											.setAttributes(traceAttributeMapNew);
+									traceNew.add(event);
+									log.add(traceNew);
+									lastestArrivalMap.put(caseIDValue,
+											logBuffer.getTimeStamp());
+									earliestArrivalMap.put(caseIDValue,
+											logBuffer.getTimeStamp());
+								} else {
+									eachTrace.add(event);
 								}
-								caseIDValue = caseIDValueWithoutBranch
-										.concat(BRANCH + (branchNum + 1));
-
-								XTrace traceNew = factory.createTrace();
-								XAttributeMap traceAttributeMapNew = factory
-										.createAttributeMap();
-								// String caseIDString = logBuffer
-								// .getCaseIDString()+branchNum;
-								XAttribute traceAttributeID = factory
-										.createAttributeLiteral(
-												XConceptExtension.KEY_NAME,
-												caseIDValue, null);
-								traceAttributeMapNew.put(traceAttributeID
-										.getKey(), traceAttributeID);
-								traceNew.setAttributes(traceAttributeMapNew);
-								traceNew.add(event);
-								log.add(traceNew);
-								// set Arrival time boundary for this case
-								lastestArrivalMap.put(caseIDValue, logBuffer
-										.getTimeStamp());
-								earliestArrivalMap.put(caseIDValue, logBuffer
-										.getTimeStamp());
-								// System.out
-								// .print("\ntimeout created new instance");
-
+								// found the right caseID, so jump out of for{}
+								break;
 							}
 
-							else {
-								eachTrace.add(event);
-							}
-
-							// System.out.print("\nadd event:"
-							// + event.getAttributes().get("Query"));
-							caseIDExist = true;
-							break;
 						}
-
-					}
-
-					if (!caseIDExist) {
-						// System.out.print("\nthe caseID does not exist");
-						// set up trace
+					} else {// do not has CaseID,then build a new trace
 						XTrace traceNew = factory.createTrace();
-						// writeTrace(traceNew,logBuffer);
 						XAttributeMap traceAttributeMapNew = factory
 								.createAttributeMap();
-						// XAttribute traceAttributeNew = factory
-						// .createAttributeLiteral("caseID", logBuffer
-						// .getCaseIDList().get(0), null);
 						String caseIDString = logBuffer.getCaseIDString();
+						// add branch to case map
+						caseBranchMap.put(caseIDString, 1);
 						caseIDString = caseIDString.concat(BRANCH + 1);
 						XAttribute traceAttributeNew = factory
 								.createAttributeLiteral(
@@ -502,8 +479,9 @@ public class XESConvertor {
 						earliestArrivalMap.put(caseIDString, logBuffer
 								.getTimeStamp());
 					}
-
-				}
+					// ---new end--
+				
+			//	}
 
 				timer.stop();
 				time3_AddEventToLog += timer.getDuration();
@@ -520,10 +498,11 @@ public class XESConvertor {
 			e.printStackTrace();
 		}
 	}
-	private void putEventToLog()
-	{
-		
+
+	private void putEventToLog() {
+
 	}
+
 	private ArrayList<Integer> setActivityID(
 			ArrayList<String> activityIDTagList, ArrayList<String> logTagList) {
 		ArrayList<Integer> locationList = new ArrayList<Integer>();
@@ -657,7 +636,7 @@ public class XESConvertor {
 		// System.out.print("\nlogContents.size():"+logActivityContents.size());
 		for (int i = 0; i < logActivityContents.size(); i++) {
 
-			if (logActivityContents.get(i).toString().matches("")) {
+			if (logActivityContents.get(i).toString().equals("")) {
 				String emptyString = new String("empty");
 				logActivityContents.set(i, emptyString);
 

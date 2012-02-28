@@ -56,7 +56,7 @@ import com.thoughtworks.xstream.XStream;
  */
 public class XESWriterFile {
 	// for test
-	final String BRANCH = "branch";
+	final String BRANCH = "-";
 	// ArrayList<String> caseIDTagList;
 	// ArrayList<String> activityIDTagList;
 	String timestampTag;
@@ -85,13 +85,16 @@ public class XESWriterFile {
 	// for test
 	LogBuffer testLogBuffer = new LogBuffer();
 
-	long time1_3_ReadFile=0;
-	long time1_SetLogBuffer=0;
-	long time2_SetEvent=0;
-	long time3_AddEventToLog=0;
-	long time4_WriteXES=0;
-	long time1_ReadRecordAsText=0;
-	long timeReadFileConrentTotal=0;
+	long time1_3_ReadFile = 0;
+	long time1_SetLogBuffer = 0;
+	long time2_SetEvent = 0;
+	long time3_AddEventToLog = 0;
+	long time4_WriteXES = 0;
+	long time1_ReadRecordAsText = 0;
+	long timeReadFileConrentTotal = 0;
+	long timeSetEvent1 = 0;
+	long timeSetEvent2 = 0;
+	long timeSetEvent3 = 0;
 
 	// long readFileContenttime;
 
@@ -162,7 +165,7 @@ public class XESWriterFile {
 		timer.start();
 		writeToXES();
 		timer.stop();
-		time4_WriteXES = +timer.getDuration();
+		time4_WriteXES += timer.getDuration();
 
 		{
 			System.out.print("\nlof file:" + readfile.getTotalSpace());
@@ -192,6 +195,14 @@ public class XESWriterFile {
 					+ Timer.formatDuration(time4_WriteXES));
 			System.out.print("\ntotalTime:"
 					+ Timer.formatDuration(time1_3_ReadFile + time4_WriteXES));
+
+			System.out.print("\n--timeSetEvent1:"
+					+ Timer.formatDuration(timeSetEvent1));
+			System.out.print("\n--timeSetEvent2:"
+					+ Timer.formatDuration(timeSetEvent2));
+			// System.out.print("\n--timeSetEvent3:"
+			// + Timer.formatDuration(timeSetEvent3));
+
 			// getDurationString
 			// long timeReadFile;
 			// long timeSetLogBuffer;
@@ -274,11 +285,12 @@ public class XESWriterFile {
 		// setUpcaseIDList
 		ArrayList<String> caseIDTagList = xesConfig.getCaseIDList();
 		// setupActivityList
-		ArrayList<String> activityIDTagList = new ArrayList<String> ();
-		ArrayList<Integer> locationList= setActivityID(activityIDTagList,logTagList);
-	//	System.out.print("\n index location:"+locationList);
-	//	System.out.print("\n activity List:"+activityIDTagList);
-		//setupTimeStamp
+		ArrayList<String> activityIDTagList = new ArrayList<String>();
+		ArrayList<Integer> locationList = setActivityID(activityIDTagList,
+				logTagList);
+		// System.out.print("\n index location:"+locationList);
+		// System.out.print("\n activity List:"+activityIDTagList);
+		// setupTimeStamp
 		String timeStampIndentifier = xesConfig.getTimeStamp();
 		// read each log Record
 		BufferedReader reader;
@@ -289,11 +301,10 @@ public class XESWriterFile {
 			record = reader.readLine();
 
 			Timer timeReadFile = new Timer();
-		
 
 			while (record != null) {
 				timeReadFile.start();
-				
+
 				logBuffer = new LogBuffer();
 				Timer timer = new Timer();
 				timer.start();
@@ -313,17 +324,18 @@ public class XESWriterFile {
 				// split logRecord to logHead and lolgBody
 				// String[] strs =
 				// pattern.split("Java Hello World\\;  Java,Hello;,World|Sun");
-//				String speciaString = new String("\\\\"); //
-////				  System.out.print("\n escapteSymble before is"+escapeSymble);
-//				  if (escapeSymble.matches(speciaString)) { //
-//				 
-//				  escapeSymble = new String("\\\\");
-//				  
-//				  } //
-		
-				//String patternString="[^"+escapeSymble+"]";
-				String patternString="[^\\\\]";
-				patternString=patternString.concat(logHeadBodyTokenizer);
+				// String speciaString = new String("\\\\"); //
+				// //
+				// System.out.print("\n escapteSymble before is"+escapeSymble);
+				// if (escapeSymble.matches(speciaString)) { //
+				//
+				// escapeSymble = new String("\\\\");
+				//
+				// } //
+
+				// String patternString="[^"+escapeSymble+"]";
+				String patternString = "[^\\\\]";
+				patternString = patternString.concat(logHeadBodyTokenizer);
 				Pattern pattern = Pattern.compile(patternString);
 				String[] strs = pattern.split(temprecord);
 				logHeadContent = strs[0].concat(String.valueOf(temprecord
@@ -367,8 +379,8 @@ public class XESWriterFile {
 				 * ArrayList(Arrays.asList(strs)); // bodyparams = new
 				 * ArrayList(Arrays.asList(strs));
 				 */
-				 patternString="[^\\\\]";
-				patternString=patternString.concat(logHeadTokenizer);
+				patternString = "[^\\\\]";
+				patternString = patternString.concat(logHeadTokenizer);
 				pattern = Pattern.compile(patternString);
 				strs = pattern.split(logHeadContent);// !!!!!!
 				int lengthIndex = 0;
@@ -377,9 +389,9 @@ public class XESWriterFile {
 						lengthIndex += strs[i].length();
 					else
 						lengthIndex += strs[i].length() + 2;
-					if(lengthIndex<logHeadContent.length()){
-					strs[i] = strs[i].concat(String.valueOf(logHeadContent
-							.charAt(lengthIndex)));
+					if (lengthIndex < logHeadContent.length()) {
+						strs[i] = strs[i].concat(String.valueOf(logHeadContent
+								.charAt(lengthIndex)));
 					}
 				}
 				headparams = new ArrayList(Arrays.asList(strs));
@@ -394,12 +406,13 @@ public class XESWriterFile {
 						lengthIndex += strs[i].length();
 					else
 						lengthIndex += strs[i].length() + 2;
-					if(lengthIndex<logHeadContent.length()){
-					strs[i] = strs[i].concat(String.valueOf(logHeadContent
-							.charAt(lengthIndex)));}
+					if (lengthIndex < logHeadContent.length()) {
+						strs[i] = strs[i].concat(String.valueOf(logHeadContent
+								.charAt(lengthIndex)));
+					}
 
 				}
-				
+
 				bodyparams = new ArrayList(Arrays.asList(strs));
 				// bodyparams = new ArrayList(Arrays.asList(strs));
 				/*
@@ -460,7 +473,7 @@ public class XESWriterFile {
 				logBuffer.setLogContent(params);
 				logBuffer.setLogTagList(logTagList);
 				// set timeStamp(content) to logBuffer
-				
+
 				String timeStampContent = null;
 				for (int j = 0; j < logBuffer.getLogTagList().size(); j++) {
 					// 判断设置的CaseIDList是否为tag中
@@ -496,15 +509,17 @@ public class XESWriterFile {
 
 				logBuffer.setActivityIDTagList(activityIDTagList);
 				ArrayList<Object> activityIDContentList = new ArrayList<Object>();
-				//set up activity tag and content to LogBuffer
-				//System.out.print("\nparam:"+params);
-				for(int l=0;l<locationList.size();l++){
-					int index=locationList.get(l);
-					if(index>=params.size()) System.out.print("\nwrong log lenth:"+params.size());
-					else{	
-					
+				// set up activity tag and content to LogBuffer
+				// System.out.print("\nparam:"+params);
+				for (int l = 0; l < locationList.size(); l++) {
+					int index = locationList.get(l);
+					if (index >= params.size()) {
+						// System.out.print("\nwrong log lenth:" +
+						// params.size());
+					} else {
+
 						activityIDContentList.add(params.get(index));
-						}
+					}
 				}
 				logBuffer.setActivityIDContentList(activityIDContentList);
 
@@ -515,7 +530,7 @@ public class XESWriterFile {
 				// Date nowDate = new Date();
 				// System.out.print("\nbefore write each event" + nowDate);
 				timer.stop();
-				time1_SetLogBuffer = +timer.getDuration();
+				time1_SetLogBuffer += timer.getDuration();
 
 				timer.start();
 				setTestLogBuffer(logBuffer);
@@ -526,13 +541,14 @@ public class XESWriterFile {
 				// System.out.print("\n add log Buffer to event:"+logBuffer.getLogContent());
 				// for test
 
-				classifier.getClassIdentity(event);
+				// classifier.getClassIdentity(event);
 				// put trace into log
 				timer.stop();
-				time2_SetEvent = +timer.getDuration();
+				time2_SetEvent += timer.getDuration();
 				timer.start();
 				if (log.isEmpty())// if log still empty,add the first case
 				{
+
 					// System.out
 					// .print("\nthe case is still empty,add the first case");
 					XTrace traceNew = factory.createTrace();
@@ -576,31 +592,54 @@ public class XESWriterFile {
 					earliestArrivalMap.put(caseIDString,
 							logBuffer.getTimeStamp());
 
-				} else {// the log is not empty,already contains trace
+				} else 
+				{// the log is not empty,already contains trace
+					Timer timer1 = new Timer();
+					Timer timer2 = new Timer();
 					boolean caseIDExist = false;
-
+					//timer1.start();
+					
 					for (int i = 0; i < log.size(); i++) {
-
+					
+					
 						XTrace eachTrace = log.get(i);
+						
 						// for(XTrace eachTrace:log){
-						String caseIDValue = eachTrace.getAttributes()
-								.get(XConceptExtension.KEY_NAME).toString();
-						int indexOfBranch = caseIDValue.indexOf(BRANCH);
-						String caseIDValueWithoutBranch = caseIDValue
-								.substring(0, indexOfBranch);
-						// System.out.print("\ncaseID in one search:"
-						// + caseIDValue);
-						boolean caseIDMatch = true;
+						XAttributeMap map = eachTrace.getAttributes();
+						XAttribute tempAttribute=map.get(XConceptExtension.KEY_NAME);
+						timer1.start();
+						String caseIDValue = ((XAttributeLiteralImpl)tempAttribute).getValue();
+						timer1.stop();
+						timeSetEvent1 += timer1.getDuration();
+						
+
+						//int indexOfBranch = caseIDValue.lastIndexOf(BRANCH);
+						
+						//String caseIDValueWithoutBranch = caseIDValue
+								//.substring(0, indexOfBranch);
+
+						timer2.start();
 						// the caseID exit
-						if (logBuffer.getCaseIDString().equalsIgnoreCase(
-								caseIDValueWithoutBranch)) {
+						boolean equalCase=caseIDValue.startsWith(logBuffer.getCaseIDString());
+						timer2.stop();
+						timeSetEvent2 += timer2.getDuration();			
+
+						if (equalCase) {
+							
 							// System.out.print("\nthe caseID already existed");
 
 							// check if it is already timeout,if timeout,create
 							// new instance
+							//timer1.start();
 							boolean ifTimeOut = checkTimeOut(logBuffer,
 									caseIDValue);
+							//timer1.stop();
+						//	timeSetEvent1 += timer1.getDuration();
+							
 							if (ifTimeOut) {
+								
+								int indexOfBranch = caseIDValue.lastIndexOf(BRANCH);
+								String caseIDValueWithoutBranch = caseIDValue.substring(0, indexOfBranch);								
 								// System.out.print("\ntime out:"+caseIDValue);
 								String branchNumString = caseIDValue
 										.substring(indexOfBranch
@@ -637,18 +676,30 @@ public class XESWriterFile {
 										logBuffer.getTimeStamp());
 								// System.out
 								// .print("\ntimeout created new instance");
-							} else {
+
+								
+							}
+							
+							else {
 								eachTrace.add(event);
 							}
+							
+							
 							// System.out.print("\nadd event:"
 							// + event.getAttributes().get("Query"));
 							caseIDExist = true;
+							break;
 						}
+						
+						
 					}
+					
+
 					// if (caseIDMatch) {
 					//
 					// }
 					// the caseID does not exist yet
+
 					if (!caseIDExist) {
 						// System.out.print("\nthe caseID does not exist");
 						// set up trace
@@ -680,18 +731,21 @@ public class XESWriterFile {
 						earliestArrivalMap.put(caseIDString,
 								logBuffer.getTimeStamp());
 					}
+		
+				
 				}
 
 				timer.stop();
-				time3_AddEventToLog = +timer.getDuration();
+				time3_AddEventToLog += timer.getDuration();
 				timerForRead.start();
 				record = reader.readLine();
 				timerForRead.stop();
-				time1_ReadRecordAsText = +timerForRead.getDuration();
+				time1_ReadRecordAsText += timerForRead.getDuration();
 				timeReadFile.stop();
-				timeReadFileConrentTotal = +timeReadFile.getDuration();
+				timeReadFileConrentTotal += timeReadFile.getDuration();
+				// System.out.print("\ntimeReadFileConrentTotal:"+timeReadFileConrentTotal);
 			}
-			
+
 			reader.close();
 			// write to XES
 
@@ -701,11 +755,12 @@ public class XESWriterFile {
 		}
 	}
 
-	private ArrayList<Integer> setActivityID(ArrayList<String> activityIDTagList,ArrayList<String> logTagList) {
+	private ArrayList<Integer> setActivityID(
+			ArrayList<String> activityIDTagList, ArrayList<String> logTagList) {
 		ArrayList<Integer> locationList = new ArrayList<Integer>();
 		// set activityIDList(Content) of LogBuffer
 		// ArrayList<Object> activityIDContentList = new ArrayList<Object>();
-//		ArrayList<String> activityIDTagList = new ArrayList<String>();
+		// ArrayList<String> activityIDTagList = new ArrayList<String>();
 		// 判断activityID是否在tag里面的原因是，不同产品有不同logBodyTag，所以一个产品不包括另外一个产品的tag
 		for (int i = 0; i < xesConfig.getActivityIDList().size(); i++) {
 			String activityID = xesConfig.getActivityIDList().get(i);
@@ -785,17 +840,17 @@ public class XESWriterFile {
 			lastestArrivalMap.put(caseIDValue, arriveTimeString);
 
 			if (Math.abs(arriveTime.getTime() - lasterTime.getTime()) > timeOut) {
-				System.out.print("\nlatest timeout:");
-				System.out.print("\tlasterTime:" + lasterTime);
-				System.out.print("\tarriveTime:" + arriveTime);
-				System.out.print("\ttimeOut:" + timeOut);
-				System.out.print("\tdifference:"
-						+ (arriveTime.getTime() - lasterTime.getTime()));
+				// System.out.print("\nlatest timeout:");
+				// System.out.print("\tlasterTime:" + lasterTime);
+				// System.out.print("\tarriveTime:" + arriveTime);
+				// System.out.print("\ttimeOut:" + timeOut);
+				// System.out.print("\tdifference:"
+				// + (arriveTime.getTime() - lasterTime.getTime()));
 				ifTimeOut = true;
 				// System.out.print("\nlatest time different:"
 				// + (lasterTime.getTime() - arriveTime.getTime()));
 			} else {
-				
+
 				lastestArrivalMap.put(caseIDValue, arriveTimeString);
 			}
 
@@ -843,9 +898,11 @@ public class XESWriterFile {
 		// get the tags of loghead and logbody from one record
 		// logConfig.config(logconfigFile, logBuffer.getLogPath());
 		// ArrayList<String> logTags = logConfig.getLogTags();
+		Timer timer = new Timer();
 		ArrayList<String> logTags = logBuffer.getActivityIDTagList();
 		// get content of this event
-		ArrayList<Object> logContents = logBuffer.getActivityIDContentList();
+		ArrayList<Object> logActivityContents = logBuffer
+				.getActivityIDContentList();
 		// create a event
 		// XEvent event = factory.createEvent();
 		XAttributeMap attributeMap = factory.createAttributeMap();
@@ -863,20 +920,37 @@ public class XESWriterFile {
 		// }
 
 		// put the log tags as attributes to attributeMap
-		for (int i = 0; i < logContents.size(); i++) {
-			if (logContents.get(i).toString().matches("")) {
+		timer.start();
+		Timer smallTimer = new Timer();
+		// System.out.print("\nlogContents.size():"+logActivityContents.size());
+		for (int i = 0; i < logActivityContents.size(); i++) {
+
+			if (logActivityContents.get(i).toString().matches("")) {
 				String emptyString = new String("empty");
-				logContents.set(i, emptyString);
+				logActivityContents.set(i, emptyString);
 				// logContents.get(i)
 				// System.out.print("\nnull at " + logTags.get(i));
 				// System.out.print("\nlog content:" + logContents);
 
 			}
-			XAttribute attribute = factory.createAttributeLiteral(
-					logTags.get(i), (String) logContents.get(i), null);
 
-			attributeMap.put(attribute.getKey(), attribute);
+			// smallTimer.start();
+			XAttribute attribute = factory.createAttributeLiteral(
+					logTags.get(i), (String) logActivityContents.get(i), null);
+			// smallTimer.stop();
+			// timeSetEvent2 += smallTimer.getDuration();
+			smallTimer.start();
+			String key = attribute.getKey();
+			smallTimer.stop();
+			// timeSetEvent2 += smallTimer.getDuration();
+			smallTimer.start();
+			attributeMap.put(key, attribute);
+			smallTimer.stop();
+			// timeSetEvent3 += smallTimer.getDuration();
 		}
+		timer.stop();
+		// timeSetEvent1 += timer.getDuration();
+		timer.start();
 		// add logPath attribute to map
 		XAttribute attribute = factory.createAttributeLiteral("logPath",
 				logBuffer.getLogPath(), null);
@@ -901,11 +975,17 @@ public class XESWriterFile {
 		// XTimeExtension.KEY_TIMESTAMP;
 		XAttribute attributeTime = factory.createAttributeTimestamp(
 				XTimeExtension.KEY_TIMESTAMP, timeStamp, null);
+
 		attributeMap.put(attributeTime.getKey(), attributeTime);
 		// XTimeExtension timeExtention = XTimeExtension.instance();
 		// timeExtention.assignTimestamp(event, timeStamp);
 		// set event's AttributesMap
+		timer.stop();
+		// timeSetEvent2 += timer.getDuration();
+		timer.start();
 		event.setAttributes(attributeMap);
+		timer.stop();
+		// timeSetEvent3 += timer.getDuration();
 		return;
 
 	}

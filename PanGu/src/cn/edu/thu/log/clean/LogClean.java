@@ -29,8 +29,7 @@ public class LogClean {
 		webconfigreadservice=new WebConfigReadServiceImpl();
 		// logbuffer=new LogBuffer();
 		crule = new HashMap<String, String>();
-		logTagList = new ArrayList<String>();
-		logContentList = new ArrayList<Object>();
+	
 		webconfigreadservice.readWebConfig("miningconfig1.xml");
 		System.out.print("\n\n\n初始化logclean");
 	}
@@ -38,7 +37,8 @@ public class LogClean {
 	public boolean logClean(LogBuffer record) {
 		// 接收全部日志清洗规则及记录
 		crule.putAll(webconfigreadservice.getLogCleanList());		//crule=webconfigreadservice.getLogCleanRules();
-		
+		logTagList = new ArrayList<String>();
+		logContentList = new ArrayList<Object>();
 		logTagList.addAll(record.getLogTagList());
 		logContentList.addAll(record.getLogContent());
 

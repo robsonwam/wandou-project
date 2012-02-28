@@ -29,19 +29,22 @@ public class LogClean {
 		crule = new HashMap<String, String>();
 		crule.putAll(webconfigreadservice.getLogCleanList());	
 		System.out.println(webconfigreadservice.getLogCleanList());		
-		System.out.print("\n\n\n初始化logclean");		
+		System.out.println("\n\n\n初始化logclean");		
 	}
 
 	public boolean logClean(LogBuffer record) {			
 		//判断标签和内容的字段数量是否一致
+		System.out.println("\nlogtag个数: "+crule.size());
 		
 		if(record.getLogTagList().size()!=record.getLogContent().size())
 			return false;
 		
+		System.out.println("\nrecord.getLogTagList().size()： "+record.getLogTagList().size());
+		System.out.println("\nrecord.getLogContent().size(): "+record.getLogContent().size());
 		int flag=1;
 //		System.out.println("\nlogTagList size : "+logTagList.size());
 //		System.out.println("\nlogContentList size : "+logContentList.size());
-		System.out.println("\nlogtag个数: "+crule.size());
+		
 		
 		Iterator<Entry<String, String>> it = crule.entrySet().iterator();		
 		System.out.println(it.hasNext());

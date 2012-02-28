@@ -6,12 +6,13 @@
   <XEventClassifiers/>
   <XTrace>
     <XAttributeMap lazy="false" buffered="true">
-      <XAttribute key="caseID" type="LITERAL" value="null10.10.128.58,"/>
+      <XAttribute key="caseID" type="LITERAL" value="nullMozilla/4.0 (compatible\; MSIE 8.0\; Windows NT 5.1\; Trident/4.0\; QQDownload 677\; doyo 2.0.0),10.10.128.58,"/>
     </XAttributeMap>
-    <XEvent xid="2DC2E803-D6AF-411B-A12E-B275912C7B81">
+    <XEvent xid="A7758752-101E-4A2A-9ACF-15206BFF6A62">
       <XAttributeMap lazy="false" buffered="false">
-        <XAttribute key="SessionID" type="LITERAL" value="DE972AB8A97D0B45DA472A6C39EF3906"/>
-        <XAttribute key="timeStamp" type="TIMESTAMP" value="3911-12-29T00:00:20.208+08:00"/>
+        <XAttribute key="Referer" type="LITERAL" value="http://image.panguso.com/imagesearch.htm?q=%E4%BA%BA%E4%BD%93%E8%89%BA%E6%9C%AF"/>
+        <XAttribute key="timeStamp" type="TIMESTAMP" value="3911-12-29T00:00:20.052+08:00"/>
+        <XAttribute key="Encoding" type="LITERAL" value="null"/>
         <XAttribute key="logPath" type="LITERAL" value="E:\for pangu\tmp_201111129~30\imageclick\10.10.160.22\imageclick_201111290000_0.log"/>
       </XAttributeMap>
     </XEvent>

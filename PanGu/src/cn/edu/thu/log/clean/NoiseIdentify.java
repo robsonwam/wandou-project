@@ -27,14 +27,15 @@ public class NoiseIdentify {
 		
 		// logCleanRules=new HashSet<Map<String,String>>();
 		nrule = new HashMap<String,NoiseFormat>();
-		logTagList = new ArrayList<String>();
-		logContentList = new ArrayList<Object>();
+		
 		webconfigreadservice.readWebConfig("miningconfig1.xml");
 	}
 
 	// 判断一个或多个字段中是否出现指定的noise规则
 	public boolean noiseStrIdentify(LogBuffer record) {
 		nrule.putAll(webconfigreadservice.getNoiseStringList());
+		logTagList = new ArrayList<String>();
+		logContentList = new ArrayList<Object>();
 		logTagList.addAll(record.getLogTagList());
 		logContentList.addAll(record.getLogContent());
 

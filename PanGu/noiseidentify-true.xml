@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<miningconfig>
+<logclean/>
+<noiseidentify>
+<noise noiseformat="IX"/>
+<mininternal mininternal="300"/>
+<maxtime maxtime="2147483647"/>
+</noiseidentify>
+<activityidentify>
+<timestamp timestamp="TimeStamp"/>
+<activity activityformat="" activityname="ContentType"/>
+<product productname="news"/>
+</activityidentify>
+<caseidentify>
+<case caseid="OriginateIP" type="mainid"/>
+</caseidentify>
+</miningconfig>

@@ -19,12 +19,13 @@ public class XESConvertServiceImp implements XESConvertService{
 		configRead.readWebConfig("miningconfig1.xml");
 		//String readFilePath = new String("D:/imageclick_file/imageclick");
 		//String resultFile = "logXes.xml";
-		XEZWriter writer = new XEZWriter(configRead, readFilePath);
+		XESWriterFile writer = new XESWriterFile(configRead, readFilePath);
 		writer.write(resultFile);
 	}
 	public LogBuffer getLogBuffer (String readFilePath) {
 		WebConfigReadService configRead = new WebConfigReadServiceImpl();
 		configRead.readWebConfig("miningconfig1.xml");
+		System.out.println("readweb成功");
 		//String readFilePath = new String("D:/imageclick_file/imageclick");
 		//String resultFile = "logXes.xml";
 		XESWriterFile writer = new XESWriterFile(configRead, readFilePath);

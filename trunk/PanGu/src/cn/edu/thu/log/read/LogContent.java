@@ -113,7 +113,7 @@ public class LogContent {
 		// read each log Record
 		try {
 			reader = new BufferedReader(new FileReader(file));
-			while ((record = reader.readLine()) != null) {
+			while ((record = reader.readLine()) != null&&logList.size()<50) {
 				Log log = new Log();
 				// set up the file path and file name for this log
 				log.setLogName(file.getName());
@@ -246,6 +246,7 @@ public class LogContent {
 				logList.add(log);
 
 			}
+			
 			reader.close();
 
 		} catch (Exception e) {

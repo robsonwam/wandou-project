@@ -13,8 +13,6 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.Iterator;
 
-import javax.swing.JOptionPane;
-
 import org.deckfour.xes.classification.XEventAttributeClassifier;
 import org.deckfour.xes.extension.XExtension;
 import org.deckfour.xes.extension.XExtensionManager;
@@ -35,10 +33,11 @@ import org.deckfour.xes.model.XTrace;
 import org.deckfour.xes.model.impl.XAttributeLiteralImpl;
 import org.deckfour.xes.model.impl.XAttributeMapImpl;
 import org.deckfour.xes.model.impl.XLogImpl;
-import org.deckfour.xes.out.XesXmlGZIPSerializer;
-import org.deckfour.xes.util.XsDateTimeConversion;
+import org.deckfour.xes.out.XesXmlSerializer;
 import org.deckfour.xes.xstreamXES.XesXStreamPersistency;
 
+import cn.edu.thu.log.clean.LogClean;
+import cn.edu.thu.log.clean.NoiseIdentify;
 import cn.edu.thu.log.read.Log;
 import cn.edu.thu.log.read.LogBuffer;
 import cn.edu.thu.log.read.LogConfig;
@@ -83,7 +82,8 @@ public class XEZWriter {
 	XExtensionManager extensionManager;
 	// for test
 	LogBuffer testLogBuffer = new LogBuffer();
-
+	LogClean logClean;
+	NoiseIdentify noiseIdentify;
 	long time1_3_ReadFile;
 	long time1_SetLogBuffer;
 	long time2_SetEvent;
@@ -109,7 +109,8 @@ public class XEZWriter {
 		this.xesConfig = xesConfig;
 		this.filePath = filePath;
 		logConfig = new LogConfig();
-
+		noiseIdentify=new NoiseIdentify();
+		logClean=new LogClean();
 	}
 
 	/**
@@ -123,6 +124,7 @@ public class XEZWriter {
 	public void write(String resultfilePath) {
 		// TODO Auto-generated method stub
 		this.resultFilePath = resultfilePath;
+
 
 		LogFilesReader logfilesReader = new LogFilesReader();
 		cateList = new ArrayList<String>();
@@ -434,15 +436,20 @@ public class XEZWriter {
 				// 判断activityID是否在tag里面的原因是，不同产品有不同logBodyTag，所以一个产品不包括另外一个产品的tag
 				for (int i = 0; i < xesConfig.getActivityIDList().size(); i++) {
 					String activityID = xesConfig.getActivityIDList().get(i);
-					for (int j = 0; j < logBuffer.getLogTagList().size(); j++) {
-						// 判断设置的CaseIDList是否为tag中
-						if (activityID.equalsIgnoreCase(logBuffer
-								.getLogTagList().get(j))) {
-							activityIDTagList.add(logBuffer.getLogTagList()
-									.get(j));
-							activityIDContentList.add(logBuffer.getLogContent()
-									.get(j).toString());
+					if (logBuffer.getLogTagList().size() != logBuffer
+							.getLogContent().size()) {
 
+					} else {
+						for (int j = 0; j < logBuffer.getLogTagList().size(); j++) {
+							// 判断设置的CaseIDList是否为tag中
+							if (activityID.equalsIgnoreCase(logBuffer
+									.getLogTagList().get(j))) {
+								activityIDTagList.add(logBuffer.getLogTagList()
+										.get(j));
+								activityIDContentList.add(logBuffer
+										.getLogContent().get(j).toString());
+
+							}
 						}
 					}
 				}
@@ -452,11 +459,19 @@ public class XEZWriter {
 				// writeEventContent(event, logBuffer);
 
 				// only write activities,logPath,caseID to event
-				Date nowDate = new Date();
-				System.out.print("\nbefore write each event" + nowDate);
+				// Date nowDate = new Date();
+				// System.out.print("\nbefore write each event" + nowDate);
 				timer.stop();
 				time1_SetLogBuffer = +timer.getDuration();
 
+				if(logClean.logClean(logBuffer)&&noiseIdentify.noiseStrIdentify(logBuffer))
+				{
+					break;
+					
+				}
+				System.out.print("\n after break");
+		
+				
 				timer.start();
 				writeEvent(event, logBuffer);
 
@@ -540,7 +555,7 @@ public class XEZWriter {
 						// caseIDExist = true;
 						// }
 						// }
-						
+
 						if (logBuffer.getCaseIDString()// the
 								// caseID
 								// exit
@@ -549,41 +564,42 @@ public class XEZWriter {
 
 							// check if it is already timeout,if timeout,create
 							// new instance
-							boolean ifTimeOut = checkTimeOut(logBuffer,caseIDValue);
-							if (ifTimeOut) {
-								String branchNumString = caseIDValue
-										.substring(indexOfBranch + BRANCH.length());
-								int branchNum=0;
-								try {
-									branchNum = Integer.parseInt(branchNumString);
-								} catch (Exception e) {
-
-								}
-								caseIDValue=caseIDValue.concat(BRANCH+(branchNum+1));
-								
-								XTrace traceNew = factory.createTrace();
-								XAttributeMap traceAttributeMapNew = factory
-										.createAttributeMap();
-//								String caseIDString = logBuffer
-//										.getCaseIDString()+branchNum;
-								XAttribute traceAttributeID = factory
-										.createAttributeLiteral(
-												XConceptExtension.KEY_NAME,
-												caseIDValue, null);
-								traceAttributeMapNew.put(
-										traceAttributeID.getKey(),
-										traceAttributeID);
-								traceNew.setAttributes(traceAttributeMapNew);
-								traceNew.add(event);
-								log.add(traceNew);
-								// set Arrival time boundary for this case
-								lastestArrivalMap.put(caseIDValue,
-										logBuffer.getTimeStamp());
-								earliestArrivalMap.put(caseIDValue,
-										logBuffer.getTimeStamp());
-								System.out
-										.print("\ntimeout created new instance");
-							}
+							// boolean ifTimeOut =
+							// checkTimeOut(logBuffer,caseIDValue);
+							// if (ifTimeOut) {
+							// String branchNumString = caseIDValue
+							// .substring(indexOfBranch + BRANCH.length());
+							// int branchNum=0;
+							// try {
+							// branchNum = Integer.parseInt(branchNumString);
+							// } catch (Exception e) {
+							//
+							// }
+							// caseIDValue=caseIDValue.concat(BRANCH+(branchNum+1));
+							//
+							// XTrace traceNew = factory.createTrace();
+							// XAttributeMap traceAttributeMapNew = factory
+							// .createAttributeMap();
+							// // String caseIDString = logBuffer
+							// // .getCaseIDString()+branchNum;
+							// XAttribute traceAttributeID = factory
+							// .createAttributeLiteral(
+							// XConceptExtension.KEY_NAME,
+							// caseIDValue, null);
+							// traceAttributeMapNew.put(
+							// traceAttributeID.getKey(),
+							// traceAttributeID);
+							// traceNew.setAttributes(traceAttributeMapNew);
+							// traceNew.add(event);
+							// log.add(traceNew);
+							// // set Arrival time boundary for this case
+							// lastestArrivalMap.put(caseIDValue,
+							// logBuffer.getTimeStamp());
+							// earliestArrivalMap.put(caseIDValue,
+							// logBuffer.getTimeStamp());
+							// System.out
+							// .print("\ntimeout created new instance");
+							// }
 							eachTrace.add(event);
 							// System.out.print("\nadd event:"
 							// + event.getAttributes().get("Query"));
@@ -603,8 +619,8 @@ public class XEZWriter {
 						// XAttribute traceAttributeNew = factory
 						// .createAttributeLiteral("caseID", logBuffer
 						// .getCaseIDList().get(0), null);
-						String caseIDString =logBuffer.getCaseIDString(); 
-						caseIDString=caseIDString.concat(BRANCH + 1);
+						String caseIDString = logBuffer.getCaseIDString();
+						caseIDString = caseIDString.concat(BRANCH + 1);
 						XAttribute traceAttributeNew = factory
 								.createAttributeLiteral(
 										XConceptExtension.KEY_NAME,
@@ -644,7 +660,7 @@ public class XEZWriter {
 	}
 
 	private void writeToXES() {
-		System.out.print("\nwrite to XES");
+		// System.out.print("\nwrite to XES");
 		try {
 			File sFile = new File(resultFilePath);
 			if (sFile.exists()) {
@@ -656,8 +672,8 @@ public class XEZWriter {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-			XesXmlGZIPSerializer xstream = new XesXmlGZIPSerializer();
-			// XesXmlSerializer xstream = new XesXmlSerializer();
+			// XesXmlGZIPSerializer xstream = new XesXmlGZIPSerializer();
+			XesXmlSerializer xstream = new XesXmlSerializer();
 			// XesXStreamPersistency.register(xstream);
 			OutputStream oStream = new BufferedOutputStream(
 					new FileOutputStream(sFile));
@@ -683,7 +699,7 @@ public class XEZWriter {
 	// traceAttributeMapNew.put(traceAttributeNew.getKey(), traceAttributeNew);
 	// traceNew.setAttributes(traceAttributeMapNew);
 	// }
-	private boolean checkTimeOut(LogBuffer logBuffer,String caseIDValue) {
+	private boolean checkTimeOut(LogBuffer logBuffer, String caseIDValue) {
 		// Time time=new Time();
 
 		// System.out.print("\ncheck if timeout");
@@ -700,15 +716,13 @@ public class XEZWriter {
 		// + (arriveTime.getTime() - earliestTime.getTime()));
 		// System.out.print("\ntimeOut:"+timeOut.getTime());
 		if (arriveTime.after(lasterTime)) {
-			lastestArrivalMap
-					.put(caseIDValue, arriveTimeString);
+			lastestArrivalMap.put(caseIDValue, arriveTimeString);
 			if (lasterTime.getTime() - arriveTime.getTime() > timeOut.getTime()) {
 				ifTimeOut = true;
 				// System.out.print("\nlatest time different:"
 				// + (lasterTime.getTime() - arriveTime.getTime()));
 			} else {
-				lastestArrivalMap.put(caseIDValue,
-						arriveTimeString);
+				lastestArrivalMap.put(caseIDValue, arriveTimeString);
 			}
 
 		}
@@ -721,8 +735,7 @@ public class XEZWriter {
 				// System.out.print("\n earliest time different:"
 				// + (arriveTime.getTime() - earliestTime.getTime()));
 			} else {
-				earliestArrivalMap.put(caseIDValue,
-						arriveTimeString);
+				earliestArrivalMap.put(caseIDValue, arriveTimeString);
 			}
 		}
 
@@ -744,6 +757,7 @@ public class XEZWriter {
 	 * @param logBuffer
 	 */
 	private void writeEvent(XEvent event, LogBuffer logBuffer) {
+		// System.out.print("write one event/");
 		// get the tags of loghead and logbody from one record
 		// logConfig.config(logconfigFile, logBuffer.getLogPath());
 		// ArrayList<String> logTags = logConfig.getLogTags();

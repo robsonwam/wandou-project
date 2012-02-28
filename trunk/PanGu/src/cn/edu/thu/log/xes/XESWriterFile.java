@@ -9,11 +9,11 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Iterator;
-
-import javax.swing.JOptionPane;
+import java.util.regex.Pattern;
 
 import org.deckfour.xes.classification.XEventAttributeClassifier;
 import org.deckfour.xes.extension.XExtension;
@@ -35,13 +35,9 @@ import org.deckfour.xes.model.XTrace;
 import org.deckfour.xes.model.impl.XAttributeLiteralImpl;
 import org.deckfour.xes.model.impl.XAttributeMapImpl;
 import org.deckfour.xes.model.impl.XLogImpl;
-import org.deckfour.xes.out.XesXmlGZIPSerializer;
 import org.deckfour.xes.out.XesXmlSerializer;
-import org.deckfour.xes.util.XsDateTimeConversion;
 import org.deckfour.xes.xstreamXES.XesXStreamPersistency;
 
-import cn.edu.thu.log.clean.LogClean;
-import cn.edu.thu.log.clean.NoiseIdentify;
 import cn.edu.thu.log.read.Log;
 import cn.edu.thu.log.read.LogBuffer;
 import cn.edu.thu.log.read.LogConfig;
@@ -61,8 +57,8 @@ import com.thoughtworks.xstream.XStream;
 public class XESWriterFile {
 	// for test
 	final String BRANCH = "branch";
-	ArrayList<String> caseIDTagList;
-	ArrayList<String> activityIDTagList;
+	// ArrayList<String> caseIDTagList;
+	// ArrayList<String> activityIDTagList;
 	String timestampTag;
 	public static XFactory factory = XFactoryRegistry.instance()
 			.currentDefault();
@@ -86,18 +82,16 @@ public class XESWriterFile {
 	LogConfig logConfig;
 	XEventAttributeClassifier classifier;
 	XExtensionManager extensionManager;
-	LogClean logClean;
-	NoiseIdentify noiseIdentify;
 	// for test
 	LogBuffer testLogBuffer = new LogBuffer();
 
-	long time1_3_ReadFile;
-	long time1_SetLogBuffer;
-	long time2_SetEvent;
-	long time3_AddEventToLog;
-	long time4_WriteXES;
-	long time1_ReadRecordAsText;
-	long timeReadFileConrentTotal;
+	long time1_3_ReadFile=0;
+	long time1_SetLogBuffer=0;
+	long time2_SetEvent=0;
+	long time3_AddEventToLog=0;
+	long time4_WriteXES=0;
+	long time1_ReadRecordAsText=0;
+	long timeReadFileConrentTotal=0;
 
 	// long readFileContenttime;
 
@@ -116,8 +110,6 @@ public class XESWriterFile {
 		this.xesConfig = xesConfig;
 		this.filePath = filePath;
 		logConfig = new LogConfig();
-		noiseIdentify = new NoiseIdentify();
-		logClean = new LogClean();
 
 	}
 
@@ -266,39 +258,43 @@ public class XESWriterFile {
 	 *            GUI for test
 	 */
 	private void readFileContent(File file) {
+		// read the config
 		logConfig.config(LOGCONFIGFILE, file.getAbsolutePath());
-		ArrayList<String> logTagList = logConfig.getLogTags();
-		// read timeput from config
-		// timeOutString = TIMEOUT;
-		// timeOut = StringToTimeStamp(timeOutString);
-		// System.out.print("\ntimeOutString::"+timeOutString);
-		// System.out.print("\ntimeout::"+timeOut);
-		// Date timeOut = this.StringToTimeStamp(timeOutString);
-		// System.out.print("\ntimeout:" + timeOut);
-		BufferedReader reader;
-		String record;
 		String logHeadTokenizer = logConfig.getLogHeadTokenizer();
 		String logBodyTokenizer = logConfig.getLogBodyTokenizer();
 		String logHeadBodyTokenizer = logConfig.getLogHeadBodyTokenizer();
 		String escapeSymble = logConfig.getEscapeSymbol();
-		String logHeadContent = null;
-		String logBodyContent = null;
-		LogBuffer logBuffer = new LogBuffer();
+		String logHeadContent = "";
+		String logBodyContent = "";
+		LogBuffer logBuffer;
 		// XES Elemet
-		XEvent event = factory.createEvent();
-
-		// XTrace trace = factory.createTrace();
-
+		XEvent event;
+		// set up logTagList
+		ArrayList<String> logTagList = logConfig.getLogTags();
+		// setUpcaseIDList
+		ArrayList<String> caseIDTagList = xesConfig.getCaseIDList();
+		// setupActivityList
+		ArrayList<String> activityIDTagList = new ArrayList<String> ();
+		ArrayList<Integer> locationList= setActivityID(activityIDTagList,logTagList);
+	//	System.out.print("\n index location:"+locationList);
+	//	System.out.print("\n activity List:"+activityIDTagList);
+		//setupTimeStamp
+		String timeStampIndentifier = xesConfig.getTimeStamp();
 		// read each log Record
+		BufferedReader reader;
+		String record;
 		try {
 			reader = new BufferedReader(new FileReader(file));
 			Timer timerForRead = new Timer();
 			record = reader.readLine();
 
 			Timer timeReadFile = new Timer();
-			timeReadFile.start();
+		
 
 			while (record != null) {
+				timeReadFile.start();
+				
+				logBuffer = new LogBuffer();
 				Timer timer = new Timer();
 				timer.start();
 				event = factory.createEvent();
@@ -315,83 +311,142 @@ public class XESWriterFile {
 				ArrayList<Object> bodyparams = new ArrayList<Object>();
 				int startIndex = 0;
 				// split logRecord to logHead and lolgBody
-				for (int i = 0; i < temprecord.length(); i++) {
-					// System.out.print("\nlogHeadBodyTokenizer:"+logHeadBodyTokenizer);
+				// String[] strs =
+				// pattern.split("Java Hello World\\;  Java,Hello;,World|Sun");
+//				String speciaString = new String("\\\\"); //
+////				  System.out.print("\n escapteSymble before is"+escapeSymble);
+//				  if (escapeSymble.matches(speciaString)) { //
+//				 
+//				  escapeSymble = new String("\\\\");
+//				  
+//				  } //
+		
+				//String patternString="[^"+escapeSymble+"]";
+				String patternString="[^\\\\]";
+				patternString=patternString.concat(logHeadBodyTokenizer);
+				Pattern pattern = Pattern.compile(patternString);
+				String[] strs = pattern.split(temprecord);
+				logHeadContent = strs[0].concat(String.valueOf(temprecord
+						.charAt(strs[0].length())));
+				logBodyContent = strs[1];
 
-					if (String.valueOf(temprecord.charAt(i)).matches(
-							logHeadBodyTokenizer)) {
-						// System.out.print("\nString.valueOf(temprecord.charAt(i)):"+String.valueOf(temprecord.charAt(i)));
-						// if (temprecord.charAt(i) == ';') {
-						// logHeadContent=record.
-						// params.add(temprecord.substring(startIndex, i));
-						logHeadContent = record.substring(0, i);
-						logHeadContent = logHeadContent
-								.concat(logHeadTokenizer);
-
-						// logHeadContent=
-						// logHeadContent.concat(logHeadTokenizer);
-						logBodyContent = record.substring(i, record.length());
-						logBodyContent = logBodyContent
-								.concat(logBodyTokenizer);
-						// System.out.print("\n log body content "
-						// + logBodyContent);
-						// System.out.print("\n log Head content "
-						// + logHeadContent);
-						// startIndex = i + 1;
+				// for (int i = 0; i < temprecord.length(); i++) {
+				// //
+				// System.out.print("\nlogHeadBodyTokenizer:"+logHeadBodyTokenizer);
+				//
+				// if (String.valueOf(temprecord.charAt(i)).matches(
+				// logHeadBodyTokenizer)) {
+				// //
+				// System.out.print("\nString.valueOf(temprecord.charAt(i)):"+String.valueOf(temprecord.charAt(i)));
+				// // if (temprecord.charAt(i) == ';') {
+				// // logHeadContent=record.
+				// // params.add(temprecord.substring(startIndex, i));
+				// logHeadContent = record.substring(0, i);
+				// logHeadContent = logHeadContent
+				// .concat(logHeadTokenizer);
+				//
+				// // logHeadContent=
+				// // logHeadContent.concat(logHeadTokenizer);
+				// logBodyContent = record.substring(i, record.length());
+				// logBodyContent = logBodyContent
+				// .concat(logBodyTokenizer);
+				// // System.out.print("\n log body content "
+				// // + logBodyContent);
+				// // System.out.print("\n log Head content "
+				// // + logHeadContent);
+				// // startIndex = i + 1;
+				// }
+				// }
+				/*
+				 * //pattern = Pattern.compile("[^\\\\],");
+				 * strs=logHeadContent.split(logHeadTokenizer);//!!!!!!
+				 * headparams = new ArrayList(Arrays.asList(strs));
+				 * headparams.add(""); headparams.add(""); headparams.add("");
+				 * //headparams = new ArrayList(Arrays.asList(strs));
+				 * strs=logBodyContent.split(logBodyTokenizer); bodyparams = new
+				 * ArrayList(Arrays.asList(strs)); // bodyparams = new
+				 * ArrayList(Arrays.asList(strs));
+				 */
+				 patternString="[^\\\\]";
+				patternString=patternString.concat(logHeadTokenizer);
+				pattern = Pattern.compile(patternString);
+				strs = pattern.split(logHeadContent);// !!!!!!
+				int lengthIndex = 0;
+				for (int i = 0; i < strs.length; i++) {
+					if (i == 0)
+						lengthIndex += strs[i].length();
+					else
+						lengthIndex += strs[i].length() + 2;
+					if(lengthIndex<logHeadContent.length()){
+					strs[i] = strs[i].concat(String.valueOf(logHeadContent
+							.charAt(lengthIndex)));
 					}
 				}
-				// split log head to params
-				startIndex = 0;
-				// System.out.print("\nlogHeadContent:"+logHeadContent);
-				for (int i = 0; i < logHeadContent.length(); i++) {
-					if (String.valueOf(logHeadContent.charAt(i)).matches(
-							logHeadTokenizer)) {
-						headparams.add(logHeadContent.substring(startIndex, i));
-						startIndex = i + 1;
-					}
-					// the token after"\" does not count
-					String speciaString = new String("\\\\");
-					// System.out.print("\n escapteSymble before is"+escapeSymble);
-					if (escapeSymble.matches(speciaString)) {
-						// "\" is also the escape symble in java. so if the log use "\" as escapesymble, the java will inteprated as "\\\\"
-						escapeSymble = new String("\\\\");
-
-					}
-					// System.out.print("\n escapteSymble after is"+escapeSymble);
-					if (String.valueOf(logHeadContent.charAt(i)).matches(
-							escapeSymble)) {
-						// System.out.print("\n found escape Symble:"
-						// + logHeadContent.charAt(i));
-						i += 2;
-					}
-				}
-				// split log body to params
-				startIndex = 0;
-				for (int i = 0; i < logBodyContent.length(); i++) {
-					if (String.valueOf(logBodyContent.charAt(i)).matches(
-							logBodyTokenizer)) {
-						bodyparams.add(logBodyContent.substring(startIndex, i));
-						startIndex = i + 1;
-					}
-
-					// the token after"\" does not count
-					String speciaString = new String("\\\\");
-					// System.out.print("\n escapteSymble before is"+escapeSymble);
-					if (escapeSymble.matches(speciaString)) {
-						// "\" is also the escape symble in java. so if the log use "\" as escapesymble, the java will inteprated as "\\\\"
-						escapeSymble = new String("\\\\");
-
-					}
-					// System.out.print("\n escapteSymble after is"+escapeSymble);
-					if (String.valueOf(logBodyContent.charAt(i)).matches(
-							escapeSymble)) {
-						// System.out.print("\n found escape Symble:"
-						// + logBodyContent.charAt(i));
-						i += 2;
-					}
+				headparams = new ArrayList(Arrays.asList(strs));
+				headparams.add("");
+				headparams.add("");
+				headparams.add("");
+				// headparams = new ArrayList(Arrays.asList(strs));
+				strs = pattern.split(logBodyContent);
+				lengthIndex = 0;
+				for (int i = 0; i < strs.length; i++) {
+					if (i == 0)
+						lengthIndex += strs[i].length();
+					else
+						lengthIndex += strs[i].length() + 2;
+					if(lengthIndex<logHeadContent.length()){
+					strs[i] = strs[i].concat(String.valueOf(logHeadContent
+							.charAt(lengthIndex)));}
 
 				}
-
+				
+				bodyparams = new ArrayList(Arrays.asList(strs));
+				// bodyparams = new ArrayList(Arrays.asList(strs));
+				/*
+				 * // split log head to params startIndex = 0; //
+				 * System.out.print("\nlogHeadContent:"+logHeadContent); for
+				 * (int i = 0; i < logHeadContent.length(); i++) { if
+				 * (String.valueOf(logHeadContent.charAt(i)).matches(
+				 * logHeadTokenizer)) {
+				 * headparams.add(logHeadContent.substring(startIndex, i));
+				 * startIndex = i + 1; } // the token after"\" does not count
+				 * String speciaString = new String("\\\\"); //
+				 * System.out.print("\n escapteSymble before is"+escapeSymble);
+				 * if (escapeSymble.matches(speciaString)) { //
+				 * "\" is also the escape symble in java. so if the log use "
+				 * \" as escapesymble, the java will inteprated as "\\\\"
+				 * escapeSymble = new String("\\\\");
+				 * 
+				 * } //
+				 * System.out.print("\n escapteSymble after is"+escapeSymble);
+				 * if (String.valueOf(logHeadContent.charAt(i)).matches(
+				 * escapeSymble)) { //
+				 * System.out.print("\n found escape Symble:" // +
+				 * logHeadContent.charAt(i)); i += 2; } } // split log body to
+				 * params startIndex = 0; for (int i = 0; i <
+				 * logBodyContent.length(); i++) { if
+				 * (String.valueOf(logBodyContent.charAt(i)).matches(
+				 * logBodyTokenizer)) {
+				 * bodyparams.add(logBodyContent.substring(startIndex, i));
+				 * startIndex = i + 1; }
+				 * 
+				 * // the token after"\" does not count String speciaString =
+				 * new String("\\\\"); //
+				 * System.out.print("\n escapteSymble before is"+escapeSymble);
+				 * if (escapeSymble.matches(speciaString)) { //
+				 * "\" is also the escape symble in java. so if the log use "
+				 * \" as escapesymble, the java will inteprated as "\\\\"
+				 * escapeSymble = new String("\\\\");
+				 * 
+				 * } //
+				 * System.out.print("\n escapteSymble after is"+escapeSymble);
+				 * if (String.valueOf(logBodyContent.charAt(i)).matches(
+				 * escapeSymble)) { //
+				 * System.out.print("\n found escape Symble:" // +
+				 * logBodyContent.charAt(i)); i += 2; }
+				 * 
+				 * }
+				 */
 				// combine the headparams and the bodyparams to generate log
 				// params
 				params.addAll(headparams);
@@ -405,7 +460,7 @@ public class XESWriterFile {
 				logBuffer.setLogContent(params);
 				logBuffer.setLogTagList(logTagList);
 				// set timeStamp(content) to logBuffer
-				String timeStampIndentifier = xesConfig.getTimeStamp();
+				
 				String timeStampContent = null;
 				for (int j = 0; j < logBuffer.getLogTagList().size(); j++) {
 					// 判断设置的CaseIDList是否为tag中
@@ -420,8 +475,8 @@ public class XESWriterFile {
 
 				// set caseIDList(Content) of LogBuffer
 				ArrayList<String> caseIDContentList = new ArrayList<String>();
-				for (int i = 0; i < xesConfig.getCaseIDList().size(); i++) {
-					String caseID = xesConfig.getCaseIDList().get(i);
+				for (int i = 0; i < caseIDTagList.size(); i++) {
+					String caseID = caseIDTagList.get(i);
 					for (int j = 0; j < logBuffer.getLogTagList().size(); j++) {
 						// 判断设置的CaseIDList是否为tag中
 						if (caseID.equalsIgnoreCase(logBuffer.getLogTagList()
@@ -439,45 +494,20 @@ public class XESWriterFile {
 				}
 				logBuffer.setCaseIDString(logCaseIDString);
 
-				// set activityIDList(Content) of LogBuffer
+				logBuffer.setActivityIDTagList(activityIDTagList);
 				ArrayList<Object> activityIDContentList = new ArrayList<Object>();
-				ArrayList<String> activityIDTagList = new ArrayList<String>();
-				
-				//cleaner
-				if ((!logClean.logClean(logBuffer)
-						)||(!noiseIdentify.noiseStrIdentify(logBuffer))) {
-					System.out.print("\nskip logbuffer");
-					continue;
+				//set up activity tag and content to LogBuffer
+				//System.out.print("\nparam:"+params);
+				for(int l=0;l<locationList.size();l++){
+					int index=locationList.get(l);
+					if(index>=params.size()) System.out.print("\nwrong log lenth:"+params.size());
+					else{	
 					
-				}
-				System.out.print("\ncorrect logBuffer");
-				// 判断activityID是否在tag里面的原因是，不同产品有不同logBodyTag，所以一个产品不包括另外一个产品的tag
-				for (int i = 0; i < xesConfig.getActivityIDList().size(); i++) {
-					String activityID = xesConfig.getActivityIDList().get(i);
-//					if (logBuffer.getLogTagList().size() != logBuffer
-//							.getLogContent().size()) {
-
-//					} else {
-						for (int j = 0; j < logBuffer.getLogTagList().size(); j++) {
-							// 判断设置的CaseIDList是否为tag中
-							if (activityID.equalsIgnoreCase(logBuffer
-									.getLogTagList().get(j))) {
-								activityIDTagList.add(logBuffer.getLogTagList()
-										.get(j));
-//								System.out.print(" "
-//										+ logBuffer.getLogTagList().get(j));
-//								System.out.print(":"
-//										+ logBuffer.getLogContent().get(j));
-
-								activityIDContentList.add(logBuffer
-										.getLogContent().get(j).toString());
-
-							}
+						activityIDContentList.add(params.get(index));
 						}
-//					}
 				}
 				logBuffer.setActivityIDContentList(activityIDContentList);
-				logBuffer.setActivityIDTagList(activityIDTagList);
+
 				// write whole content of log to event
 				// writeEventContent(event, logBuffer);
 
@@ -488,6 +518,7 @@ public class XESWriterFile {
 				time1_SetLogBuffer = +timer.getDuration();
 
 				timer.start();
+				setTestLogBuffer(logBuffer);
 				writeEvent(event, logBuffer);
 
 				// nowDate=new Date();
@@ -495,18 +526,10 @@ public class XESWriterFile {
 				// System.out.print("\n add log Buffer to event:"+logBuffer.getLogContent());
 				// for test
 
-				setTestLogBuffer(logBuffer);
 				classifier.getClassIdentity(event);
-				// test
-			
-//					continue;
-
-				
-//				System.out.print("\n after continue");
-
 				// put trace into log
 				timer.stop();
-				time2_SetEvent = timer.getDuration();
+				time2_SetEvent = +timer.getDuration();
 				timer.start();
 				if (log.isEmpty())// if log still empty,add the first case
 				{
@@ -658,20 +681,17 @@ public class XESWriterFile {
 								logBuffer.getTimeStamp());
 					}
 				}
-//				}
-//				else{
-//					System.out.print("\n delete log");
-//				}
+
 				timer.stop();
 				time3_AddEventToLog = +timer.getDuration();
 				timerForRead.start();
 				record = reader.readLine();
 				timerForRead.stop();
 				time1_ReadRecordAsText = +timerForRead.getDuration();
-
+				timeReadFile.stop();
+				timeReadFileConrentTotal = +timeReadFile.getDuration();
 			}
-			timeReadFile.stop();
-			timeReadFileConrentTotal = +timeReadFile.getDuration();
+			
 			reader.close();
 			// write to XES
 
@@ -679,6 +699,30 @@ public class XESWriterFile {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	private ArrayList<Integer> setActivityID(ArrayList<String> activityIDTagList,ArrayList<String> logTagList) {
+		ArrayList<Integer> locationList = new ArrayList<Integer>();
+		// set activityIDList(Content) of LogBuffer
+		// ArrayList<Object> activityIDContentList = new ArrayList<Object>();
+//		ArrayList<String> activityIDTagList = new ArrayList<String>();
+		// 判断activityID是否在tag里面的原因是，不同产品有不同logBodyTag，所以一个产品不包括另外一个产品的tag
+		for (int i = 0; i < xesConfig.getActivityIDList().size(); i++) {
+			String activityID = xesConfig.getActivityIDList().get(i);
+
+			for (int j = 0; j < logTagList.size(); j++) {
+				// 判断设置的CaseIDList是否为tag中
+				if (activityID.equalsIgnoreCase(logTagList.get(j))) {
+
+					activityIDTagList.add(logTagList.get(j));
+					locationList.add(j);
+					// activityIDContentList.add(logBuffer.getLogContent()
+					// .get(j).toString());
+
+				}
+			}
+		}
+		return locationList;
 	}
 
 	private void writeToXES() {
@@ -740,17 +784,18 @@ public class XESWriterFile {
 		if (arriveTime.after(lasterTime)) {
 			lastestArrivalMap.put(caseIDValue, arriveTimeString);
 
-			if (arriveTime.getTime() - lasterTime.getTime() > timeOut) {
+			if (Math.abs(arriveTime.getTime() - lasterTime.getTime()) > timeOut) {
 				System.out.print("\nlatest timeout:");
 				System.out.print("\tlasterTime:" + lasterTime);
 				System.out.print("\tarriveTime:" + arriveTime);
 				System.out.print("\ttimeOut:" + timeOut);
 				System.out.print("\tdifference:"
-						+ (lasterTime.getTime() - arriveTime.getTime()));
+						+ (arriveTime.getTime() - lasterTime.getTime()));
 				ifTimeOut = true;
 				// System.out.print("\nlatest time different:"
 				// + (lasterTime.getTime() - arriveTime.getTime()));
 			} else {
+				
 				lastestArrivalMap.put(caseIDValue, arriveTimeString);
 			}
 
@@ -805,22 +850,22 @@ public class XESWriterFile {
 		// XEvent event = factory.createEvent();
 		XAttributeMap attributeMap = factory.createAttributeMap();
 		// event
-		if (logTags.size() == logContents.size()) {
-			// System.out.print("\nthe size is the same");
-			// System.out.print("\nlog activity tags:" + logTags);
-			// System.out.print("\nlog activity content:" + logContents);
-		} else {
-			if (logTags.size() == logContents.size()) {
-				// System.out.print("\nthe size is not the same");
-				// System.out.print("\nlog activity tags:" + logTags);
-				// System.out.print("\nlog activity content:" + logContents);
-			}
-		}
+		// if (logTags.size() == logContents.size()) {
+		// System.out.print("\nthe size is the same");
+		// System.out.print("\nlog activity tags:" + logTags.size());
+		// System.out.print("\nlog activity content:" + logContents.size());
+		// } else {
+		// // if (logTags.size() == logContents.size()) {
+		// System.out.print("\nthe size is not the same");
+		// System.out.print("\nlog activity tags:" + logTags.size());
+		// System.out.print("\nlog activity content:" + logContents.size());
+		// // }
+		// }
 
 		// put the log tags as attributes to attributeMap
-		for (int i = 0; i < logTags.size(); i++) {
+		for (int i = 0; i < logContents.size(); i++) {
 			if (logContents.get(i).toString().matches("")) {
-				String emptyString = new String("null");
+				String emptyString = new String("empty");
 				logContents.set(i, emptyString);
 				// logContents.get(i)
 				// System.out.print("\nnull at " + logTags.get(i));

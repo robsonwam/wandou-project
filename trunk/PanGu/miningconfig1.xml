@@ -7,31 +7,11 @@
 </noiseidentify>
 <activityidentify>
 <timestamp timestamp="TimeStamp"/>
-<activity activityformat="" activityname="Ptn"/>
-<activity activityformat="" activityname="DeviceID"/>
-<activity activityformat="" activityname="Encoding"/>
-<activity activityformat="" activityname="Rank"/>
+
 <activity activityformat="" activityname="Query"/>
-<activity activityformat="" activityname="Shard"/>
-<activity activityformat="" activityname="MobileNo"/>
-<activity activityformat="" activityname="PGID"/>
-<activity activityformat="" activityname="TransactionID"/>
-<activity activityformat="" activityname="Latitude"/>
-<activity activityformat="" activityname="URL"/>
-<activity activityformat="" activityname="RemoteIP"/>
-<activity activityformat="" activityname="SessionID"/>
-<activity activityformat="" activityname="OriginateIP"/>
-<activity activityformat="" activityname="AppRespTime"/>
 <activity activityformat="" activityname="PageNum"/>
-<activity activityformat="" activityname="Source"/>
-<activity activityformat="" activityname="UA"/>
-<activity activityformat="" activityname="IsAdvance"/>
-<activity activityformat="" activityname="QueryType"/>
-<activity activityformat="" activityname="Referer"/>
-<activity activityformat="" activityname="Longitude"/>
-<activity activityformat="" activityname="Uid"/>
 <activity activityformat="" activityname="ContentType"/>
-<activity activityformat="" activityname="HasAds"/>
+
 <product productname="page"/>
 </activityidentify>
 <caseidentify>

@@ -44,16 +44,16 @@ public class NoiseIdentify {
 						Pattern.CASE_INSENSITIVE);
 				Matcher matcher = pattern.matcher(content);
 				// 如果匹配，则这个字段后面的noise规则不用检查，跳出这条noise规则的检查
-				
-				System.out.println("\n当前噪音串是："+str);
-				System.out.println("\n当前字段是： "+tagname);
-				System.out.println("\n要匹配的字段是："+content);
+//				
+//				System.out.println("\n当前噪音串是："+str);
+//				System.out.println("\n当前字段是： "+tagname);
+//				System.out.println("\n要匹配的字段是："+content);
 				//System.out.println("\nmatcher.find()结果1："+matcher.find());
 				//System.out.println("\nmatcher.find()结果2："+matcher.find());
 				if (matcher.find()) {
 					//System.out.println("\nmatcher.find()结果："+matcher.find());
 					flag = 0;// 设置以后，外部循环也不1满足条件，其他字段不用执行检查，直接结束执行
-					System.out.println("\n出现匹配的噪音串！");
+					System.out.println("\n出现匹配的噪音串:"+str);
 					break;
 				}
 			}
@@ -61,7 +61,7 @@ public class NoiseIdentify {
 		}
 		//表示出现了规定的噪音字符串，需要返回false删掉
 		if (flag == 0){
-			System.out.println("\nnoise flag=0");
+			//System.out.println("\nnoise flag=0");
 			return false;
 		}
 		

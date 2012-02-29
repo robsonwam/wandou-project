@@ -51,7 +51,6 @@ public class XESConvertor {
 	private final String LOGCONFIGFILE = "config.xml";
 	private final long TIMEOUT_MINUTE = 30;
 	private final long MINUTE_MILLIS = 60000;
-	// XESConfig xesConfig;
 	WebConfigReadService xesConfig;
 	String filePath;
 	String timestampTag;
@@ -200,9 +199,8 @@ public class XESConvertor {
 		String record;
 		try {
 			reader = new BufferedReader(new FileReader(file));
-			record = reader.readLine();
 			// deal file by line
-			while (record != null) {
+			while ((record = reader.readLine()) != null) {
 				// initialize
 				event = factory.createEvent();
 				logBuffer = new LogBuffer();
@@ -215,6 +213,9 @@ public class XESConvertor {
 				patternString = patternString.concat(logHeadBodyTokenizer);
 				Pattern pattern = Pattern.compile(patternString);
 				String[] strs = pattern.split(temprecord);
+				if (strs[0].length() == temprecord.length())
+					continue;
+				
 				logHeadContent = strs[0].concat(String.valueOf(temprecord
 						.charAt(strs[0].length())));
 				logBodyContent = strs[1];
@@ -280,19 +281,15 @@ public class XESConvertor {
 				// noise test and clean test for logBuffer
 				setTestLogBuffer(logBuffer);
 				if (!logclean.logClean(logBuffer)) {
-					System.out.println("\nnot clean");
-					record = reader.readLine();
+					// System.out.println("\nnot clean");
+					//record = reader.readLine();
 					continue;
-				} else {
-					System.out.println("\nclean");
 				}
 
 				if (!noiseidentify.noiseStrIdentify(logBuffer)) {
-					System.out.println("\nhas noise");
-					record = reader.readLine();
+					// System.out.println("\nhas noise");
+				//	record = reader.readLine();
 					continue;
-				} else {
-					System.out.println("\nno noise");
 				}
 
 				// set logBuffer to event
@@ -302,7 +299,7 @@ public class XESConvertor {
 				putEventToLog(logBuffer, event);
 
 				// read the next line
-				record = reader.readLine();
+				//record = reader.readLine();
 			}
 			reader.close();
 		} catch (Exception e) {
@@ -354,11 +351,6 @@ public class XESConvertor {
 		Date lasterTime = StringToTimeStamp(lasterTimeString);
 		Date earliestTime = StringToTimeStamp(earliestTimeString);
 		Date arriveTime = StringToTimeStamp(arriveTimeString);
-		// System.out.print("\nlasterTime:"
-		// + (lasterTime.getTime()));
-		// System.out.print("\n earliest time different:"
-		// + (arriveTime.getTime() - earliestTime.getTime()));
-		// System.out.print("\ntimeOut:"+timeOut.getTime());
 		if (arriveTime.after(lasterTime)) {
 			if (Math.abs(arriveTime.getTime() - lasterTime.getTime()) > timeOut) {
 				// System.out.print("\nlatest timeout:");
@@ -372,7 +364,6 @@ public class XESConvertor {
 				// + (lasterTime.getTime() - arriveTime.getTime()));
 			}
 		}
-		// lasterTime.
 		if (arriveTime.before(earliestTime)) {
 
 			if (arriveTime.getTime() - earliestTime.getTime() > timeOut) {
@@ -381,7 +372,6 @@ public class XESConvertor {
 				System.out.print("\tarriveTime:" + arriveTime);
 				System.out.print("\ttimeOut:" + timeOut);
 				ifTimeOut = true;
-
 				// System.out.print("\n earliest time different:"
 				// + (arriveTime.getTime() - earliestTime.getTime()));
 			}

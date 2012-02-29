@@ -45,7 +45,7 @@ import cn.edu.thu.log.web.service.WebConfigReadService;
  * @author meng
  * 
  */
-public class XESConvertor {
+public class XESConvertorNew {
 	// for test
 	final String BRANCH = "-bn";
 	// ArrayList<String> caseIDTagList;
@@ -102,7 +102,7 @@ public class XESConvertor {
 	// }
 	// WebConfigReadService
 	// WebConfigReadServiceImpl configRead; 搴旇鏈変竴涓帴鍙ｅ彲浠ヨ鍙栧叧浜庤缃殑鍙傛暟
-	public XESConvertor(WebConfigReadService xesConfig, String filePath) {
+	public XESConvertorNew(WebConfigReadService xesConfig, String filePath) {
 		this.xesConfig = xesConfig;
 		this.filePath = filePath;
 		logConfig = new LogConfig();

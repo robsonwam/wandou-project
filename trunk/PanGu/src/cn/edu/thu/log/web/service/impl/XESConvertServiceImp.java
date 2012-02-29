@@ -4,7 +4,6 @@ import cn.edu.thu.log.read.LogBuffer;
 import cn.edu.thu.log.web.service.WebConfigReadService;
 import cn.edu.thu.log.web.service.XESConvertService;
 import cn.edu.thu.log.xes.XESConvertor;
-import cn.edu.thu.log.xes.XESWriterFile;
 
 
 /**
@@ -28,7 +27,7 @@ public class XESConvertServiceImp implements XESConvertService{
 		System.out.println("readweb成功");
 		//String readFilePath = new String("D:/imageclick_file/imageclick");
 		//String resultFile = "logXes.xml";
-		XESWriterFile writer = new XESWriterFile(configRead, readFilePath);
+		XESConvertor writer = new XESConvertor(configRead, readFilePath);
 		writer.write("testXES2.xml");
 		LogBuffer logBuffer=writer.getTestLogBuffer();
 		return logBuffer;

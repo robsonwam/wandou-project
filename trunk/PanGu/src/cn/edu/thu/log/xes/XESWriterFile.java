@@ -38,6 +38,8 @@ import org.deckfour.xes.model.impl.XLogImpl;
 import org.deckfour.xes.out.XesXmlSerializer;
 import org.deckfour.xes.xstreamXES.XesXStreamPersistency;
 
+import cn.edu.thu.log.clean.LogClean;
+import cn.edu.thu.log.clean.NoiseIdentify;
 import cn.edu.thu.log.read.Log;
 import cn.edu.thu.log.read.LogBuffer;
 import cn.edu.thu.log.read.LogConfig;
@@ -523,6 +525,11 @@ public class XESWriterFile {
 				}
 				logBuffer.setActivityIDContentList(activityIDContentList);
 
+				LogClean logclean=new LogClean();
+				NoiseIdentify noiseIdentify=new NoiseIdentify();
+				
+				System.out.println("\nlogclean结果： "+logclean.logClean(logBuffer));
+				
 				// write whole content of log to event
 				// writeEventContent(event, logBuffer);
 

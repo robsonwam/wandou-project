@@ -24,7 +24,7 @@ public class LogClean {
     
 	public LogClean() {
 		webconfigreadservice=new WebConfigReadServiceImpl();
-		webconfigreadservice.readWebConfig("noiseidentify-false.xml");
+		webconfigreadservice.readWebConfig("miningconfig1.xml");
 		
 		crule = new HashMap<String, String>();
 		crule.putAll(webconfigreadservice.getLogCleanList());	

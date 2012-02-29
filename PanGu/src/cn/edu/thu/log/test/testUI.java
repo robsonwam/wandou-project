@@ -749,7 +749,7 @@ public class testUI extends JFrame {
 		JScrollPane productPane = new JScrollPane(productList);
 		productPane.createVerticalScrollBar();
 		productPane.setBorder(BorderFactory.createTitledBorder("选择的产品"));
-
+		productPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		productPanel.setLayout(new BorderLayout());
 		productPanel.add(up, BorderLayout.NORTH);
 		productPanel.add(productPane);
@@ -757,11 +757,14 @@ public class testUI extends JFrame {
 		/** 字段面板包括对应产品的所有字段，有一个JList */
 		JPanel tagPanel = new JPanel(new BorderLayout());
 		tagPanel.setBorder(BorderFactory.createTitledBorder("产品所有字段"));
-		tagList.setVisibleRowCount(20);
+		//tagList.setVisibleRowCount(20);
 		tagList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 		tagList.setPreferredSize(getPreferredSize());
+		//tagList.setAutoscrolls(true);
+		
 		JScrollPane tagPane = new JScrollPane(tagList);
-		tagPane.createHorizontalScrollBar();
+		//tagPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		tagPane.getVerticalScrollBar().setValue(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		// tagList.getSelectedValue()来记录选择的活动字段
 		tagPanel.add(tagPane);
 		/** 操作面板包括选择字段作为活动的所有操作，包括两个添加按钮，一个timestamp结果框，一个正则表达式输入框 */
@@ -832,6 +835,7 @@ public class testUI extends JFrame {
 				.createTitledBorder("活动选择结果"));
 		JScrollPane actResultPane = new JScrollPane(activityResultTable);
 		actResultPane.setPreferredSize(getPreferredSize());
+		actResultPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		activityResultPanel.add(actResultPane);
 
 		/** 将所有面板加入其中 */

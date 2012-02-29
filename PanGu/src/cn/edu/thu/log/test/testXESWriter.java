@@ -44,13 +44,13 @@ public class testXESWriter {
 		WebConfigReadService configRead=new WebConfigReadServiceImpl();
 		configRead.readWebConfig("miningconfig1.xml");
 //		String readFilePath = new String(
-//				"E:/pangu_new/1.pagesearch-ip-20120215-16/collect_temp/pagesearch/10.10.128.13/pagesearch_201202150000_0.log");
+//				"E:/for pangu/盘古0222/1.pagesearch-ip-20120215-16/collect_temp/pagesearch/10.10.128.13/pagesearch_201202150000_0.log");
 //		String readFilePath = new String(
-//				"E:/pangu_new/3.pagesearch-hdfs-20120215-16/pagesearch-hdfs-20120215-16/duration=2012021500/pagesearch_2012021500");
-//		String readFilePath = new String(
-//				"E:/pangu_new/3.pagesearch-hdfs-20120215-16/pagesearch-hdfs-20120215-16/duration=2012021522/pagesearch_2012021522");
+//				"E:/for pangu/盘古0222/3.pagesearch-hdfs-20120215-16/pagesearch-hdfs-20120215-16/duration=2012021500/pagesearch_2012021500");
 		String readFilePath = new String(
-				"E:/pangu_new/2.pagesearch-file-20120215-16/pagesearch20120215.log");
+				"E:/for pangu/盘古0222/3.pagesearch-hdfs-20120215-16/pagesearch-hdfs-20120215-16/duration=2012021522/pagesearch_2012021522");
+//		String readFilePath = new String(
+//				"E:/for pangu/盘古0222/2.pagesearch-file-20120215-16/pagesearch20120215.log");
 		String resultFile="E:/bigData.xez";
 		XESConvertServiceImp writer = new XESConvertServiceImp();
 		writer.convert(readFilePath, resultFile);

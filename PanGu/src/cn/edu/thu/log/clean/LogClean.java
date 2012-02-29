@@ -47,7 +47,7 @@ public class LogClean {
 		
 		
 		Iterator<Entry<String, String>> it = crule.entrySet().iterator();		
-		System.out.println(it.hasNext());
+		//System.out.println(it.hasNext());
 		
 		while (it.hasNext()) {
 			System.out.println("进入logclean，遍历logtag");

@@ -14,12 +14,12 @@ import cn.edu.thu.log.web.service.impl.WebConfigReadServiceImpl;
 
 public class NoiseIdentify {
 	private Map<String,NoiseFormat> nrule;
-	private int flag = 1;
+	//private int flag = 1;
 	private WebConfigReadService webconfigreadservice;
 	
 	public NoiseIdentify() {
 		webconfigreadservice=new WebConfigReadServiceImpl();
-		webconfigreadservice.readWebConfig("miningconfig1.xml");
+		webconfigreadservice.readWebConfig("noiseidentify-false.xml");
 		
 		nrule = new HashMap<String,NoiseFormat>();
 		nrule.putAll(webconfigreadservice.getNoiseStringList());
@@ -28,6 +28,7 @@ public class NoiseIdentify {
 
 	// 判断一个或多个字段中是否出现指定的noise规则
 	public boolean noiseStrIdentify(LogBuffer record) {
+		int flag = 1;
 		
 		Iterator<Entry<String, NoiseFormat>> ruleit = nrule.entrySet().iterator();
 		while (ruleit.hasNext() && flag == 1) {
@@ -50,7 +51,7 @@ public class NoiseIdentify {
 				//System.out.println("\nmatcher.find()结果1："+matcher.find());
 				//System.out.println("\nmatcher.find()结果2："+matcher.find());
 				if (matcher.find()) {
-					System.out.println("\nmatcher.find()结果："+matcher.find());
+					//System.out.println("\nmatcher.find()结果："+matcher.find());
 					flag = 0;// 设置以后，外部循环也不1满足条件，其他字段不用执行检查，直接结束执行
 					System.out.println("\n出现匹配的噪音串！");
 					break;
@@ -59,8 +60,10 @@ public class NoiseIdentify {
 			// 如果匹配，则flag保持为1
 		}
 		//表示出现了规定的噪音字符串，需要返回false删掉
-		if (flag == 0)
+		if (flag == 0){
+			System.out.println("\nnoise flag=0");
 			return false;
+		}
 		
 		return true;
 	}

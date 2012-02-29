@@ -2,7 +2,7 @@
 <miningconfig>
 <logclean/>
 <noiseidentify>
-<noise noiseformat="Mozilla"/>
+<noise noiseformat="Mozilla" noisetag="UA"/>
 <mininternal mininternal="300"/>
 <maxtime maxtime="2147483647"/>
 </noiseidentify>

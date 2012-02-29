@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <miningconfig>
-<logclean/>
+<logclean>
+<logtag tagformat="\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}" tagname="RemoteIP"/>
+<logtag tagformat="\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}" tagname="OriginateIP"/>
+</logclean>
 <noiseidentify>
+<noise noiseformat="seo" noisetag="UA"/>
 <mininternal mininternal="300"/>
-<maxtime maxtime="2147483647"/>
+<maxtime maxtime="72"/>
 </noiseidentify>
 <activityidentify>
 <timestamp timestamp="TimeStamp"/>

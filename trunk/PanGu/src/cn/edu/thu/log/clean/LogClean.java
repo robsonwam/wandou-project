@@ -24,7 +24,7 @@ public class LogClean {
     
 	public LogClean() {
 		webconfigreadservice=new WebConfigReadServiceImpl();
-		webconfigreadservice.readWebConfig("miningconfig1.xml");
+		webconfigreadservice.readWebConfig("noiseidentify-false.xml");
 		
 		crule = new HashMap<String, String>();
 		crule.putAll(webconfigreadservice.getLogCleanList());	
@@ -35,12 +35,12 @@ public class LogClean {
 	public boolean logClean(LogBuffer record) {			
 		//判断标签和内容的字段数量是否一致
 		System.out.println("\nlogtag个数: "+crule.size());
-		
+
+		System.out.println("\nrecord.getLogTagList().size()： "+record.getLogTagList().size());
+		System.out.println("\nrecord.getLogContent().size(): "+record.getLogContent().size());
 		if(record.getLogTagList().size()!=record.getLogContent().size())
 			return false;
 		
-		System.out.println("\nrecord.getLogTagList().size()： "+record.getLogTagList().size());
-		System.out.println("\nrecord.getLogContent().size(): "+record.getLogContent().size());
 		int flag=1;
 //		System.out.println("\nlogTagList size : "+logTagList.size());
 //		System.out.println("\nlogContentList size : "+logContentList.size());

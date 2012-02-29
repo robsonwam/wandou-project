@@ -6,7 +6,6 @@ import java.io.FileReader;
 import java.util.ArrayList;
 
 import cn.edu.thu.log.test.testUI;
-import cn.edu.thu.log.xes.XESWriter;
 
 /**
  * reader for content of log file,which contains functions that can read content
@@ -24,12 +23,11 @@ public class LogContent {
 	ArrayList<String> cateList;
 	/** Log's configuration class */
 	LogConfig logConfig;
-	ArrayList<Log> logList;
+	ArrayList<LogBuffer> logList;
 	ArrayList<String> logHeadContentParams;
 	ArrayList<String> logBodyContentParams;
 	/**logBuffer to save one record's content*/
 	LogBuffer logBuffer;
-	XESWriter xesWriter;
 	/**
 	 * constructor
 	 * 
@@ -38,7 +36,7 @@ public class LogContent {
 	 */
 	public LogContent(LogConfig logConfig) {
 		this.logConfig = logConfig;
-		logList = new ArrayList<Log>();
+		logList = new ArrayList<LogBuffer>();
 		//xesWriter=new XESWriter();
 	}
 
@@ -113,8 +111,8 @@ public class LogContent {
 		// read each log Record
 		try {
 			reader = new BufferedReader(new FileReader(file));
-			while ((record = reader.readLine()) != null&&logList.size()<50) {
-				Log log = new Log();
+			while ((record = reader.readLine()) != null&&logList.size()<100) {
+				LogBuffer log = new LogBuffer();
 				// set up the file path and file name for this log
 				log.setLogName(file.getName());
 				log.setLogPath(file.getPath());
@@ -204,14 +202,6 @@ public class LogContent {
 				params.addAll(bodyparams);
 				
 				
-				//For XES 
-//				logBuffer = new 	LogBuffer();
-//				logBuffer.setLogHeadContent(headparams);
-//				logBuffer.setLogBodyContent(headparams);
-//				logBuffer.setLogContent(params);
-				
-			//	xesWriter.writeEvent(logBuffer);
-				
 				// add more null to fit the merged tags
 				String category = file.getName().split("_")[0];
 				int indexCate = 0;
@@ -229,20 +219,13 @@ public class LogContent {
 					int tempBodyParamCount = logConfig.getLogBodyByCate(
 							cateList.get(i)).size();
 					insertParamscount += tempBodyParamCount;
-					// System.out.print("\nlog body size:" +
-					// tempBodyParamCount);
 
 				}
-
 				logConfig.getLogBody().size();
 				for (int j = 0; j < insertParamscount; j++) {
 					params.add(insertIndex, " ");
 				}
-				// System.out.print("\n params add:" + params);
-				// logUI.addLog(params);
 				log.setLogContent(params);
-
-				// System.out.print("\nadd log:" + log.getLogContent());
 				logList.add(log);
 
 			}
@@ -264,26 +247,17 @@ public class LogContent {
 	 *            GUI for test/ it is not used here
 	 * @return
 	 */
-	public ArrayList<Log> getContent(String filePath) {
+	public ArrayList<LogBuffer> getContent(String filePath) {
 		// TODO Auto-generated method stub
 		// the List of log that represent the content that want to be read
 		File readfile = new File(filePath);
-		logList = new ArrayList<Log>();
+		logList = new ArrayList<LogBuffer>();
 
 		LogFilesReader logfilesReader = new LogFilesReader();
 		cateList = new ArrayList<String>();
 		cateList = logfilesReader.getCateList(readfile);
 
 		readFile(readfile);
-		// if(cateList.size()>1)
-		// {
-		//
-		// readFile(readfile, logUI);
-		// }
-		// else{
-		// readFile(readfile, logUI);
-		// }
-
 		return logList;
 	}
 }

@@ -265,8 +265,6 @@ public class LogConfig {
 				// .print("\n the size of matchList:" + matchList.size());
 				for (int j = 0; j < matchList.size(); j++) {
 					if (name.equals(matchList.get(j))) {
-						// System.out.print("\n name " + name + " matches "
-						// + matchList.get(j) + "in the list");
 						// get childList
 						NodeList tagNodeList = node.getChildNodes();
 						for (int t = 0; t < tagNodeList.getLength(); t++) {
@@ -292,7 +290,7 @@ public class LogConfig {
 	 *            the list of products like List of image,page
 	 * @return
 	 */
-	public Collection<String> readTagsByProducts(
+	public ArrayList<String> readTagsByProducts(
 			ArrayList<String> matchProductList) {
 		ArrayList<String> tagList = new ArrayList<String>();
 		NodeList productNodeList = doc
@@ -305,11 +303,8 @@ public class LogConfig {
 				productName = productNode.getAttributes().getNamedItem("name")
 						.getNodeValue();
 			}
-			// .print("\n the size of matchList:" + matchList.size());
 			for (int j = 0; j < matchProductList.size(); j++) {
 				if (productName.equals(matchProductList.get(j))) {
-					 System.out.print("\n name " + productName + " matches "
-					 + matchProductList.get(j) + " in the list");
 					// get childList:actionNodeList
 					NodeList actionNodeList = productNode.getChildNodes();
 					for (int t = 0; t < actionNodeList.getLength(); t++) {

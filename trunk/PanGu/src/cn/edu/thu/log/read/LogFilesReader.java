@@ -55,7 +55,7 @@ public class LogFilesReader {
 			// readConfig(newfileCate);
 			if (!cateList.contains(newfileCate)) {
 				cateList.add(newfileCate);
-				System.out.print("\n cate List add " + newfileCate);
+			//	System.out.print("\n cate List add " + newfileCate);
 			}
 
 		} else if (readfile.isDirectory()) {

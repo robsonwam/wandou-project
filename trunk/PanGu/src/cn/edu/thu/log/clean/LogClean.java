@@ -28,16 +28,14 @@ public class LogClean {
 		
 		crule = new HashMap<String, String>();
 		crule.putAll(webconfigreadservice.getLogCleanList());	
-		System.out.println(webconfigreadservice.getLogCleanList());		
-		System.out.println("\n\n\n初始化logclean");		
+		
 	}
 
 	public boolean logClean(LogBuffer record) {			
 		//判断标签和内容的字段数量是否一致
-		System.out.println("\nlogtag个数: "+crule.size());
+//		System.out.println("\nlogtag个数: "+crule.size());
 
-		System.out.println("\nrecord.getLogTagList().size()： "+record.getLogTagList().size());
-		System.out.println("\nrecord.getLogContent().size(): "+record.getLogContent().size());
+		
 		if(record.getLogTagList().size()!=record.getLogContent().size())
 			return false;
 		
@@ -50,7 +48,7 @@ public class LogClean {
 		//System.out.println(it.hasNext());
 		
 		while (it.hasNext()) {
-			System.out.println("进入logclean，遍历logtag");
+			//System.out.println("进入logclean，遍历logtag");
 			Entry<String, String> entry = it.next();
 			// 获得每一个需要清洗的tag
 			String tagname = entry.getKey();
@@ -63,10 +61,10 @@ public class LogClean {
 			Pattern pattern=Pattern.compile(tagformat);
 			//Pattern pattern = Pattern.compile("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
 			Matcher matcher = pattern.matcher(content);
-			System.out.println("正则表达式: "+tagformat);
-			System.out.println("要匹配的字段: "+tagname);
-			System.out.println("要匹配的字段内容: "+content);
-			System.out.println("matcher是否匹配:"+matcher.matches());
+//			System.out.println("正则表达式: "+tagformat);
+//			System.out.println("要匹配的字段: "+tagname);
+//			System.out.println("要匹配的字段内容: "+content);
+//			System.out.println("matcher是否匹配:"+matcher.matches());
 			
 			//如果不匹配，则后面的字段不用检查，直接返回整个记录不符合要求，false
 			if(!matcher.matches()){				

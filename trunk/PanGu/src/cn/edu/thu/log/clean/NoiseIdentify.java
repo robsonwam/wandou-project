@@ -19,7 +19,7 @@ public class NoiseIdentify {
 	
 	public NoiseIdentify() {
 		webconfigreadservice=new WebConfigReadServiceImpl();
-		webconfigreadservice.readWebConfig("noiseidentify-false.xml");
+		webconfigreadservice.readWebConfig("miningconfig1.xml");
 		
 		nrule = new HashMap<String,NoiseFormat>();
 		nrule.putAll(webconfigreadservice.getNoiseStringList());

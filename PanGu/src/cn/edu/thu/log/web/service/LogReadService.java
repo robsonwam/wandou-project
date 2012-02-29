@@ -3,7 +3,7 @@ package cn.edu.thu.log.web.service;
 import java.io.File;
 import java.util.ArrayList;
 
-import cn.edu.thu.log.read.Log;
+import cn.edu.thu.log.read.LogBuffer;
 import cn.edu.thu.log.test.testUI;
 
 /**
@@ -13,7 +13,7 @@ import cn.edu.thu.log.test.testUI;
  * 
  */
 public interface LogReadService {
-	public ArrayList<Log> addLog(File file, testUI logUI);
+	public ArrayList<LogBuffer> addLog(File file, testUI logUI);
 
 	/**
 	 * function to read the log
@@ -26,9 +26,9 @@ public interface LogReadService {
 	 *            command
 	 * @return
 	 */
-	public ArrayList<Log> readLog(File file, testUI logUI);
+	public ArrayList<LogBuffer> readLog(File file, testUI logUI);
 
-	public ArrayList<Log> searchLog(String searchKey, ArrayList<Log> logList,
+	public ArrayList<LogBuffer> searchLog(String searchKey, ArrayList<LogBuffer> logList,
 			testUI logUI);
 
 	/**

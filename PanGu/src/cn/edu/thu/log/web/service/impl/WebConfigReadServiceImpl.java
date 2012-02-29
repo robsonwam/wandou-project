@@ -73,7 +73,7 @@ public class WebConfigReadServiceImpl implements WebConfigReadService{
 		}
 		//获得根节点miningconfig
 		Element root=doc.getDocumentElement();
-		System.out.println("root: "+root.getTagName());
+		
 		//NodeList configrule=root.getChildNodes();
 		//System.out.println("rootlist:"+ root.getElementsByTagName("logtag"));
 		//System.out.println("configrule length: "+ root.getElementsByTagName("logtag").getLength());
@@ -95,7 +95,7 @@ public class WebConfigReadServiceImpl implements WebConfigReadService{
 		for(int i=0;i<cleanruleList.getLength();i++){
 			Element tag =(Element) cleanruleList.item(i);
 			logCleanList.put(tag.getAttribute("tagname"),tag.getAttribute("tagformat"));
-			System.out.println("tagname="+tag.getAttribute("tagname")+" tagformat="+tag.getAttribute("tagformat"));
+			
 		}			
 		
 		for(int i=0;i<noisestrList.getLength();i++){			

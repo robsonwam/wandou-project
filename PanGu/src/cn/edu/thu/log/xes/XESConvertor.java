@@ -13,6 +13,7 @@ import java.util.Hashtable;
 import java.util.regex.Pattern;
 
 import org.deckfour.xes.classification.XEventAttributeClassifier;
+import org.deckfour.xes.extension.XExtension;
 import org.deckfour.xes.extension.XExtensionManager;
 import org.deckfour.xes.extension.std.XConceptExtension;
 import org.deckfour.xes.extension.std.XTimeExtension;
@@ -117,6 +118,13 @@ public class XESConvertor {
 		earliestArrivalMap = new Hashtable<String, String>();
 		caseBranchMap = new Hashtable<String, XTrace>();
 
+		// setup avtivityClassifier
+		setupClassifier();
+		// setup extensions
+		setupExtensions();
+		// setup global attributes
+		setupGlobalAttributes();
+		
 		Timer timer = new Timer();
 		timer.start();
 		// read File or Directory
@@ -138,6 +146,37 @@ public class XESConvertor {
 		System.out.print("\ntotalTime:"
 				+ Timer.formatDuration(time1_3_ReadFile + time4_WriteXES));
 		return;
+	}
+	
+	/**
+	 * set up classifier for log
+	 */
+	private void setupClassifier() {
+		String[] keys = { XConceptExtension.KEY_NAME };
+		classifier = new XEventAttributeClassifier("activity classifier", keys);
+		log.getClassifiers().add(classifier);
+
+	}
+
+	// set up extensions for log
+	private void setupExtensions() {
+		XExtension timeExtension = XTimeExtension.instance();
+		XExtension conceptExtension = XConceptExtension.instance();
+		log.getExtensions().add(timeExtension);
+		log.getExtensions().add(conceptExtension);
+
+	}
+
+	// set up global attributes
+	private void setupGlobalAttributes() {
+		XAttribute attributeConcept = factory.createAttributeLiteral(
+				XConceptExtension.KEY_NAME, "name", null);
+		log.getGlobalEventAttributes().add(attributeConcept);
+		XAttribute attributeTime = factory.createAttributeLiteral(
+				XTimeExtension.KEY_TIMESTAMP, "time", null);
+		log.getGlobalEventAttributes().add(attributeTime);
+		
+		log.getGlobalTraceAttributes().add(attributeConcept);
 	}
 
 	/**
@@ -387,53 +426,36 @@ public class XESConvertor {
 	 * @param logBuffer
 	 */
 	private void writeEvent(XEvent event, LogBuffer logBuffer) {
-		Timer timer = new Timer();
 		ArrayList<String> logTags = logBuffer.getActivityIDTagList();
 		// get content of this event
 		ArrayList<Object> logActivityContents = logBuffer
 				.getActivityIDContentList();
 		// create a event
 		XAttributeMap attributeMap = factory.createAttributeMap();
+
 		// put the log tags as attributes to attributeMap
-		timer.start();
-		Timer smallTimer = new Timer();
+		String activityVal = "";
 		for (int i = 0; i < logActivityContents.size(); i++) {
-
-			if (logActivityContents.get(i).toString().equals("")) {
-				String emptyString = new String("empty");
-				logActivityContents.set(i, emptyString);
-
-			}
-			XAttribute attribute = factory.createAttributeLiteral(
-					logTags.get(i), (String) logActivityContents.get(i), null);
-			smallTimer.start();
-			String key = attribute.getKey();
-			smallTimer.stop();
-			smallTimer.start();
-			attributeMap.put(key, attribute);
-			smallTimer.stop();
+			activityVal += logActivityContents.get(i).toString();
 		}
-		timer.stop();
-		timer.start();
-		// add logPath attribute to map
-		XAttribute attribute = factory.createAttributeLiteral("logPath",
-				logBuffer.getLogPath(), null);
-		attributeMap.put(attribute.getKey(), attribute);
-		String timeString = logBuffer.getTimeStamp();
+		XAttribute attribute = factory.createAttributeLiteral(
+				XConceptExtension.KEY_NAME, activityVal, null);
+		attributeMap.put(XConceptExtension.KEY_NAME, attribute);
 
+		// add logPath attribute to map
+		// XAttribute attribute = factory.createAttributeLiteral("logPath",
+		// logBuffer.getLogPath(), null);
+		// attributeMap.put(attribute.getKey(), attribute);
+
+		// add timestamp attribute to map
+		String timeString = logBuffer.getTimeStamp();
 		Date timeStamp = StringToTimeStamp(timeString);
 		XAttribute attributeTime = factory.createAttributeTimestamp(
 				XTimeExtension.KEY_TIMESTAMP, timeStamp, null);
-
 		attributeMap.put(attributeTime.getKey(), attributeTime);
+
 		// set event's AttributesMap
-		timer.stop();
-		// timeSetEvent2 += timer.getDuration();
-		timer.start();
 		event.setAttributes(attributeMap);
-		timer.stop();
-		// timeSetEvent3 += timer.getDuration();
-		return;
 
 	}
 

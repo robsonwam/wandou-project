@@ -27,6 +27,7 @@ import org.deckfour.xes.model.XTrace;
 import org.deckfour.xes.model.impl.XAttributeLiteralImpl;
 import org.deckfour.xes.model.impl.XAttributeMapImpl;
 import org.deckfour.xes.model.impl.XLogImpl;
+import org.deckfour.xes.nikefs2.NikeFS2FileAccessMonitor;
 import org.deckfour.xes.out.XesXmlSerializer;
 
 import cn.edu.thu.log.clean.LogClean;
@@ -52,14 +53,16 @@ public class XESConvertor {
 	private final String LOGCONFIGFILE = "config.xml";
 	private final long TIMEOUT_MINUTE = 30;
 	private final long MINUTE_MILLIS = 60000;
+	private final long SWAPSIZE = 67108864;
 	WebConfigReadService xesConfig;
-	
+
 	String filePath;
 	String timestampTag;
 	String resultFilePath;
 	XLog log;
-	
-
+	/** the total size of .log files */
+	long fileSize;
+	int sizeOfShadowMap;
 	String timeOutString;
 	Date timeOut;
 	/** map of laster arrival time in one case */
@@ -97,6 +100,7 @@ public class XESConvertor {
 		logConfig = new LogConfig();
 		logclean = new LogClean();
 		noiseidentify = new NoiseIdentify();
+
 	}
 
 	/**
@@ -116,10 +120,13 @@ public class XESConvertor {
 		cateList = logfilesReader.getCateList(filePath);
 		File readfile = new File(filePath);
 		XAttributeMapImpl map = new XAttributeMapImpl();
+		
 		log = new XLogImpl(map);
+		System.out.print("\nset up log\n");
 		lastestArrivalMap = new Hashtable<String, String>();
 		earliestArrivalMap = new Hashtable<String, String>();
 		caseBranchMap = new Hashtable<String, XTrace>();
+		fileSize = 0;
 
 		// setup avtivityClassifier
 		setupClassifier();
@@ -127,16 +134,20 @@ public class XESConvertor {
 		setupExtensions();
 		// setup global attributes
 		setupGlobalAttributes();
-		
+
 		Timer timer = new Timer();
 		timer.start();
 		// read File or Directory
 		readFile(readfile);
+		System.out.print("\nstart ReadFile\n");
 		timer.stop();
 		time1_3_ReadFile += timer.getDuration();
 
-		
-		
+		// set up the size of shadowMap
+		System.out.print("\nfilesize: " + fileSize);
+		sizeOfShadowMap = (int) (fileSize / SWAPSIZE) + 1;
+		System.out.print("\nsize of sizeOfShadowMap in XESConvert " + sizeOfShadowMap);
+
 		timer.start();
 		// write log to xes file
 		writeToXES();
@@ -152,7 +163,7 @@ public class XESConvertor {
 				+ Timer.formatDuration(time1_3_ReadFile + time4_WriteXES));
 		return;
 	}
-	
+
 	/**
 	 * set up classifier for log
 	 */
@@ -180,7 +191,7 @@ public class XESConvertor {
 		XAttribute attributeTime = factory.createAttributeLiteral(
 				XTimeExtension.KEY_TIMESTAMP, "time", null);
 		log.getGlobalEventAttributes().add(attributeTime);
-		
+
 		log.getGlobalTraceAttributes().add(attributeConcept);
 	}
 
@@ -218,6 +229,8 @@ public class XESConvertor {
 	 *            GUI for test
 	 */
 	private void readFileContent(File file) {
+		// caculate the total size of .log files
+		fileSize = fileSize + file.length();
 		// read the config
 		logConfig.config(LOGCONFIGFILE, file.getAbsolutePath());
 		String logHeadTokenizer = logConfig.getLogHeadTokenizer();
@@ -259,7 +272,7 @@ public class XESConvertor {
 				String[] strs = pattern.split(temprecord);
 				if (strs[0].length() == temprecord.length())
 					continue;
-				
+
 				logHeadContent = strs[0].concat(String.valueOf(temprecord
 						.charAt(strs[0].length())));
 				logBodyContent = strs[1];
@@ -316,7 +329,7 @@ public class XESConvertor {
 				for (int l = 0; l < locationList.size(); l++) {
 					int index = locationList.get(l);
 					if (index >= params.size()) {
-					} else {	
+					} else {
 						activityIDContentList.add(params.get(index));
 					}
 				}
@@ -326,13 +339,13 @@ public class XESConvertor {
 				setTestLogBuffer(logBuffer);
 				if (!logclean.logClean(logBuffer)) {
 					// System.out.println("\nnot clean");
-					//record = reader.readLine();
+					// record = reader.readLine();
 					continue;
 				}
 
 				if (!noiseidentify.noiseStrIdentify(logBuffer)) {
 					// System.out.println("\nhas noise");
-				//	record = reader.readLine();
+					// record = reader.readLine();
 					continue;
 				}
 
@@ -343,7 +356,7 @@ public class XESConvertor {
 				putEventToLog(logBuffer, event);
 
 				// read the next line
-				//record = reader.readLine();
+				// record = reader.readLine();
 			}
 			reader.close();
 		} catch (Exception e) {
@@ -431,7 +444,6 @@ public class XESConvertor {
 	 * @param logBuffer
 	 */
 	private void writeEvent(XEvent event, LogBuffer logBuffer) {
-		ArrayList<String> logTags = logBuffer.getActivityIDTagList();
 		// get content of this event
 		ArrayList<Object> logActivityContents = logBuffer
 				.getActivityIDContentList();
@@ -622,6 +634,8 @@ public class XESConvertor {
 			}
 			// XesXmlGZIPSerializer xstream = new XesXmlGZIPSerializer();
 			XesXmlSerializer xstream = new XesXmlSerializer();
+			System.out.print("\nsize of sizeOfShadowMap before setup in XESConvert " + sizeOfShadowMap+"\n");
+			xstream.setSizeOfShadowMap(sizeOfShadowMap);
 			// XesXStreamPersistency.register(xstream);
 			OutputStream oStream = new BufferedOutputStream(
 					new FileOutputStream(sFile));
@@ -640,6 +654,7 @@ public class XESConvertor {
 	public void setTestLogBuffer(LogBuffer logBuffer) {
 		this.testLogBuffer = logBuffer;
 	}
+
 	public XLog getLog() {
 		return log;
 	}

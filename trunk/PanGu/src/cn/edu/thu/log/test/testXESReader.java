@@ -7,7 +7,11 @@ import org.deckfour.xes.model.XLog;
 import cn.edu.thu.log.web.service.WebConfigReadService;
 import cn.edu.thu.log.web.service.impl.WebConfigReadServiceImpl;
 import cn.edu.thu.log.web.service.impl.XESConvertServiceImp;
-
+/**
+ * test get XLog from XES in several ways
+ * 
+ *
+ */
 public class testXESReader {
 	/**
 	 * @param args

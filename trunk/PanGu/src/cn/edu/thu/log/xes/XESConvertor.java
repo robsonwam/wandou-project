@@ -53,10 +53,13 @@ public class XESConvertor {
 	private final long TIMEOUT_MINUTE = 30;
 	private final long MINUTE_MILLIS = 60000;
 	WebConfigReadService xesConfig;
+	
 	String filePath;
 	String timestampTag;
 	String resultFilePath;
 	XLog log;
+	
+
 	String timeOutString;
 	Date timeOut;
 	/** map of laster arrival time in one case */
@@ -132,6 +135,8 @@ public class XESConvertor {
 		timer.stop();
 		time1_3_ReadFile += timer.getDuration();
 
+		
+		
 		timer.start();
 		// write log to xes file
 		writeToXES();
@@ -311,7 +316,7 @@ public class XESConvertor {
 				for (int l = 0; l < locationList.size(); l++) {
 					int index = locationList.get(l);
 					if (index >= params.size()) {
-					} else {
+					} else {	
 						activityIDContentList.add(params.get(index));
 					}
 				}
@@ -634,5 +639,12 @@ public class XESConvertor {
 
 	public void setTestLogBuffer(LogBuffer logBuffer) {
 		this.testLogBuffer = logBuffer;
+	}
+	public XLog getLog() {
+		return log;
+	}
+
+	public void setLog(XLog log) {
+		this.log = log;
 	}
 }

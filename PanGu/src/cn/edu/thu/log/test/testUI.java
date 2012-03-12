@@ -95,7 +95,6 @@ public class testUI extends JFrame {
 	String fileName;
 	File chosenfile;
 	File[] chosenfiles;
-	File chosenMiningFile;
 	// Service
 	LogReadServiceImpl logreadservice;
 
@@ -105,22 +104,13 @@ public class testUI extends JFrame {
 	JMenuItem noiseIdentifyItem;
 	JMenuItem activityIdentifyItem;
 	JMenuItem caseIdentifyItem;
-	
-	/** 过程挖掘面板 */
-	JMenu processMining;
-	JMenuItem openMiningFileItem;
-	JMenuItem processMiningItem;
-	JMenuItem registerMiningItem;
-	
+
 	JPanel emptyPanel;
 	JPanel miningConfigPanel;
 	JPanel logCleanPanel;
 	JPanel noiseIdentifyPanel;
 	JPanel activityIdentifyPanel;
 	JPanel caseIdentifyPanel;
-	JPanel processMiningPanel;
-	JPanel logAnalyzePanel;
-	JPanel registerMiningPanel;
 	Container container;
 	CardLayout cardManager;
 
@@ -204,12 +194,8 @@ public class testUI extends JFrame {
 		logCleanPanel = new JPanel();
 		noiseIdentifyPanel = new JPanel();
 		activityIdentifyPanel = new JPanel();
-		processMiningPanel=new JPanel();
-		logAnalyzePanel=new JPanel();
-		registerMiningPanel=new JPanel();
 		caseIdentifyPanel = new JPanel();
-		
-		
+
 		// 菜单控件的初始化，添加事件监听，并添加到界面中
 		initMenuBar();
 
@@ -217,20 +203,15 @@ public class testUI extends JFrame {
 		initHomePanel();
 
 		// 初始化挖掘配置文件面板
-		//initMiningConfigPanel();
+		initMiningConfigPanel();
 
-		//初始化过程挖掘面板		
-		initProcessMiningPanel();
-		
 		// 在cardLayout布局的frame中添加不同面板
 		container.add(homePanel, "home面板");
 		container.add(logCleanPanel, "日志清洗面板");
 		container.add(noiseIdentifyPanel, "噪音识别面板");
 		container.add(activityIdentifyPanel, "活动识别面板");
-		container.add(processMiningPanel,"过程挖掘面板");
 		container.add(caseIdentifyPanel, "案例识别面板");
-		container.add(registerMiningPanel,"注册新挖掘算法");
-		container.add(logAnalyzePanel,"日志分析面板");
+
 	}
 
 	// 初始化菜单栏
@@ -363,52 +344,10 @@ public class testUI extends JFrame {
 
 			});
 
-			//配置过程挖掘菜单
-			processMining=new JMenu("过程挖掘");
-			openMiningFileItem=new JMenuItem("打开新的日志文件");
-			processMiningItem=new JMenuItem("挖掘算法选择");
-			processMiningItem.setEnabled(false);
-			registerMiningItem=new JMenuItem("注册新挖掘算法");
-			processMining.add(processMiningItem);
-			processMining.add(registerMiningItem);
-			processMining.add(openMiningFileItem);
-			
-			processMiningItem.addActionListener(new ActionListener(){
-
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					// TODO Auto-generated method stub
-					
-				}
-				
-			});
-			
-			openMiningFileItem.addActionListener(new ActionListener(){
-
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					// TODO Auto-generated method stub
-					openMiningFile();
-				}
-
-				
-			});
-			
-			registerMiningItem.addActionListener(new ActionListener(){
-
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					// TODO Auto-generated method stub
-					cardManager.show(container, "注册新挖掘算法");
-				}
-				
-			});	
-			
 			// 对菜单栏初始化
 			menuBar = new JMenuBar();
 			menuBar.add(homeMenu);
 			menuBar.add(miningConfig);
-			menuBar.add(processMining);
 			menuBar.add(aboutMenu);
 			// 添加菜单到界面
 			this.setJMenuBar(menuBar);
@@ -526,7 +465,6 @@ public class testUI extends JFrame {
 		initCaseIdentifyPanel();
 	}
 
-	
 	// 初始化日志清洗面板
 	private void initLogCleanPanel() {
 		// logCleanPanel.setBackground(Color.BLACK);
@@ -929,11 +867,6 @@ public class testUI extends JFrame {
 		caseIdentifyPanel.add(caseResultList);
 	}
 
-	//初始化过程挖掘面板
-	private void initProcessMiningPanel(){
-		
-	}
-	
 	/**
 	 * add each log record for test
 	 * 
@@ -1162,26 +1095,6 @@ public class testUI extends JFrame {
 		WebConfigReadService webconfigreadservice = new WebConfigReadServiceImpl();
 		JOptionPane.showMessageDialog(this,
 				"配置信息已经保存于" + savedFile.getAbsolutePath());
-	}
-	
-	//打开要挖掘的日志
-	private void openMiningFile() {
-		// TODO Auto-generated method stub
-		// chooser file
-		JFileChooser chooser = new JFileChooser();
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		chooser.setMultiSelectionEnabled(true);
-		chooser.setCurrentDirectory(new File("E://"));
-		int returnVal = chooser.showOpenDialog(this);
-		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			chosenMiningFile = chooser.getSelectedFile();
-			System.out.println("载入的文件是"+chosenMiningFile.getAbsolutePath());
-			cardManager.show(container, "日志分析面板");
-			
-			/**
-			 * 调用日志分析算法，出入要分析的日志
-			 */			
-		}
 	}
 
 }

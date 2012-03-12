@@ -1,35 +1,64 @@
 package cn.edu.thu.log.web.service.impl;
 
-import cn.edu.thu.log.read.LogBuffer;
+import java.util.Collection;
+
+import org.deckfour.xes.model.XLog;
+
 import cn.edu.thu.log.web.service.WebConfigReadService;
 import cn.edu.thu.log.web.service.XESConvertService;
 import cn.edu.thu.log.xes.XESConvertor;
-
+import cn.edu.thu.log.xes.XESReader;
 
 /**
  * implementation of service XES Convert.
+ * 
  * @author meng
- *
+ * 
  */
-public class XESConvertServiceImp implements XESConvertService{
+public class XESConvertServiceImp implements XESConvertService {
+	XLog xlog;
+
 	@Override
-	public void convert(String readFilePath,String resultFile) {
+	public void convert(String readFilePath, String resultFile) {
 		WebConfigReadService configRead = new WebConfigReadServiceImpl();
 		configRead.readWebConfig("miningconfig1.xml");
-		//String readFilePath = new String("D:/imageclick_file/imageclick");
-		//String resultFile = "logXes.xml";
+		// String readFilePath = new String("D:/imageclick_file/imageclick");
+		// String resultFile = "logXes.xml";
 		XESConvertor writer = new XESConvertor(configRead, readFilePath);
 		writer.write(resultFile);
+		xlog = writer.getLog();
 	}
-	public LogBuffer getLogBuffer (String readFilePath) {
-		WebConfigReadService configRead = new WebConfigReadServiceImpl();
-		configRead.readWebConfig("miningconfig1.xml");
-		System.out.println("readweb成功");
-		//String readFilePath = new String("D:/imageclick_file/imageclick");
-		//String resultFile = "logXes.xml";
-		XESConvertor writer = new XESConvertor(configRead, readFilePath);
-		writer.write("testXES2.xml");
-		LogBuffer logBuffer=writer.getTestLogBuffer();
-		return logBuffer;
+
+	@Override
+	public XLog getXlog() {
+
+		return xlog;
 	}
+
+	@Override
+	public Collection<XLog> readStandardLog(String standardLogFile) {
+		XESReader xesReader=new XESReader();
+		Collection<XLog> logs;
+		logs=xesReader.readStandardLog( standardLogFile);
+		return logs;
+	}
+	@Override
+	public Collection<XLog> readStandardLog() {
+		XESReader xesReader=new XESReader();
+		Collection<XLog> logs;
+		logs=xesReader.readStandardLog();
+		return logs;
+	}
+	// public LogBuffer getLogBuffer (String readFilePath) {
+	// WebConfigReadService configRead = new WebConfigReadServiceImpl();
+	// configRead.readWebConfig("miningconfig1.xml");
+	// System.out.println("readweb成功");
+	// //String readFilePath = new String("D:/imageclick_file/imageclick");
+	// //String resultFile = "logXes.xml";
+	// XESConvertor writer = new XESConvertor(configRead, readFilePath);
+	// writer.write("testXES2.xml");
+	// LogBuffer logBuffer=writer.getTestLogBuffer();
+	// return logBuffer;
+	// }
+
 }

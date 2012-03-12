@@ -13,11 +13,14 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Vector;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -41,11 +44,15 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableModel;
 
+import org.deckfour.xes.model.XLog;
+
+import cn.edu.thu.log.mining.AlphaMiner;
 import cn.edu.thu.log.preprocessrule.NoiseFormat;
 import cn.edu.thu.log.read.LogBuffer;
 import cn.edu.thu.log.web.service.LogReadService;
 import cn.edu.thu.log.web.service.MiningConfigUIService;
 import cn.edu.thu.log.web.service.WebConfigReadService;
+import cn.edu.thu.log.web.service.XESConvertService;
 import cn.edu.thu.log.web.service.impl.LogReadServiceImpl;
 import cn.edu.thu.log.web.service.impl.MiningConfigUIServiceImpl;
 import cn.edu.thu.log.web.service.impl.WebConfigReadServiceImpl;
@@ -95,6 +102,7 @@ public class testUI extends JFrame {
 	String fileName;
 	File chosenfile;
 	File[] chosenfiles;
+	File chosenMiningFile;
 	// Service
 	LogReadServiceImpl logreadservice;
 
@@ -104,8 +112,18 @@ public class testUI extends JFrame {
 	JMenuItem noiseIdentifyItem;
 	JMenuItem activityIdentifyItem;
 	JMenuItem caseIdentifyItem;
+	
+	/** 过程挖掘面板 */
+	JMenu processMiningMainMenu;
+	JMenuItem openMiningFileItem;
+	JMenu processMiningMenu;
+	ArrayList<String> processMiningItems;
+	JMenuItem miningItem;
+	JMenuItem registerMiningItem;
+	
 
-	JPanel emptyPanel;
+
+
 	JPanel miningConfigPanel;
 	JPanel logCleanPanel;
 	JPanel noiseIdentifyPanel;
@@ -139,7 +157,8 @@ public class testUI extends JFrame {
 	ArrayList<String> tempList;
 
 	String miningconfigfilename = null;
-
+	
+	XESConvertService XESConvert;
 	/**
 	 * construction function
 	 * 
@@ -150,6 +169,7 @@ public class testUI extends JFrame {
 
 		// initiate the UI
 		miningconfigservice = new MiningConfigUIServiceImpl();
+		XESConvert = new XESConvertServiceImp();
 		// miningconfigwriteservice=new MiningConfigWriteServiceImpl();
 		// readlogservice=new LogReadServiceImpl();
 		productsname = new HashMap<String, String>();
@@ -344,10 +364,77 @@ public class testUI extends JFrame {
 
 			});
 
+
+			//配置过程挖掘菜单
+			processMiningMainMenu=new JMenu("过程挖掘");
+			openMiningFileItem=new JMenuItem("打开新的日志文件");
+			processMiningMenu=new JMenu("挖掘算法选择");
+			processMiningMenu.setEnabled(false);
+			ArrayList<String> miningNames=new ArrayList<String>();
+			miningNames.add("AlphaMiner");
+			
+			for(String name: miningNames){
+				JMenuItem alphaItem=new JMenuItem(name);
+				processMiningMenu.add(alphaItem);
+				alphaItem.addActionListener(new ActionListener(){
+
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						// TODO Auto-generated method stub
+						AlphaMiner alphaminer=new AlphaMiner();
+						Collection<XLog> logs=XESConvert.readStandardLog(chosenMiningFile.getAbsolutePath());
+						Iterator<XLog> it= logs.iterator();
+						try {
+							alphaminer.doMining(it.next());
+						} catch (CancellationException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						} catch (InterruptedException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						} catch (ExecutionException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+					}
+					
+				});
+			}
+			registerMiningItem=new JMenuItem("注册新挖掘算法");
+			processMiningMainMenu.add(processMiningMenu);
+			processMiningMainMenu.add(registerMiningItem);
+			processMiningMainMenu.add(openMiningFileItem);	
+
+			
+			openMiningFileItem.addActionListener(new ActionListener(){
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					// TODO Auto-generated method stub
+					openMiningFile();
+				}
+
+				
+			});
+			
+			registerMiningItem.addActionListener(new ActionListener(){
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					// TODO Auto-generated method stub
+					cardManager.show(container, "注册新挖掘算法");
+				}
+				
+			});	
+			
+
 			// 对菜单栏初始化
 			menuBar = new JMenuBar();
 			menuBar.add(homeMenu);
 			menuBar.add(miningConfig);
+
+			menuBar.add(processMiningMainMenu);
+
 			menuBar.add(aboutMenu);
 			// 添加菜单到界面
 			this.setJMenuBar(menuBar);
@@ -924,7 +1011,7 @@ public class testUI extends JFrame {
 
 		
 
-		XESConvertServiceImp XESConvert = new XESConvertServiceImp();
+		//XESConvertServiceImp XESConvert = new XESConvertServiceImp();
 		XESConvert.convert(chosenfile.getAbsolutePath(),
 				savedFile.getAbsolutePath());
 		JOptionPane.showMessageDialog(this,
@@ -1096,5 +1183,29 @@ public class testUI extends JFrame {
 		JOptionPane.showMessageDialog(this,
 				"配置信息已经保存于" + savedFile.getAbsolutePath());
 	}
+
+	
+	//打开要挖掘的日志
+	private void openMiningFile() {
+		// TODO Auto-generated method stub
+		// chooser file
+		JFileChooser chooser = new JFileChooser();
+		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		chooser.setMultiSelectionEnabled(true);
+		chooser.setCurrentDirectory(new File("E://"));
+		int returnVal = chooser.showOpenDialog(this);
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			chosenMiningFile = chooser.getSelectedFile();
+			System.out.println("载入的文件是"+chosenMiningFile.getAbsolutePath());
+			cardManager.show(container, "日志分析面板");
+			processMiningMenu.setEnabled(true);
+			//XESConvert.readStandardLog(chosenMiningFile.getAbsolutePath());
+			
+			/**
+			 * 调用日志分析算法，出入要分析的日志
+			 */			
+		}
+	}
+
 
 }

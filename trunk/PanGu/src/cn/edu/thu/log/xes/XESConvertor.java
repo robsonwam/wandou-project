@@ -35,6 +35,7 @@ import cn.edu.thu.log.read.LogBuffer;
 import cn.edu.thu.log.read.LogConfig;
 import cn.edu.thu.log.read.LogFilesReader;
 import cn.edu.thu.log.util.Format;
+import cn.edu.thu.log.util.PanGuConstants;
 import cn.edu.thu.log.util.Timer;
 import cn.edu.thu.log.web.service.WebConfigReadService;
 
@@ -49,10 +50,7 @@ public class XESConvertor {
 	final String BRANCH = "-bn";
 
 	public static XFactory factory;
-	private final String LOGCONFIGFILE = "config.xml";
-	// private final long TIMEOUT_MINUTE = 30;
-	// private final long MINUTE_MILLIS = 60000;
-	private final long SWAPSIZE = 67108864;
+
 	WebConfigReadService xesConfig;
 
 	String filePath;
@@ -145,7 +143,7 @@ public class XESConvertor {
 
 		// set up the size of shadowMap
 		System.out.print("\nfilesize: " + fileSize);
-		sizeOfShadowMap = (int) (fileSize / SWAPSIZE) + 1;
+		sizeOfShadowMap = (int) (fileSize / PanGuConstants.SWAPSIZE) + 1;
 		System.out.print("\nsize shoud be in XESConvert " + sizeOfShadowMap);
 		// XFactoryRegistry.instance().setSizeOfShadowMap(sizeOfShadowMap);
 
@@ -257,7 +255,7 @@ public class XESConvertor {
 		// caculate the total size of .log files
 		fileSize = fileSize + file.length();
 		// read the config
-		logConfig.config(LOGCONFIGFILE, file.getAbsolutePath());
+		logConfig.config(PanGuConstants.LOGREAD_CONFIGFILE, file.getAbsolutePath());
 		String logHeadTokenizer = logConfig.getLogHeadTokenizer();
 		String logBodyTokenizer = logConfig.getLogBodyTokenizer();
 		String logHeadBodyTokenizer = logConfig.getLogHeadBodyTokenizer();

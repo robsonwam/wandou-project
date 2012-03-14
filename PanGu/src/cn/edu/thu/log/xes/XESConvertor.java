@@ -27,7 +27,6 @@ import org.deckfour.xes.model.XTrace;
 import org.deckfour.xes.model.impl.XAttributeLiteralImpl;
 import org.deckfour.xes.model.impl.XAttributeMapImpl;
 import org.deckfour.xes.model.impl.XLogImpl;
-import org.deckfour.xes.nikefs2.NikeFS2FileAccessMonitor;
 import org.deckfour.xes.out.XesXmlSerializer;
 
 import cn.edu.thu.log.clean.LogClean;
@@ -35,6 +34,7 @@ import cn.edu.thu.log.clean.NoiseIdentify;
 import cn.edu.thu.log.read.LogBuffer;
 import cn.edu.thu.log.read.LogConfig;
 import cn.edu.thu.log.read.LogFilesReader;
+import cn.edu.thu.log.util.Format;
 import cn.edu.thu.log.util.Timer;
 import cn.edu.thu.log.web.service.WebConfigReadService;
 
@@ -48,11 +48,10 @@ import cn.edu.thu.log.web.service.WebConfigReadService;
 public class XESConvertor {
 	final String BRANCH = "-bn";
 
-	public static XFactory factory = XFactoryRegistry.instance()
-			.currentDefault();
+	public static XFactory factory;
 	private final String LOGCONFIGFILE = "config.xml";
-	private final long TIMEOUT_MINUTE = 30;
-	private final long MINUTE_MILLIS = 60000;
+	// private final long TIMEOUT_MINUTE = 30;
+	// private final long MINUTE_MILLIS = 60000;
 	private final long SWAPSIZE = 67108864;
 	WebConfigReadService xesConfig;
 
@@ -65,10 +64,10 @@ public class XESConvertor {
 	int sizeOfShadowMap;
 	String timeOutString;
 	Date timeOut;
-	/** map of laster arrival time in one case */
-	Hashtable<String, String> lastestArrivalMap;
-	/** map of earliest arrival time . one case */
-	Hashtable<String, String> earliestArrivalMap;
+	// /** map of laster arrival time in one case */
+	// Hashtable<String, String> lastestArrivalMap;
+	// /** map of earliest arrival time . one case */
+	// Hashtable<String, String> earliestArrivalMap;
 	/** map of latest trace from each caseID */
 	Hashtable<String, XTrace> caseBranchMap;
 	// from logContent
@@ -95,6 +94,8 @@ public class XESConvertor {
 	 *            the file to save the result log
 	 */
 	public XESConvertor(WebConfigReadService xesConfig, String filePath) {
+		factory = XFactoryRegistry.instance().currentDefault();
+		// XFactoryRegistry.instance().setSizeOfShadowMap(10);
 		this.xesConfig = xesConfig;
 		this.filePath = filePath;
 		logConfig = new LogConfig();
@@ -120,11 +121,10 @@ public class XESConvertor {
 		cateList = logfilesReader.getCateList(filePath);
 		File readfile = new File(filePath);
 		XAttributeMapImpl map = new XAttributeMapImpl();
-		
+
 		log = new XLogImpl(map);
 		System.out.print("\nset up log\n");
-		lastestArrivalMap = new Hashtable<String, String>();
-		earliestArrivalMap = new Hashtable<String, String>();
+
 		caseBranchMap = new Hashtable<String, XTrace>();
 		fileSize = 0;
 
@@ -146,7 +146,8 @@ public class XESConvertor {
 		// set up the size of shadowMap
 		System.out.print("\nfilesize: " + fileSize);
 		sizeOfShadowMap = (int) (fileSize / SWAPSIZE) + 1;
-		System.out.print("\nsize of sizeOfShadowMap in XESConvert " + sizeOfShadowMap);
+		System.out.print("\nsize shoud be in XESConvert " + sizeOfShadowMap);
+		// XFactoryRegistry.instance().setSizeOfShadowMap(sizeOfShadowMap);
 
 		timer.start();
 		// write log to xes file
@@ -195,6 +196,30 @@ public class XESConvertor {
 		log.getGlobalTraceAttributes().add(attributeConcept);
 	}
 
+	/**
+	 * reader for file/Directory
+	 * 
+	 * @param readfile
+	 *            log file
+	 * @param logUI
+	 *            GUI for test
+	 */
+	// private void getFileSize(File readfile) {
+	// if (!readfile.isDirectory()) {
+	// fileSize = fileSize + readfile.length();
+	// } else if (readfile.isDirectory()) {
+	// File[] fileList = readfile.listFiles();
+	// for (int i = 0; i < fileList.length; i++) {
+	// File editfile = fileList[i];
+	// if (!editfile.isDirectory()) {
+	// fileSize = fileSize + readfile.length();
+	//
+	// } else if (editfile.isDirectory()) {
+	// getFileSize(editfile);
+	// }
+	// }
+	// }
+	// }
 	/**
 	 * reader for file/Directory
 	 * 
@@ -277,10 +302,11 @@ public class XESConvertor {
 						.charAt(strs[0].length())));
 				logBodyContent = strs[1];
 				// set up log Head params
-				headparams.addAll(extractContent(logHeadTokenizer,
+
+				headparams.addAll(Format.splitContentToList(logHeadTokenizer,
 						logHeadContent));
 				// set up logBody params
-				bodyparams.addAll(extractContent(logBodyTokenizer,
+				bodyparams.addAll(Format.splitContentToList(logBodyTokenizer,
 						logBodyContent));
 				// set up log Content
 				params.addAll(headparams);
@@ -388,54 +414,54 @@ public class XESConvertor {
 		return locationList;
 	}
 
-	/**
-	 * check if the logBuffer arriveTime is within the time limit of one case
-	 * 
-	 * @param logBuffer
-	 *            arrived logBuffer
-	 * @param caseIDValue
-	 *            the case's caseID
-	 * @return true:logBuffer attive within case; false: logBuffer timeout
-	 */
-	private boolean checkTimeOut(LogBuffer logBuffer, String caseIDValue) {
-		// Time time=new Time();
-		long timeOut = MINUTE_MILLIS * TIMEOUT_MINUTE;
-		// System.out.print("\ncheck if timeout");
-		boolean ifTimeOut = false;
-		String lasterTimeString = lastestArrivalMap.get(caseIDValue);
-		String earliestTimeString = earliestArrivalMap.get(caseIDValue);
-		String arriveTimeString = logBuffer.getTimeStamp();
-		Date lasterTime = StringToTimeStamp(lasterTimeString);
-		Date earliestTime = StringToTimeStamp(earliestTimeString);
-		Date arriveTime = StringToTimeStamp(arriveTimeString);
-		if (arriveTime.after(lasterTime)) {
-			if (Math.abs(arriveTime.getTime() - lasterTime.getTime()) > timeOut) {
-				// System.out.print("\nlatest timeout:");
-				// System.out.print("\tlasterTime:" + lasterTime);
-				// System.out.print("\tarriveTime:" + arriveTime);
-				// System.out.print("\ttimeOut:" + timeOut);
-				// System.out.print("\tdifference:"
-				// + (arriveTime.getTime() - lasterTime.getTime()));
-				ifTimeOut = true;
-				// System.out.print("\nlatest time different:"
-				// + (lasterTime.getTime() - arriveTime.getTime()));
-			}
-		}
-		if (arriveTime.before(earliestTime)) {
-
-			if (arriveTime.getTime() - earliestTime.getTime() > timeOut) {
-				System.out.print("\n eariliest timeout:");
-				System.out.print("\tlasterTime:" + earliestTime);
-				System.out.print("\tarriveTime:" + arriveTime);
-				System.out.print("\ttimeOut:" + timeOut);
-				ifTimeOut = true;
-				// System.out.print("\n earliest time different:"
-				// + (arriveTime.getTime() - earliestTime.getTime()));
-			}
-		}
-
-		return ifTimeOut;
-	}
+	// /**
+	// * check if the logBuffer arriveTime is within the time limit of one case
+	// *
+	// * @param logBuffer
+	// * arrived logBuffer
+	// * @param caseIDValue
+	// * the case's caseID
+	// * @return true:logBuffer attive within case; false: logBuffer timeout
+	// */
+	// private boolean checkTimeOut(LogBuffer logBuffer, String caseIDValue) {
+	// // Time time=new Time();
+	// long timeOut = MINUTE_MILLIS * TIMEOUT_MINUTE;
+	// // System.out.print("\ncheck if timeout");
+	// boolean ifTimeOut = false;
+	// String lasterTimeString = lastestArrivalMap.get(caseIDValue);
+	// String earliestTimeString = earliestArrivalMap.get(caseIDValue);
+	// String arriveTimeString = logBuffer.getTimeStamp();
+	// Date lasterTime = StringToTimeStamp(lasterTimeString);
+	// Date earliestTime = StringToTimeStamp(earliestTimeString);
+	// Date arriveTime = StringToTimeStamp(arriveTimeString);
+	// if (arriveTime.after(lasterTime)) {
+	// if (Math.abs(arriveTime.getTime() - lasterTime.getTime()) > timeOut) {
+	// // System.out.print("\nlatest timeout:");
+	// // System.out.print("\tlasterTime:" + lasterTime);
+	// // System.out.print("\tarriveTime:" + arriveTime);
+	// // System.out.print("\ttimeOut:" + timeOut);
+	// // System.out.print("\tdifference:"
+	// // + (arriveTime.getTime() - lasterTime.getTime()));
+	// ifTimeOut = true;
+	// // System.out.print("\nlatest time different:"
+	// // + (lasterTime.getTime() - arriveTime.getTime()));
+	// }
+	// }
+	// if (arriveTime.before(earliestTime)) {
+	//
+	// if (arriveTime.getTime() - earliestTime.getTime() > timeOut) {
+	// System.out.print("\n eariliest timeout:");
+	// System.out.print("\tlasterTime:" + earliestTime);
+	// System.out.print("\tarriveTime:" + arriveTime);
+	// System.out.print("\ttimeOut:" + timeOut);
+	// ifTimeOut = true;
+	// // System.out.print("\n earliest time different:"
+	// // + (arriveTime.getTime() - earliestTime.getTime()));
+	// }
+	// }
+	//
+	// return ifTimeOut;
+	// }
 
 	/**
 	 * write activities,logPath,caseID to event
@@ -466,13 +492,14 @@ public class XESConvertor {
 
 		// add timestamp attribute to map
 		String timeString = logBuffer.getTimeStamp();
-		Date timeStamp = StringToTimeStamp(timeString);
+		Date timeStamp = Format.StringToTimeStamp(timeString);
 		XAttribute attributeTime = factory.createAttributeTimestamp(
 				XTimeExtension.KEY_TIMESTAMP, timeStamp, null);
 		attributeMap.put(attributeTime.getKey(), attributeTime);
 
 		// set event's AttributesMap
 		event.setAttributes(attributeMap);
+//		XESConvertorMonitor.instance().addEventNum();
 
 	}
 
@@ -487,6 +514,7 @@ public class XESConvertor {
 	 *            the caseID of logBuffer
 	 */
 	private void putEventToLog(LogBuffer logBuffer, XEvent event) {
+
 		// get caseID for this logBuffer
 		String logCaseIDString = logBuffer.getCaseIDString();
 		// if map already contains this event's caseID
@@ -497,7 +525,8 @@ public class XESConvertor {
 			String caseIDValue = ((XAttributeLiteralImpl) tempAttribute)
 					.getValue();
 			// found the lastest case,check if it is already timeout
-			boolean ifTimeOut = checkTimeOut(logBuffer, caseIDValue);
+			boolean ifTimeOut = XESConvertorMonitor.instance().ifTimeOut(
+					logBuffer, caseIDValue);
 			// time out, build a new trace with new branch
 			if (ifTimeOut) {
 				int pos = caseIDValue.lastIndexOf(BRANCH);
@@ -517,11 +546,14 @@ public class XESConvertor {
 				traceNew.setAttributes(traceAttributeMapNew);
 				traceNew.add(event);
 				log.add(traceNew);
-				lastestArrivalMap.put(newCaseID, logBuffer.getTimeStamp());
-				earliestArrivalMap.put(newCaseID, logBuffer.getTimeStamp());
+				XESConvertorMonitor.instance().updateLastestArrivalMap(
+						caseIDValue, logBuffer.getTimeStamp());
+				XESConvertorMonitor.instance().updateEarliestArrivalMap(
+						caseIDValue, logBuffer.getTimeStamp());
 			} else {
 				eachTrace.add(event);
-				lastestArrivalMap.put(caseIDValue, logBuffer.getTimeStamp());
+				XESConvertorMonitor.instance().updateLastestArrivalMap(
+						caseIDValue, logBuffer.getTimeStamp());
 			}
 		} else {// do not has CaseID,then build a new trace
 			XTrace traceNew = factory.createTrace();
@@ -539,82 +571,84 @@ public class XESConvertor {
 			traceNew.add(event);
 			// add new trace to log
 			log.add(traceNew);
-			lastestArrivalMap.put(caseIDString, logBuffer.getTimeStamp());
-			earliestArrivalMap.put(caseIDString, logBuffer.getTimeStamp());
+			XESConvertorMonitor.instance().updateLastestArrivalMap(
+					caseIDString, logBuffer.getTimeStamp());
+			XESConvertorMonitor.instance().updateEarliestArrivalMap(
+					caseIDString, logBuffer.getTimeStamp());
 		}
 	}
 
-	/**
-	 * setup timestamp in Date format
-	 * 
-	 * @param timeString
-	 *            String of timeStamp
-	 * @return Date format as timeStamp
-	 */
-	@SuppressWarnings("deprecation")
-	private Date StringToTimeStamp(String timeString) {
-		Date timeStamp = new Date();
-		if (timeString != null) {
-			try {
-				timeString = timeString.trim();
-				timeStamp
-						.setYear(Integer.parseInt(timeString.substring(0, 4)) - 1900);
-				timeStamp
-						.setMonth(Integer.parseInt(timeString.substring(4, 6)) - 1);
-				timeStamp.setDate(Integer.parseInt(timeString.substring(6, 8)));
-				timeStamp
-						.setHours(Integer.parseInt(timeString.substring(8, 10)));
-				timeStamp.setMinutes(Integer.parseInt(timeString.substring(10,
-						12)));
-				timeStamp.setSeconds(Integer.parseInt(timeString.substring(12,
-						14)));
-			} catch (Exception e) {
-				System.out.print("\ntime format wrong as:" + timeString);
+	// /**
+	// * setup timestamp in Date format
+	// *
+	// * @param timeString
+	// * String of timeStamp
+	// * @return Date format as timeStamp
+	// */
+	// @SuppressWarnings("deprecation")
+	// private Date StringToTimeStamp(String timeString) {
+	// Date timeStamp = new Date();
+	// if (timeString != null) {
+	// try {
+	// timeString = timeString.trim();
+	// timeStamp
+	// .setYear(Integer.parseInt(timeString.substring(0, 4)) - 1900);
+	// timeStamp
+	// .setMonth(Integer.parseInt(timeString.substring(4, 6)) - 1);
+	// timeStamp.setDate(Integer.parseInt(timeString.substring(6, 8)));
+	// timeStamp
+	// .setHours(Integer.parseInt(timeString.substring(8, 10)));
+	// timeStamp.setMinutes(Integer.parseInt(timeString.substring(10,
+	// 12)));
+	// timeStamp.setSeconds(Integer.parseInt(timeString.substring(12,
+	// 14)));
+	// } catch (Exception e) {
+	// System.out.print("\ntime format wrong as:" + timeString);
+	//
+	// }
+	// }
+	// return timeStamp;
+	// }
 
-			}
-		}
-		return timeStamp;
-	}
-
-	/**
-	 * split content by Tokenizer to List
-	 * 
-	 * @param logHeadTokenizer
-	 *            Tokenizer
-	 * @param logHeadContent
-	 *            content
-	 * @return a list of content fields
-	 */
-	private ArrayList<String> extractContent(String logHeadTokenizer,
-			String logHeadContent) {
-		// Split logHeadContent by logHeadTokenizer
-		int len = logHeadContent.length();
-		int pos = 0;
-		ArrayList<String> alParams = new ArrayList<String>();
-		int nl = logHeadTokenizer.length();
-		int oldPos = 0;
-		while (pos < len) {
-			int idx = logHeadContent.indexOf(logHeadTokenizer, pos);
-			if (idx != -1) {
-				pos = idx + nl;
-
-				if (idx == 0) {
-					alParams.add("");
-					oldPos = pos;
-				} else if (logHeadContent.charAt(idx - 1) != '\\') {
-					alParams.add(logHeadContent.substring(oldPos, idx));
-					oldPos = pos;
-				}
-
-				if (pos == len)
-					alParams.add("");
-			} else {
-				alParams.add(logHeadContent.substring(pos + nl));
-				pos = len;
-			}
-		}
-		return alParams;
-	}
+	// /**
+	// * split content by Tokenizer to List
+	// *
+	// * @param logHeadTokenizer
+	// * Tokenizer
+	// * @param logHeadContent
+	// * content
+	// * @return a list of content fields
+	// */
+	// private ArrayList<String> extractContent(String logHeadTokenizer,
+	// String logHeadContent) {
+	// // Split logHeadContent by logHeadTokenizer
+	// int len = logHeadContent.length();
+	// int pos = 0;
+	// ArrayList<String> alParams = new ArrayList<String>();
+	// int nl = logHeadTokenizer.length();
+	// int oldPos = 0;
+	// while (pos < len) {
+	// int idx = logHeadContent.indexOf(logHeadTokenizer, pos);
+	// if (idx != -1) {
+	// pos = idx + nl;
+	//
+	// if (idx == 0) {
+	// alParams.add("");
+	// oldPos = pos;
+	// } else if (logHeadContent.charAt(idx - 1) != '\\') {
+	// alParams.add(logHeadContent.substring(oldPos, idx));
+	// oldPos = pos;
+	// }
+	//
+	// if (pos == len)
+	// alParams.add("");
+	// } else {
+	// alParams.add(logHeadContent.substring(pos + nl));
+	// pos = len;
+	// }
+	// }
+	// return alParams;
+	// }
 
 	/**
 	 * write log to xes file
@@ -634,8 +668,10 @@ public class XESConvertor {
 			}
 			// XesXmlGZIPSerializer xstream = new XesXmlGZIPSerializer();
 			XesXmlSerializer xstream = new XesXmlSerializer();
-			System.out.print("\nsize of sizeOfShadowMap before setup in XESConvert " + sizeOfShadowMap+"\n");
-			xstream.setSizeOfShadowMap(sizeOfShadowMap);
+			// System.out.print("\nsize of sizeOfShadowMap before setup in XESConvert "
+			// + sizeOfShadowMap+"\n");
+			// xstream.setSizeOfShadowMap(sizeOfShadowMap);
+			// NikeFS2FileAccessMonitor.instance().setShadowSize(sizeOfShadowMap);
 			// XesXStreamPersistency.register(xstream);
 			OutputStream oStream = new BufferedOutputStream(
 					new FileOutputStream(sFile));

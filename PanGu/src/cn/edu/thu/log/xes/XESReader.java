@@ -48,7 +48,7 @@ public class XESReader {
 				}
 			}
 		} catch (Exception e) {
-			System.out.print("\nno file selected");
+			e.printStackTrace();
 		}
 		System.out.println("Reading / building performance: "
 				+ timer.getDurationString());
@@ -91,7 +91,7 @@ public class XESReader {
 				}
 			}
 		} catch (Exception e) {
-			System.out.print("\nno file selected");
+			System.out.print("\nno file selected\n");
 		}
 		System.out.println("Reading / building performance: "
 				+ timer.getDurationString());

@@ -5,6 +5,7 @@ import java.util.Hashtable;
 
 import cn.edu.thu.log.read.LogBuffer;
 import cn.edu.thu.log.util.Format;
+import cn.edu.thu.log.util.PanGuConstants;
 
 public class XESConvertorMonitor {
 	private static XESConvertorMonitor singleton = null;
@@ -17,9 +18,7 @@ public class XESConvertorMonitor {
 	}
 
 	int numOfEvent;
-	final int MAX_EVENT_NUM = 500;
-	private final long TIMEOUT_MINUTE = 10;
-	private final long MINUTE_MILLIS = 60000;
+
 
 	/** map of laster arrival time in one case */
 	Hashtable<String, String> lastestArrivalMap;
@@ -33,7 +32,7 @@ public class XESConvertorMonitor {
 	}
 
 	public boolean ifExceedMaxEventNum() {
-		if (numOfEvent > MAX_EVENT_NUM) {
+		if (numOfEvent > PanGuConstants.MAX_EVENT_NUM) {
 			return true;
 		}
 		return false;
@@ -53,7 +52,7 @@ public class XESConvertorMonitor {
 	 */
 	public boolean ifTimeOut(LogBuffer logBuffer, String caseIDValue) {
 		// Time time=new Time();
-		long timeOut = MINUTE_MILLIS * TIMEOUT_MINUTE;
+		long timeOut = PanGuConstants.MINUTE_MILLIS * PanGuConstants.TIMEOUT_MINUTE;
 		// System.out.print("\ncheck if timeout");
 		boolean ifTimeOut = false;
 		String lasterTimeString = lastestArrivalMap.get(caseIDValue);

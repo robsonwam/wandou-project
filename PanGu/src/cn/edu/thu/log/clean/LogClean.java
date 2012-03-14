@@ -8,6 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import cn.edu.thu.log.read.LogBuffer;
+import cn.edu.thu.log.util.PanGuConstants;
 import cn.edu.thu.log.web.service.WebConfigReadService;
 import cn.edu.thu.log.web.service.impl.WebConfigReadServiceImpl;
 
@@ -25,7 +26,7 @@ public class LogClean {
 
 	public LogClean() {
 		webconfigreadservice = new WebConfigReadServiceImpl();
-		webconfigreadservice.readWebConfig("miningconfig1.xml");
+		webconfigreadservice.readWebConfig(PanGuConstants.CLEAN_CONFIGFILE);
 
 		crule = new HashMap<String, String>();
 		crule.putAll(webconfigreadservice.getLogCleanList());
@@ -37,11 +38,11 @@ public class LogClean {
 		// System.out.println("\nlogtag个数: "+crule.size());
 
 		if (record.getLogTagList().size() != record.getLogContent().size()) {
-			System.out.print("\nfound dirty log record, record discarded");
-			System.out
-					.print("\tlog tag size:" + record.getLogTagList().size());
-			System.out.print(" != log content size: "
-					+ record.getLogContent().size());
+//			System.out.print("\nfound dirty log record, record discarded");
+//			System.out
+//					.print("\tlog tag size:" + record.getLogTagList().size());
+//			System.out.print(" != log content size: "
+//					+ record.getLogContent().size());
 			return false;
 		}
 

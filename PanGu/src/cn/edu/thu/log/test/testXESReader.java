@@ -39,13 +39,13 @@ public class testXESReader {
 		// System.out.println("\n" + currentLog.size());
 		
 		/** test function to get log from a specific .xes file */
-		String standardLogFile = "E:/bigData.xes";
-		logs=convertor.readStandardLog(standardLogFile);
+//		String standardLogFile = "E:/bigData.xes";
+//		logs=convertor.readStandardLog(standardLogFile);
 		
 		/** test function to get log from .xes(fileChooser) */
-//		logs=convertor.readStandardLog();
+     	logs=convertor.readStandardLog();
 		
-		System.out.print("\nlogs: "+logs.iterator().next().get(0).get(0).getID());
+		System.out.print("\nlogs: "+logs.size());
 		
 
 	}

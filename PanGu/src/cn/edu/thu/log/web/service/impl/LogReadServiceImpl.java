@@ -10,6 +10,7 @@ import cn.edu.thu.log.read.LogBuffer;
 import cn.edu.thu.log.read.LogConfig;
 import cn.edu.thu.log.read.LogContent;
 import cn.edu.thu.log.test.testUI;
+import cn.edu.thu.log.util.PanGuConstants;
 import cn.edu.thu.log.web.service.LogReadService;
 
 /**
@@ -21,7 +22,7 @@ import cn.edu.thu.log.web.service.LogReadService;
 public class LogReadServiceImpl implements LogReadService {
 	LogConfig logConfig;
 	LogContent logContent;
-	private final String CONFIGFILE = "config.xml";
+	//private final String CONFIGFILE = "config.xml";
 
 	/**
 	 * Constructor
@@ -61,7 +62,7 @@ public class LogReadServiceImpl implements LogReadService {
 	public ArrayList<LogBuffer> readLog(File file, testUI logUI) {
 
 		// File file=files[0];
-		logConfig.config(CONFIGFILE, file.getAbsolutePath());
+		logConfig.config(PanGuConstants.LOGREAD_CONFIGFILE, file.getAbsolutePath());
 		ArrayList<String> logTags = logConfig.getLogTags();
 		// read the logFile and display the information on UI
 		ArrayList<LogBuffer> logList = new ArrayList<LogBuffer>();
@@ -88,7 +89,7 @@ public class LogReadServiceImpl implements LogReadService {
 	@Override
 	public ArrayList<String> getLogTagsByProducts(ArrayList<String> productList) {
 		ArrayList<String> logTags = new ArrayList<String>();
-		logConfig.config(CONFIGFILE);
+		logConfig.config(PanGuConstants.LOGREAD_CONFIGFILE);
 		logTags.addAll(logConfig.getLogHead());
 		ArrayList<String> bodyList = logConfig.readTagsByProducts(productList);
 		for (int i = 0; i < bodyList.size(); i++) {

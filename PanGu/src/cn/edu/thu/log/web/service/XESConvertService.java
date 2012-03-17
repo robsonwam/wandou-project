@@ -45,4 +45,5 @@ public interface XESConvertService {
 	 *         files, like .xes file
 	 */
 	public Collection<XLog> readStandardLog();
+	public XLog mergeXESToLog(String sourcePath, String name) ;
 }

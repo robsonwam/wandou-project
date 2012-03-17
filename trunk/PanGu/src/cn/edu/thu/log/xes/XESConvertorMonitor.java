@@ -3,6 +3,8 @@ package cn.edu.thu.log.xes;
 import java.util.Date;
 import java.util.Hashtable;
 
+import org.deckfour.xes.model.XTrace;
+
 import cn.edu.thu.log.read.LogBuffer;
 import cn.edu.thu.log.util.Format;
 import cn.edu.thu.log.util.PanGuConstants;
@@ -17,18 +19,18 @@ public class XESConvertorMonitor {
 		return singleton;
 	}
 
-	int numOfEvent;
+	public int numOfEvent;
 
 
 	/** map of laster arrival time in one case */
-	Hashtable<String, String> lastestArrivalMap;
+	Hashtable<XTrace, String> lastestArrivalMap;
 	/** map of earliest arrival time . one case */
-	Hashtable<String, String> earliestArrivalMap;
+	Hashtable<XTrace, String> earliestArrivalMap;
 
 	public XESConvertorMonitor() {
 		this.numOfEvent = 0;
-		this.lastestArrivalMap = new Hashtable<String, String>();
-		this.earliestArrivalMap = new Hashtable<String, String>();
+		this.lastestArrivalMap = new Hashtable<XTrace, String>();
+		this.earliestArrivalMap = new Hashtable<XTrace, String>();
 	}
 
 	public boolean ifExceedMaxEventNum() {
@@ -37,8 +39,8 @@ public class XESConvertorMonitor {
 		}
 		return false;
 	}
-	public void addEventNum() {
-		numOfEvent++;
+	public void addEventNum(int addSize) {
+		numOfEvent=numOfEvent+addSize;
 	}
 
 	/**
@@ -50,28 +52,29 @@ public class XESConvertorMonitor {
 	 *            the case's caseID
 	 * @return true:logBuffer attive within case; false: logBuffer timeout
 	 */
-	public boolean ifTimeOut(LogBuffer logBuffer, String caseIDValue) {
+	public boolean ifTimeOut(LogBuffer logBuffer, XTrace trace) {
 		// Time time=new Time();
-		long timeOut = PanGuConstants.MINUTE_MILLIS * PanGuConstants.TIMEOUT_MINUTE;
+		long timeOut = PanGuConstants.TIMEROUT;
 		// System.out.print("\ncheck if timeout");
 		boolean ifTimeOut = false;
-		String lasterTimeString = lastestArrivalMap.get(caseIDValue);
-		String earliestTimeString = earliestArrivalMap.get(caseIDValue);
+		String lasterTimeString = lastestArrivalMap.get(trace);
+		String earliestTimeString = earliestArrivalMap.get(trace);
 		String arriveTimeString = logBuffer.getTimeStamp();
 		Date lasterTime = Format.StringToTimeStamp(lasterTimeString);
 		Date earliestTime = Format.StringToTimeStamp(earliestTimeString);
 		Date arriveTime = Format.StringToTimeStamp(arriveTimeString);
 		if (arriveTime.after(lasterTime)) {
 			if (Math.abs(arriveTime.getTime() - lasterTime.getTime()) > timeOut) {
-				 System.out.print("\nlatest timeout:");
+				ifTimeOut = true;
+				// System.out.print("\nlatest timeout:");
 				// System.out.print("\tlasterTime:" + lasterTime);
 				// System.out.print("\tarriveTime:" + arriveTime);
 				// System.out.print("\ttimeOut:" + timeOut);
 				// System.out.print("\tdifference:"
 				// + (arriveTime.getTime() - lasterTime.getTime()));
-				ifTimeOut = true;
-				// System.out.print("\nlatest time different:"
-				// + (lasterTime.getTime() - arriveTime.getTime()));
+				
+//				 System.out.print("\nlatest time different:"
+//				 + (lasterTime.getTime() - arriveTime.getTime()));
 			}
 		}
 		if (arriveTime.before(earliestTime)) {
@@ -90,14 +93,14 @@ public class XESConvertorMonitor {
 		return ifTimeOut;
 	}
 
-	public void updateLastestArrivalMap(	String newCaseID,
+	public void updateLastestArrivalMap(XTrace trace,
 			String timeStamp) {
-		lastestArrivalMap.put(newCaseID, timeStamp);
+		lastestArrivalMap.put(trace, timeStamp);
 	}
 
-	public void updateEarliestArrivalMap(String newCaseID,
+	public void updateEarliestArrivalMap(XTrace trace,
 			String timeStamp) {
-		earliestArrivalMap.put(newCaseID, timeStamp);
+		earliestArrivalMap.put(trace, timeStamp);
 	}
 
 }

@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.regex.Pattern;
 
@@ -19,14 +20,14 @@ import org.deckfour.xes.extension.std.XConceptExtension;
 import org.deckfour.xes.extension.std.XTimeExtension;
 import org.deckfour.xes.factory.XFactory;
 import org.deckfour.xes.factory.XFactoryRegistry;
+import org.deckfour.xes.info.XLogInfo;
+import org.deckfour.xes.info.XLogInfoFactory;
 import org.deckfour.xes.model.XAttribute;
 import org.deckfour.xes.model.XAttributeMap;
 import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
 import org.deckfour.xes.model.impl.XAttributeLiteralImpl;
-import org.deckfour.xes.model.impl.XAttributeMapImpl;
-import org.deckfour.xes.model.impl.XLogImpl;
 import org.deckfour.xes.out.XesXmlSerializer;
 
 import cn.edu.thu.log.clean.LogClean;
@@ -48,9 +49,12 @@ import cn.edu.thu.log.web.service.WebConfigReadService;
  */
 public class XESConvertor {
 	final String BRANCH = "-bn";
-
+	int numOfEvent = 0;
+	int totalEvent = 0;
+	int XESBranch = 0;
+	String currentTimeString;
 	public static XFactory factory;
-
+	XLog logReplace;
 	WebConfigReadService xesConfig;
 
 	String filePath;
@@ -118,9 +122,13 @@ public class XESConvertor {
 		cateList = new ArrayList<String>();
 		cateList = logfilesReader.getCateList(filePath);
 		File readfile = new File(filePath);
-		XAttributeMapImpl map = new XAttributeMapImpl();
+		// XAttributeMapImpl map = new XAttributeMapImpl();
 
-		log = new XLogImpl(map);
+		log = factory.createLog();
+		logReplace = factory.createLog();
+
+		XESConvertorMonitor.instance().numOfEvent = 0;
+		// log = new XLogImpl(map);
 		System.out.print("\nset up log\n");
 
 		caseBranchMap = new Hashtable<String, XTrace>();
@@ -137,7 +145,7 @@ public class XESConvertor {
 		timer.start();
 		// read File or Directory
 		readFile(readfile);
-		System.out.print("\nstart ReadFile\n");
+		System.out.print("\nfinish ReadFile\n");
 		timer.stop();
 		time1_3_ReadFile += timer.getDuration();
 
@@ -147,9 +155,20 @@ public class XESConvertor {
 		System.out.print("\nsize shoud be in XESConvert " + sizeOfShadowMap);
 		// XFactoryRegistry.instance().setSizeOfShadowMap(sizeOfShadowMap);
 
+		splitFinalLog();
+
+		System.out.print("\nTotal num of events: " + totalEvent);
+
 		timer.start();
 		// write log to xes file
-		writeToXES();
+		System.out.print("\nsize of log before write to XES:" + getLogSize(log)
+				+ " : " + numOfEvent);
+		System.out.print("\nsize of logReplace before write to XES:"
+				+ getLogSize(logReplace) + " : "
+				+ XESConvertorMonitor.instance().numOfEvent);
+
+		writeToXES(log);
+		writeToXES(logReplace);
 		timer.stop();
 		time4_WriteXES += timer.getDuration();
 
@@ -255,7 +274,8 @@ public class XESConvertor {
 		// caculate the total size of .log files
 		fileSize = fileSize + file.length();
 		// read the config
-		logConfig.config(PanGuConstants.LOGREAD_CONFIGFILE, file.getAbsolutePath());
+		logConfig.config(PanGuConstants.LOGREAD_CONFIGFILE, file
+				.getAbsolutePath());
 		String logHeadTokenizer = logConfig.getLogHeadTokenizer();
 		String logBodyTokenizer = logConfig.getLogBodyTokenizer();
 		String logHeadBodyTokenizer = logConfig.getLogHeadBodyTokenizer();
@@ -362,13 +382,13 @@ public class XESConvertor {
 				// noise test and clean test for logBuffer
 				setTestLogBuffer(logBuffer);
 				if (!logclean.logClean(logBuffer)) {
-					// System.out.println("\nnot clean");
+					System.out.println("\nnot clean");
 					// record = reader.readLine();
 					continue;
 				}
 
 				if (!noiseidentify.noiseStrIdentify(logBuffer)) {
-					// System.out.println("\nhas noise");
+					System.out.println("\nhas noise");
 					// record = reader.readLine();
 					continue;
 				}
@@ -412,55 +432,6 @@ public class XESConvertor {
 		return locationList;
 	}
 
-	// /**
-	// * check if the logBuffer arriveTime is within the time limit of one case
-	// *
-	// * @param logBuffer
-	// * arrived logBuffer
-	// * @param caseIDValue
-	// * the case's caseID
-	// * @return true:logBuffer attive within case; false: logBuffer timeout
-	// */
-	// private boolean checkTimeOut(LogBuffer logBuffer, String caseIDValue) {
-	// // Time time=new Time();
-	// long timeOut = MINUTE_MILLIS * TIMEOUT_MINUTE;
-	// // System.out.print("\ncheck if timeout");
-	// boolean ifTimeOut = false;
-	// String lasterTimeString = lastestArrivalMap.get(caseIDValue);
-	// String earliestTimeString = earliestArrivalMap.get(caseIDValue);
-	// String arriveTimeString = logBuffer.getTimeStamp();
-	// Date lasterTime = StringToTimeStamp(lasterTimeString);
-	// Date earliestTime = StringToTimeStamp(earliestTimeString);
-	// Date arriveTime = StringToTimeStamp(arriveTimeString);
-	// if (arriveTime.after(lasterTime)) {
-	// if (Math.abs(arriveTime.getTime() - lasterTime.getTime()) > timeOut) {
-	// // System.out.print("\nlatest timeout:");
-	// // System.out.print("\tlasterTime:" + lasterTime);
-	// // System.out.print("\tarriveTime:" + arriveTime);
-	// // System.out.print("\ttimeOut:" + timeOut);
-	// // System.out.print("\tdifference:"
-	// // + (arriveTime.getTime() - lasterTime.getTime()));
-	// ifTimeOut = true;
-	// // System.out.print("\nlatest time different:"
-	// // + (lasterTime.getTime() - arriveTime.getTime()));
-	// }
-	// }
-	// if (arriveTime.before(earliestTime)) {
-	//
-	// if (arriveTime.getTime() - earliestTime.getTime() > timeOut) {
-	// System.out.print("\n eariliest timeout:");
-	// System.out.print("\tlasterTime:" + earliestTime);
-	// System.out.print("\tarriveTime:" + arriveTime);
-	// System.out.print("\ttimeOut:" + timeOut);
-	// ifTimeOut = true;
-	// // System.out.print("\n earliest time different:"
-	// // + (arriveTime.getTime() - earliestTime.getTime()));
-	// }
-	// }
-	//
-	// return ifTimeOut;
-	// }
-
 	/**
 	 * write activities,logPath,caseID to event
 	 * 
@@ -468,6 +439,7 @@ public class XESConvertor {
 	 * @param logBuffer
 	 */
 	private void writeEvent(XEvent event, LogBuffer logBuffer) {
+
 		// get content of this event
 		ArrayList<Object> logActivityContents = logBuffer
 				.getActivityIDContentList();
@@ -494,10 +466,9 @@ public class XESConvertor {
 		XAttribute attributeTime = factory.createAttributeTimestamp(
 				XTimeExtension.KEY_TIMESTAMP, timeStamp, null);
 		attributeMap.put(attributeTime.getKey(), attributeTime);
-
+		currentTimeString = timeString;
 		// set event's AttributesMap
 		event.setAttributes(attributeMap);
-//		XESConvertorMonitor.instance().addEventNum();
 
 	}
 
@@ -523,8 +494,10 @@ public class XESConvertor {
 			String caseIDValue = ((XAttributeLiteralImpl) tempAttribute)
 					.getValue();
 			// found the lastest case,check if it is already timeout
+			// boolean ifTimeOut = XESConvertorMonitor.instance().ifTimeOut(
+			// logBuffer, caseIDValue);
 			boolean ifTimeOut = XESConvertorMonitor.instance().ifTimeOut(
-					logBuffer, caseIDValue);
+					logBuffer, eachTrace);
 			// time out, build a new trace with new branch
 			if (ifTimeOut) {
 				int pos = caseIDValue.lastIndexOf(BRANCH);
@@ -544,14 +517,23 @@ public class XESConvertor {
 				traceNew.setAttributes(traceAttributeMapNew);
 				traceNew.add(event);
 				log.add(traceNew);
+				// XESConvertorMonitor.instance().updateLastestArrivalMap(
+				// caseIDValue, logBuffer.getTimeStamp());
+				// XESConvertorMonitor.instance().updateEarliestArrivalMap(
+				// caseIDValue, logBuffer.getTimeStamp());
 				XESConvertorMonitor.instance().updateLastestArrivalMap(
-						caseIDValue, logBuffer.getTimeStamp());
+						traceNew, logBuffer.getTimeStamp());
 				XESConvertorMonitor.instance().updateEarliestArrivalMap(
-						caseIDValue, logBuffer.getTimeStamp());
+						traceNew, logBuffer.getTimeStamp());
 			} else {
+				if (!log.contains(eachTrace)) {
+					System.out.print("\nlog does not contains this trace");
+				}
 				eachTrace.add(event);
+				// XESConvertorMonitor.instance().updateLastestArrivalMap(
+				// caseIDValue, logBuffer.getTimeStamp());
 				XESConvertorMonitor.instance().updateLastestArrivalMap(
-						caseIDValue, logBuffer.getTimeStamp());
+						eachTrace, logBuffer.getTimeStamp());
 			}
 		} else {// do not has CaseID,then build a new trace
 			XTrace traceNew = factory.createTrace();
@@ -569,92 +551,145 @@ public class XESConvertor {
 			traceNew.add(event);
 			// add new trace to log
 			log.add(traceNew);
-			XESConvertorMonitor.instance().updateLastestArrivalMap(
-					caseIDString, logBuffer.getTimeStamp());
-			XESConvertorMonitor.instance().updateEarliestArrivalMap(
-					caseIDString, logBuffer.getTimeStamp());
+			// XESConvertorMonitor.instance().updateLastestArrivalMap(
+			// caseIDString, logBuffer.getTimeStamp());
+			// XESConvertorMonitor.instance().updateEarliestArrivalMap(
+			// caseIDString, logBuffer.getTimeStamp());
+			XESConvertorMonitor.instance().updateLastestArrivalMap(traceNew,
+					logBuffer.getTimeStamp());
+			XESConvertorMonitor.instance().updateEarliestArrivalMap(traceNew,
+					logBuffer.getTimeStamp());
+		}
+		numOfEvent++;
+		totalEvent++;
+		System.out.print("\nadd event to log:size of log" + getLogSize(log)
+				+ " : " + numOfEvent);
+		if (getLogSize(log) != numOfEvent) {// for test
+			// numOfEvent=getLogSize(log);
+			// System.exit(0);
+		}
+		splitXLog();
+	}
+
+	private void splitXLog() {
+		if (numOfEvent > PanGuConstants.MAX_EVENT_NUM) {
+			System.out.print("\nExceedMaxEventNum in log: " + numOfEvent);
+			Enumeration<String> latestTimes = XESConvertorMonitor.instance().lastestArrivalMap
+					.elements();
+			Enumeration<XTrace> traces = XESConvertorMonitor.instance().lastestArrivalMap
+					.keys();
+			Date currentTime = Format.StringToTimeStamp(currentTimeString);// the
+
+			while (latestTimes.hasMoreElements()) {
+				Date lasterTime = Format.StringToTimeStamp(latestTimes
+						.nextElement());
+				XTrace currentTrace = traces.nextElement();
+				if (getLogSize(log) != numOfEvent) {
+					System.exit(0);
+				}
+				if (log.contains(currentTrace)) {
+					// complete trace
+					if (Math.abs(currentTime.getTime() - lasterTime.getTime()) > PanGuConstants.TIMEROUT) {
+						logReplace.add(currentTrace);
+						XESConvertorMonitor.instance().numOfEvent = XESConvertorMonitor
+								.instance().numOfEvent
+								+ currentTrace.size();
+						System.out.print("\nsize of logReplace"
+								+ getLogSize(logReplace) + " : "
+								+ XESConvertorMonitor.instance().numOfEvent);
+
+						if (XESConvertorMonitor.instance()
+								.ifExceedMaxEventNum()) {
+							logReplace.remove(currentTrace);// 1
+							XESConvertorMonitor.instance().numOfEvent = XESConvertorMonitor
+									.instance().numOfEvent
+									- currentTrace.size();// 1
+							System.out
+									.print("\nsize of events in logReplace before writeToXES: "
+											+ getLogSize(logReplace)
+											+ " : "
+											+ +XESConvertorMonitor.instance().numOfEvent);
+							System.out
+									.print("\nsize of events in log before logReplace writeToXES: "
+											+ getLogSize(log)
+											+ " : "
+											+ numOfEvent);
+							writeToXES(logReplace);
+							logReplace = factory.createLog();
+							System.out.print("\nlogReplace emptyed:"
+									+ getLogSize(logReplace));
+							XESConvertorMonitor.instance().numOfEvent = 0;
+							break;
+						} else {
+							log.remove(currentTrace);
+							numOfEvent = numOfEvent - currentTrace.size();
+							System.out.print("\nsize of log" + getLogSize(log)
+									+ " : " + numOfEvent);
+						}
+					}
+				}
+			}
 		}
 	}
 
-	// /**
-	// * setup timestamp in Date format
-	// *
-	// * @param timeString
-	// * String of timeStamp
-	// * @return Date format as timeStamp
-	// */
-	// @SuppressWarnings("deprecation")
-	// private Date StringToTimeStamp(String timeString) {
-	// Date timeStamp = new Date();
-	// if (timeString != null) {
-	// try {
-	// timeString = timeString.trim();
-	// timeStamp
-	// .setYear(Integer.parseInt(timeString.substring(0, 4)) - 1900);
-	// timeStamp
-	// .setMonth(Integer.parseInt(timeString.substring(4, 6)) - 1);
-	// timeStamp.setDate(Integer.parseInt(timeString.substring(6, 8)));
-	// timeStamp
-	// .setHours(Integer.parseInt(timeString.substring(8, 10)));
-	// timeStamp.setMinutes(Integer.parseInt(timeString.substring(10,
-	// 12)));
-	// timeStamp.setSeconds(Integer.parseInt(timeString.substring(12,
-	// 14)));
-	// } catch (Exception e) {
-	// System.out.print("\ntime format wrong as:" + timeString);
-	//
-	// }
-	// }
-	// return timeStamp;
-	// }
+	public void splitFinalLog() {
+		System.out.print("\nsplit final log");
+		if (numOfEvent > PanGuConstants.MAX_EVENT_NUM) {
+			System.out.print("\nsplit final log:numOFEvent:" + numOfEvent);
+			while (log.iterator().hasNext()) {
+				XTrace currentTrace = log.iterator().next();
+				logReplace.add(currentTrace);
+				System.out.print("\nsize of logReplace"
+						+ getLogSize(logReplace) + " : "
+						+ XESConvertorMonitor.instance().numOfEvent);
+				XESConvertorMonitor.instance().numOfEvent = XESConvertorMonitor
+						.instance().numOfEvent
+						+ currentTrace.size();
+				if (XESConvertorMonitor.instance().numOfEvent > PanGuConstants.MAX_EVENT_NUM) {
 
-	// /**
-	// * split content by Tokenizer to List
-	// *
-	// * @param logHeadTokenizer
-	// * Tokenizer
-	// * @param logHeadContent
-	// * content
-	// * @return a list of content fields
-	// */
-	// private ArrayList<String> extractContent(String logHeadTokenizer,
-	// String logHeadContent) {
-	// // Split logHeadContent by logHeadTokenizer
-	// int len = logHeadContent.length();
-	// int pos = 0;
-	// ArrayList<String> alParams = new ArrayList<String>();
-	// int nl = logHeadTokenizer.length();
-	// int oldPos = 0;
-	// while (pos < len) {
-	// int idx = logHeadContent.indexOf(logHeadTokenizer, pos);
-	// if (idx != -1) {
-	// pos = idx + nl;
-	//
-	// if (idx == 0) {
-	// alParams.add("");
-	// oldPos = pos;
-	// } else if (logHeadContent.charAt(idx - 1) != '\\') {
-	// alParams.add(logHeadContent.substring(oldPos, idx));
-	// oldPos = pos;
-	// }
-	//
-	// if (pos == len)
-	// alParams.add("");
-	// } else {
-	// alParams.add(logHeadContent.substring(pos + nl));
-	// pos = len;
-	// }
-	// }
-	// return alParams;
-	// }
+					logReplace.remove(currentTrace);// 1
+					XESConvertorMonitor.instance().numOfEvent = XESConvertorMonitor
+							.instance().numOfEvent
+							- currentTrace.size();// 1
+
+					System.out
+							.print("\nsplit final log:size in logReplace before writeToXES: "
+									+ getLogSize(logReplace)
+									+ " : "
+									+ +XESConvertorMonitor.instance().numOfEvent);
+					System.out
+							.print("\nsplit final log:size in log before logReplace writeToXES: "
+									+ getLogSize(log) + " : " + numOfEvent);
+					writeToXES(logReplace);
+					logReplace = factory.createLog();
+					System.out.print("\nlogReplace emptyed:"
+							+ getLogSize(logReplace));
+					XESConvertorMonitor.instance().numOfEvent = 0;
+					break;
+				} else {
+					log.remove(currentTrace);
+					numOfEvent = numOfEvent - currentTrace.size();
+					System.out.print("\nsplit final log:size of log"
+							+ getLogSize(log) + " : " + numOfEvent);
+				}
+			}
+		}
+	}
 
 	/**
 	 * write log to xes file
 	 */
-	private void writeToXES() {
+	private void writeToXES(XLog writeLog) {
+		// wirteLog is empty
+		if (writeLog.size() == 0) {
+			return;
+		}
+		// get the size of events in writeLog
+		System.out.print("\nthe size of writeLog: " + getLogSize(writeLog));
 		System.out.print("\nwrite to XES");
 		try {
-			File sFile = new File(resultFilePath);
+			File sFile = new File(resultFilePath + "_" + XESBranch + ".xes");
+			XESBranch++;
 			if (sFile.exists()) {
 				sFile.delete();
 			}
@@ -673,7 +708,7 @@ public class XESConvertor {
 			// XesXStreamPersistency.register(xstream);
 			OutputStream oStream = new BufferedOutputStream(
 					new FileOutputStream(sFile));
-			xstream.serialize(log, oStream);
+			xstream.serialize(writeLog, oStream);
 			oStream.close();
 
 		} catch (Exception e) {
@@ -695,5 +730,22 @@ public class XESConvertor {
 
 	public void setLog(XLog log) {
 		this.log = log;
+	}
+
+	private int getLogSize(XLog logL) {
+		// int sizeOfWriteLog = 0;
+		// for (int i = 0; i < logL.size(); i++) {
+		// XTrace traceTemp = logL.get(i);
+		// sizeOfWriteLog = sizeOfWriteLog + traceTemp.size();
+		// // sizeOfWriteLog = sizeOfWriteLog + getTraceSize(traceTemp);
+		// }
+		// return sizeOfWriteLog;
+		int events = 0;
+		XLogInfo info = null;
+
+		info = XLogInfoFactory.createLogInfo(logL);
+		events += info.getNumberOfEvents();
+
+		return events;
 	}
 }

@@ -3,10 +3,12 @@ package cn.edu.thu.log.web.service.impl;
 import java.util.Collection;
 
 import org.deckfour.xes.model.XLog;
+import org.deckfour.xes.model.impl.XLogImpl;
 
 import cn.edu.thu.log.web.service.WebConfigReadService;
 import cn.edu.thu.log.web.service.XESConvertService;
 import cn.edu.thu.log.xes.XESConvertor;
+import cn.edu.thu.log.xes.XESMerge;
 import cn.edu.thu.log.xes.XESReader;
 
 /**
@@ -17,6 +19,8 @@ import cn.edu.thu.log.xes.XESReader;
  */
 public class XESConvertServiceImp implements XESConvertService {
 	XLog xlog;
+
+
 
 	@Override
 	public void convert(String readFilePath, String resultFile) {
@@ -37,17 +41,26 @@ public class XESConvertServiceImp implements XESConvertService {
 
 	@Override
 	public Collection<XLog> readStandardLog(String standardLogFile) {
-		XESReader xesReader=new XESReader();
+		XESReader xesReader = new XESReader();
 		Collection<XLog> logs;
-		logs=xesReader.readStandardLog( standardLogFile);
+		logs = xesReader.readStandardLog(standardLogFile);
 		return logs;
 	}
+
 	@Override
 	public Collection<XLog> readStandardLog() {
-		XESReader xesReader=new XESReader();
+		XESReader xesReader = new XESReader();
 		Collection<XLog> logs;
-		logs=xesReader.readStandardLog();
+		logs = xesReader.readStandardLog();
 		return logs;
+	}
+
+	@Override
+	public XLog mergeXESToLog(String sourcePath, String name) {
+		System.out.print("\nget into merge service");
+		XESMerge xesMerge = new XESMerge();
+		xlog = xesMerge.mergeXES(sourcePath, name);
+		return xlog;
 	}
 	// public LogBuffer getLogBuffer (String readFilePath) {
 	// WebConfigReadService configRead = new WebConfigReadServiceImpl();

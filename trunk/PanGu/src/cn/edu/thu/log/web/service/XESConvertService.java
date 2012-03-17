@@ -1,5 +1,6 @@
 package cn.edu.thu.log.web.service;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.deckfour.xes.model.XLog;
@@ -46,4 +47,5 @@ public interface XESConvertService {
 	 */
 	public Collection<XLog> readStandardLog();
 	public XLog mergeXESToLog(String sourcePath, String name) ;
+	public ArrayList<String> reserveXEStoLogLoc(String sourcePath, String name) ;
 }

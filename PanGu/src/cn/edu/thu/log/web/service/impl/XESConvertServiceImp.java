@@ -1,15 +1,16 @@
 package cn.edu.thu.log.web.service.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.deckfour.xes.model.XLog;
-import org.deckfour.xes.model.impl.XLogImpl;
 
 import cn.edu.thu.log.web.service.WebConfigReadService;
 import cn.edu.thu.log.web.service.XESConvertService;
 import cn.edu.thu.log.xes.XESConvertor;
 import cn.edu.thu.log.xes.XESMerge;
 import cn.edu.thu.log.xes.XESReader;
+import cn.edu.thu.log.xes.XESReverse;
 
 /**
  * implementation of service XES Convert.
@@ -19,8 +20,6 @@ import cn.edu.thu.log.xes.XESReader;
  */
 public class XESConvertServiceImp implements XESConvertService {
 	XLog xlog;
-
-
 
 	@Override
 	public void convert(String readFilePath, String resultFile) {
@@ -61,6 +60,16 @@ public class XESConvertServiceImp implements XESConvertService {
 		XESMerge xesMerge = new XESMerge();
 		xlog = xesMerge.mergeXES(sourcePath, name);
 		return xlog;
+	}
+
+	@Override
+	public ArrayList<String> reserveXEStoLogLoc(String sourcePath, String name) {
+		ArrayList<String> originalLogLocationList;
+		XESReverse xesReserve = new XESReverse();
+		xesReserve.reverse(sourcePath, name);
+		originalLogLocationList = xesReserve.getOriginalLogLocationList();
+		return originalLogLocationList;
+
 	}
 	// public LogBuffer getLogBuffer (String readFilePath) {
 	// WebConfigReadService configRead = new WebConfigReadServiceImpl();

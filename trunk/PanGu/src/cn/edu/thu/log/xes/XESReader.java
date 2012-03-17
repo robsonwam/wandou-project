@@ -1,25 +1,19 @@
 package cn.edu.thu.log.xes;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
 import java.util.Collection;
 
 import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
 
 import org.deckfour.xes.in.XParser;
 import org.deckfour.xes.in.XParserRegistry;
 import org.deckfour.xes.info.XLogInfo;
 import org.deckfour.xes.info.XLogInfoFactory;
 import org.deckfour.xes.model.XLog;
-import org.deckfour.xes.out.XSerializer;
-import org.deckfour.xes.out.XSerializerRegistry;
 import org.deckfour.xes.util.XTimer;
 
 /**
- * Read the standard log file,like .XES .MXML
+ * Read the one standard log file,like .XES .MXML
  * 
  * @author meng
  * 

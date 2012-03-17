@@ -455,10 +455,10 @@ public class XESConvertor {
 				XConceptExtension.KEY_NAME, activityVal, null);
 		attributeMap.put(XConceptExtension.KEY_NAME, attribute);
 
-		// add logPath attribute to map
-		// XAttribute attribute = factory.createAttributeLiteral("logPath",
-		// logBuffer.getLogPath(), null);
-		// attributeMap.put(attribute.getKey(), attribute);
+		 //add logPath attribute to map
+		 XAttribute attributePath = factory.createAttributeLiteral(PanGuConstants.LOGPATH_ATTRIBUTE,
+		 logBuffer.getLogPath(), null);
+		 attributeMap.put(attributePath.getKey(), attributePath);
 
 		// add timestamp attribute to map
 		String timeString = logBuffer.getTimeStamp();

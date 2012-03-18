@@ -175,7 +175,7 @@ public class AlphaMiner implements NodeExpander<Tuple> {
 		// Add places for each tuple
 		for (Tuple tuple : result) {
 			Place p = net.addPlace(tuple.toString());
-			System.out.println("添加新的Place");
+			//System.out.println("添加新的Place");
 			for (XEventClass eventClass : tuple.leftPart) {
 				net.addArc(class2transition.get(eventClass), p);
 			}

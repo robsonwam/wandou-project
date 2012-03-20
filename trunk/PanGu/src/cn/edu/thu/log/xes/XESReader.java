@@ -71,7 +71,7 @@ public class XESReader {
 	 */
 
 	public Collection<XLog> readStandardLog(String sourcePath) {
-
+		System.out.println("miningfile is："+ sourcePath);
 		File sourceFile = new File(sourcePath);
 		// load source file
 		Collection<XLog> logs = null;

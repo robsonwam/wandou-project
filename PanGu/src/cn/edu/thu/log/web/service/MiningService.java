@@ -9,4 +9,6 @@ public interface MiningService {
 	public Petrinet doGeneticMinerMining(XLog log);
 	
 	public Petrinet doFuzzyMinerMining(XLog log);
+	
+	public Petrinet doHeuristicMinerMining(XLog log);
 }

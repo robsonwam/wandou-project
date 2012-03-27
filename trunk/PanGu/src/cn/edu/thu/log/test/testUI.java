@@ -12,8 +12,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -21,7 +19,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Vector;
-import java.util.concurrent.CancellationException;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -40,6 +37,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
+import javax.swing.JSlider;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
@@ -128,6 +126,8 @@ public class testUI extends JFrame {
 	JPanel noiseIdentifyPanel;
 	JPanel activityIdentifyPanel;
 	JPanel caseIdentifyPanel;
+	JPanel heuristicMinerPanel;
+	ParametersPanel parameters;
 	Container container;
 	CardLayout cardManager;
 
@@ -159,6 +159,8 @@ public class testUI extends JFrame {
 
 	XESConvertService XESConvert;
 	MiningService miningservice;
+
+	XLog log;
 	/**
 	 * construction function
 	 * 
@@ -170,7 +172,7 @@ public class testUI extends JFrame {
 		// initiate the UI
 		miningconfigservice = new MiningConfigUIServiceImpl();
 		XESConvert = new XESConvertServiceImp();
-		miningservice=new MiningServiceImpl();
+		miningservice = new MiningServiceImpl();
 		// miningconfigwriteservice=new MiningConfigWriteServiceImpl();
 		// readlogservice=new LogReadServiceImpl();
 		productsname = new HashMap<String, String>();
@@ -216,6 +218,7 @@ public class testUI extends JFrame {
 		noiseIdentifyPanel = new JPanel();
 		activityIdentifyPanel = new JPanel();
 		caseIdentifyPanel = new JPanel();
+		heuristicMinerPanel = new JPanel();
 
 		// 菜单控件的初始化，添加事件监听，并添加到界面中
 		initMenuBar();
@@ -226,13 +229,16 @@ public class testUI extends JFrame {
 		// 初始化挖掘配置文件面板
 		initMiningConfigPanel();
 
+		// 初始化启发是挖掘算法配置面板
+		initHeuristicMinerPanel();
+
 		// 在cardLayout布局的frame中添加不同面板
 		container.add(homePanel, "home面板");
 		container.add(logCleanPanel, "日志清洗面板");
 		container.add(noiseIdentifyPanel, "噪音识别面板");
 		container.add(activityIdentifyPanel, "活动识别面板");
 		container.add(caseIdentifyPanel, "案例识别面板");
-
+		container.add(heuristicMinerPanel, "启发式算法面板");
 	}
 
 	// 初始化菜单栏
@@ -369,13 +375,15 @@ public class testUI extends JFrame {
 			processMiningMainMenu = new JMenu("过程挖掘");
 			openMiningFileItem = new JMenuItem("打开新的日志文件");
 			processMiningMenu = new JMenu("挖掘算法选择");
-			processMiningMenu.setEnabled(false);
+			//processMiningMenu.setEnabled(false);
 
 			// 调用Boot类中的方法，返回全部的挖掘算法到Map<String，String>中，其中key是挖掘算法名称
 			// value是算法的包位置
 			Map<String, String> miningAlgorithms = new HashMap<String, String>();
-			miningAlgorithms.put("AlphaMiner", "cn.edu.thu.log.mining.AlphaMiner");
-
+			miningAlgorithms.put("AlphaMiner",
+					"cn.edu.thu.log.mining.AlphaMiner");
+			miningAlgorithms.put("HeuristicMiner",
+					"cn.edu.thu.log.mining.HeuristicMiner");
 			JMenuItem miningItem = null;
 			Iterator<Entry<String, String>> it = miningAlgorithms.entrySet()
 					.iterator();
@@ -385,11 +393,12 @@ public class testUI extends JFrame {
 				String value = entry.getValue();
 				miningItem = new JMenuItem(key);
 				processMiningMenu.add(miningItem);
-				miningItem.addActionListener(new MiningHandler(key,value));
+				miningItem.addActionListener(new MiningHandler(key, value));
+				processMiningMainMenu.add(processMiningMenu);
 			}
-			registerMiningItem = new JMenuItem("注册新挖掘算法");
-			processMiningMainMenu.add(processMiningMenu);
-			processMiningMainMenu.add(registerMiningItem);
+			// registerMiningItem = new JMenuItem("注册新挖掘算法");
+
+			// processMiningMainMenu.add(registerMiningItem);
 			processMiningMainMenu.add(openMiningFileItem);
 
 			openMiningFileItem.addActionListener(new ActionListener() {
@@ -402,15 +411,15 @@ public class testUI extends JFrame {
 
 			});
 
-			registerMiningItem.addActionListener(new ActionListener() {
-
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					// TODO Auto-generated method stub
-					cardManager.show(container, "注册新挖掘算法");
-				}
-
-			});
+			// registerMiningItem.addActionListener(new ActionListener() {
+			//
+			// @Override
+			// public void actionPerformed(ActionEvent e) {
+			// // TODO Auto-generated method stub
+			// cardManager.show(container, "注册新挖掘算法");
+			// }
+			//
+			// });
 
 			// 对菜单栏初始化
 			menuBar = new JMenuBar();
@@ -941,6 +950,58 @@ public class testUI extends JFrame {
 		caseIdentifyPanel.add(caseResultList);
 	}
 
+	// 初始化启发式挖掘算法配置面板
+	private void initHeuristicMinerPanel() {
+//		// TODO Auto-generated method stub
+//		heuristicMinerPanel.setLayout(new BorderLayout());
+//		JPanel heuristicParameterPanel = new JPanel();
+//		heuristicParameterPanel.setLayout(new BorderLayout());
+//		heuristicParameterPanel.setBorder(BorderFactory
+//				.createTitledBorder("Heuristic Miner Parameters"));
+//
+//		JPanel thresholdPanel = new JPanel(new BorderLayout());
+//		heuristicParameterPanel.add(thresholdPanel, BorderLayout.CENTER);
+//		JPanel upPanel = new JPanel();
+//		upPanel.setBorder(BorderFactory.createTitledBorder("Threshold"));
+//		JPanel downPanel = new JPanel();
+//		downPanel.setBorder(BorderFactory.createTitledBorder("Heuristics"));
+//		thresholdPanel.add(upPanel, BorderLayout.CENTER);
+//		thresholdPanel.add(downPanel, BorderLayout.SOUTH);
+//
+		JPanel buttonPanel = new JPanel();
+		JButton cancelButton = new JButton("Cancel");
+		JButton continueButton = new JButton("Continue");
+		buttonPanel.add(cancelButton);
+		buttonPanel.add(continueButton);
+		
+		parameters=new ParametersPanel();
+		cancelButton.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				cardManager.show(container, "home面板");
+			}
+			
+		});
+		
+		continueButton.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				miningservice.doHeuristicMinerMining(log,parameters.getSettings());
+			}
+			
+		});
+		
+		
+		heuristicMinerPanel.setLayout(new BorderLayout());
+		heuristicMinerPanel.add(parameters, BorderLayout.CENTER);
+		heuristicMinerPanel.add(buttonPanel, BorderLayout.SOUTH);
+		
+	}
+
 	/**
 	 * add each log record for test
 	 * 
@@ -1179,7 +1240,8 @@ public class testUI extends JFrame {
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			chosenMiningFile = chooser.getSelectedFile();
 			System.out.println("载入的文件是" + chosenMiningFile.getAbsolutePath());
-			cardManager.show(container, "日志分析面板");
+			// cardManager.show(container, "日志分析面板");
+
 			processMiningMenu.setEnabled(true);
 			// XESConvert.readStandardLog(chosenMiningFile.getAbsolutePath());
 
@@ -1191,52 +1253,39 @@ public class testUI extends JFrame {
 
 	/**
 	 * 内部类，用于处理选择合适的挖掘算法
+	 * 
 	 * @author wan
-	 *
+	 * 
 	 */
 	class MiningHandler implements ActionListener {
-		private String name; 
+		private String name;
 		private String algorithm;
-		public MiningHandler(String name,String algorithm) {
-			this.name=name;
-			this.algorithm=algorithm;
+
+		public MiningHandler(String name, String algorithm) {
+			this.name = name;
+			this.algorithm = algorithm;
 		}
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			// TODO Auto-generated method stub			
+			// TODO Auto-generated method stub
+			// Class<?> c=MiningService.class;
+			if (name.equals("HeuristicMiner")){
+				cardManager.show(container, "启发式算法面板");	
+				
+			Collection<XLog> logs = XESConvert.readStandardLog(chosenMiningFile
+					.getAbsolutePath());
+			Iterator<XLog> it = logs.iterator();
+			// Object argobj=it.next();
+			log = it.next();
+			// Method method=c.getMethod("do"+name+"Mining", XLog.class);
+			// method.invoke(miningservice, argobj);
+			
+//			if (name.equals("AlphaMiner"))
+//				miningservice.doAlphaMinerMining(log);
+					
+			}
 
-			try {		
-				Class<?> c=MiningService.class;
-				Collection<XLog> logs = XESConvert
-						.readStandardLog(chosenMiningFile
-								.getAbsolutePath());
-				Iterator<XLog> it = logs.iterator();	
-				Object argobj=it.next();	
-				
-				Method method=c.getMethod("do"+name+"Mining", XLog.class);
-				method.invoke(miningservice, argobj);
-				
-				} catch (CancellationException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();				
-				} catch (SecurityException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (NoSuchMethodException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (IllegalArgumentException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();			
-				} catch (IllegalAccessException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (InvocationTargetException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-						
 		}
 	}
 }

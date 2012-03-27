@@ -274,8 +274,8 @@ public class XESConvertor {
 		// caculate the total size of .log files
 		fileSize = fileSize + file.length();
 		// read the config
-		logConfig.config(PanGuConstants.LOGREAD_CONFIGFILE, file
-				.getAbsolutePath());
+		logConfig.config(PanGuConstants.LOGREAD_CONFIGFILE,
+				file.getAbsolutePath());
 		String logHeadTokenizer = logConfig.getLogHeadTokenizer();
 		String logBodyTokenizer = logConfig.getLogBodyTokenizer();
 		String logHeadBodyTokenizer = logConfig.getLogHeadBodyTokenizer();
@@ -455,10 +455,10 @@ public class XESConvertor {
 				XConceptExtension.KEY_NAME, activityVal, null);
 		attributeMap.put(XConceptExtension.KEY_NAME, attribute);
 
-		 //add logPath attribute to map
-		 XAttribute attributePath = factory.createAttributeLiteral(PanGuConstants.LOGPATH_ATTRIBUTE,
-		 logBuffer.getLogPath(), null);
-		 attributeMap.put(attributePath.getKey(), attributePath);
+		// add logPath attribute to map
+		XAttribute attributePath = factory.createAttributeLiteral(
+				PanGuConstants.LOGPATH_ATTRIBUTE, logBuffer.getLogPath(), null);
+		attributeMap.put(attributePath.getKey(), attributePath);
 
 		// add timestamp attribute to map
 		String timeString = logBuffer.getTimeStamp();
@@ -562,8 +562,8 @@ public class XESConvertor {
 		}
 		numOfEvent++;
 		totalEvent++;
-		System.out.print("\nadd event to log:size of log" + getLogSize(log)
-				+ " : " + numOfEvent);
+		// System.out.print("\nadd event to log:size of log" + getLogSize(log)
+		// + " : " + numOfEvent);
 		if (getLogSize(log) != numOfEvent) {// for test
 			// numOfEvent=getLogSize(log);
 			// System.exit(0);
@@ -573,7 +573,7 @@ public class XESConvertor {
 
 	private void splitXLog() {
 		if (numOfEvent > PanGuConstants.MAX_EVENT_NUM) {
-			System.out.print("\nExceedMaxEventNum in log: " + numOfEvent);
+			// System.out.print("\nExceedMaxEventNum in log: " + numOfEvent);
 			Enumeration<String> latestTimes = XESConvertorMonitor.instance().lastestArrivalMap
 					.elements();
 			Enumeration<XTrace> traces = XESConvertorMonitor.instance().lastestArrivalMap
@@ -592,11 +592,10 @@ public class XESConvertor {
 					if (Math.abs(currentTime.getTime() - lasterTime.getTime()) > PanGuConstants.TIMEROUT) {
 						logReplace.add(currentTrace);
 						XESConvertorMonitor.instance().numOfEvent = XESConvertorMonitor
-								.instance().numOfEvent
-								+ currentTrace.size();
-						System.out.print("\nsize of logReplace"
-								+ getLogSize(logReplace) + " : "
-								+ XESConvertorMonitor.instance().numOfEvent);
+								.instance().numOfEvent + currentTrace.size();
+						// System.out.print("\nsize of logReplace"
+						// + getLogSize(logReplace) + " : "
+						// + XESConvertorMonitor.instance().numOfEvent);
 
 						if (XESConvertorMonitor.instance()
 								.ifExceedMaxEventNum()) {
@@ -616,8 +615,8 @@ public class XESConvertor {
 											+ numOfEvent);
 							writeToXES(logReplace);
 							logReplace = factory.createLog();
-							System.out.print("\nlogReplace emptyed:"
-									+ getLogSize(logReplace));
+							// System.out.print("\nlogReplace emptyed:"
+							// + getLogSize(logReplace));
 							XESConvertorMonitor.instance().numOfEvent = 0;
 							break;
 						} else {
@@ -634,7 +633,7 @@ public class XESConvertor {
 
 	public void splitFinalLog() {
 		System.out.print("\nsplit final log");
-		if (numOfEvent > PanGuConstants.MAX_EVENT_NUM) {
+		while (numOfEvent > PanGuConstants.MAX_EVENT_NUM) {
 			System.out.print("\nsplit final log:numOFEvent:" + numOfEvent);
 			while (log.iterator().hasNext()) {
 				XTrace currentTrace = log.iterator().next();
@@ -643,14 +642,12 @@ public class XESConvertor {
 						+ getLogSize(logReplace) + " : "
 						+ XESConvertorMonitor.instance().numOfEvent);
 				XESConvertorMonitor.instance().numOfEvent = XESConvertorMonitor
-						.instance().numOfEvent
-						+ currentTrace.size();
+						.instance().numOfEvent + currentTrace.size();
 				if (XESConvertorMonitor.instance().numOfEvent > PanGuConstants.MAX_EVENT_NUM) {
 
 					logReplace.remove(currentTrace);// 1
 					XESConvertorMonitor.instance().numOfEvent = XESConvertorMonitor
-							.instance().numOfEvent
-							- currentTrace.size();// 1
+							.instance().numOfEvent - currentTrace.size();// 1
 
 					System.out
 							.print("\nsplit final log:size in logReplace before writeToXES: "
@@ -669,8 +666,8 @@ public class XESConvertor {
 				} else {
 					log.remove(currentTrace);
 					numOfEvent = numOfEvent - currentTrace.size();
-					System.out.print("\nsplit final log:size of log"
-							+ getLogSize(log) + " : " + numOfEvent);
+					// System.out.print("\nsplit final log:size of log"
+					// + getLogSize(log) + " : " + numOfEvent);
 				}
 			}
 		}

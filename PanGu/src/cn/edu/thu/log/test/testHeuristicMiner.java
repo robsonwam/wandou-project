@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import org.deckfour.xes.model.XLog;
+import org.processmining.plugins.heuristicsnet.miner.heuristics.miner.settings.HeuristicsMinerSettings;
 
 import cn.edu.thu.log.mining.heuristicmining.HeuristicsMiner;
 import cn.edu.thu.log.web.service.MiningService;
@@ -24,10 +25,12 @@ public class testHeuristicMiner {
 		
 		XESConvertServiceImp convertor = new XESConvertServiceImp();
 		Collection<XLog> logs=convertor.readStandardLog("E:/过程挖掘/event-logs-process-mining-book/Chapter_1/running-example.xes");
+//		Collection<XLog> logs=convertor.readStandardLog("E:/过程挖掘/event-logs-process-mining-book/Chapter_1/running-example-just-two-cases.xes");
 		Iterator<XLog> it = logs.iterator();
 		XLog xlog=it.next();
+		HeuristicsMinerSettings settings=new HeuristicsMinerSettings();
 		MiningService miningservice=new MiningServiceImpl();	
-		miningservice.doHeuristicMinerMining(xlog);
+		miningservice.doHeuristicMinerMining(xlog,settings);
 	}
 
 }

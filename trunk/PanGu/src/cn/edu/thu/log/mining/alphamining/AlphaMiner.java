@@ -10,16 +10,12 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 import org.deckfour.xes.classification.XEventClass;
 import org.deckfour.xes.extension.std.XConceptExtension;
 import org.deckfour.xes.info.XLogInfo;
 import org.deckfour.xes.info.XLogInfoFactory;
 import org.deckfour.xes.model.XLog;
-
-
 import org.processmining.framework.util.Pair;
 import org.processmining.framework.util.search.MultiThreadedSearcher;
 import org.processmining.framework.util.search.NodeExpander;
@@ -27,43 +23,51 @@ import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.models.graphbased.directed.petrinet.elements.Place;
 import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
 import org.processmining.models.graphbased.directed.petrinet.impl.PetrinetFactory;
-import org.processmining.plugins.log.logabstraction.BasicLogRelations;
-import org.processmining.plugins.log.logabstraction.LogRelations;
+
+import cn.edu.thu.log.logabstraction.BasicLogRelations;
+import cn.edu.thu.log.logabstraction.LogRelations;
+import cn.edu.thu.log.logabstraction.MergeXLogInfo;
+import cn.edu.thu.log.web.service.XESReadService;
+import cn.edu.thu.log.web.service.impl.XESReadServiceImpl;
 
 public class AlphaMiner implements NodeExpander<Tuple> {	
 	private LogRelations relations;
 	private List<XEventClass> eventClasses;
 	private InitContext init;
+	private XLog log;
+	private MergeXLogInfo mergexloginfo;
 	
 	public AlphaMiner(){
-		init=new InitContext();
+		init=new InitContext();		
 	}
 	
 	//**************** 3 Variants without nets **********************//	
-	public Petrinet doMining(XLog log) throws CancellationException, InterruptedException,
+	public Petrinet doMining(XESReadService reader) throws CancellationException, InterruptedException,
 			ExecutionException {
-		System.out.println("��ʼ����doMining1"+log.getAttributes().size());
-		XLogInfo info = XLogInfoFactory.createLogInfo(log);
-		return doAlphaMiningPrivate(log, info);
+		System.out.println("��ʼ����doMining1");
+		//mergexloginfo=new MergeXLogInfo(log);
+		//XLogInfo info=mergexloginfo.passInfoParameter();
+		//XLogInfo info = XLogInfoFactory.createLogInfo(log);
+		return doAlphaMiningPrivate(reader);
 	}
 
-	//@PluginVariant(variantLabel = "User-defined event classes", requiredParameterLabels = { 0, 1 })
-	public Petrinet doMining(XLog log, XLogInfo summary) throws CancellationException,
-			InterruptedException, ExecutionException {
-		System.out.println("��ʼ����doMining2");
-		return doAlphaMiningPrivate(log, summary);
-	}
-
-	//@PluginVariant(variantLabel = "User-defined event classes and relations", requiredParameterLabels = { 1, 2 })
-	public Petrinet doMining(XLogInfo summary, LogRelations relations)
-			throws InterruptedException, ExecutionException {
-		System.out.println("��ʼ����doMining3");
-		return doAlphaMiningPrivateWithRelations(summary, relations);
-	}
+//	//@PluginVariant(variantLabel = "User-defined event classes", requiredParameterLabels = { 0, 1 })
+//	public Petrinet doMining(XLog log, XLogInfo summary) throws CancellationException,
+//			InterruptedException, ExecutionException {
+//		System.out.println("��ʼ����doMining2");
+//		return doAlphaMiningPrivate(log, summary);
+//	}
+//
+//	//@PluginVariant(variantLabel = "User-defined event classes and relations", requiredParameterLabels = { 1, 2 })
+//	public Petrinet doMining(XLogInfo summary, LogRelations relations)
+//			throws InterruptedException, ExecutionException {
+//		System.out.println("��ʼ����doMining3");
+//		return doAlphaMiningPrivateWithRelations(summary, relations);
+//	}
 
 	//****************************************************************//
 
-	private Petrinet doAlphaMiningPrivate(XLog log, XLogInfo summary)
+	private Petrinet doAlphaMiningPrivate(XESReadService reader)
 			throws CancellationException, InterruptedException, ExecutionException {
 
 		// No log relations are specified, so find a plugin that can construct them.
@@ -104,9 +108,24 @@ public class AlphaMiner implements NodeExpander<Tuple> {
 //		PluginExecutionResult pluginResult = plugin.getSecond().invoke(c2, log, summary);
 //		pluginResult.synchronize();
 //		LogRelations relations = pluginResult.<LogRelations>getResult(plugin.getFirst());
-		LogRelations relations=new BasicLogRelations(log);
+		LogRelations relation=null;
+		
+		XLog loginit=reader.next();
+		if(loginit!=null){
+			relation=new BasicLogRelations(loginit);
+			relation.fillDirectSuccessionMatrices(loginit);	
+		}
+		
+		while(reader.hasNext()){
+			System.out.println("in the while");
+			log=reader.next();						
+			relation.readNextLog(log);
+			relation.fillDirectSuccessionMatrices(log);			
+		}
+		System.out.println("relation summary event number:"+relation.getSummary().getNumberOfEvents());
+		relation.makeBasicRelations(false);
 		// Now we have the relations and we can continue with the mining.
-		return doAlphaMiningPrivateWithRelations(relations.getSummary(), relations);
+		return doAlphaMiningPrivateWithRelations(relation.getSummary(), relation);
 	}
 
 	private Petrinet doAlphaMiningPrivateWithRelations(XLogInfo summary, LogRelations relations)
@@ -177,6 +196,8 @@ public class AlphaMiner implements NodeExpander<Tuple> {
 			Place p = net.addPlace(tuple.toString());
 			//System.out.println("添加新的Place");
 			for (XEventClass eventClass : tuple.leftPart) {
+				System.out.println("\nTransition is:"+class2transition.get(eventClass));
+				System.out.println("\nPlace is: "+p);
 				net.addArc(class2transition.get(eventClass), p);
 			}
 			for (XEventClass eventClass : tuple.rightPart) {
@@ -187,16 +208,20 @@ public class AlphaMiner implements NodeExpander<Tuple> {
 		//progress.inc();
 
 		//Marking m = new Marking();
-
+		System.out.println("\nadd start place！");
 		// Add initial and final place
 		Place pstart = net.addPlace("Start");
 		for (XEventClass eventClass : relations.getStartTraceInfo().keySet()) {
+			
+			System.out.println("start event: "+eventClass);
+			System.out.println("class2transition:"+class2transition.get(eventClass));
 			net.addArc(pstart, class2transition.get(eventClass));
 		}
 		//m.add(pstart);
-
+		System.out.println("\nadd end place！");
 		Place pend = net.addPlace("End");
 		for (XEventClass eventClass : relations.getEndTraceInfo().keySet()) {
+			System.out.println("end event: "+eventClass);
 			net.addArc(class2transition.get(eventClass), pend);
 		}
 		//progress.inc();

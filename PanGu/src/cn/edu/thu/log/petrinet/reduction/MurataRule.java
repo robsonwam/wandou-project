@@ -3,7 +3,6 @@ package cn.edu.thu.log.petrinet.reduction;
 import java.util.Collection;
 import java.util.HashMap;
 
-
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetNode;
 import org.processmining.models.graphbased.directed.petrinet.elements.Place;

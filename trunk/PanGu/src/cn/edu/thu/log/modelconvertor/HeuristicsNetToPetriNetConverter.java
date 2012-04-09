@@ -20,6 +20,7 @@ import org.processmining.plugins.heuristicsnet.miner.heuristics.miner.operators.
 import org.processmining.plugins.heuristicsnet.miner.heuristics.miner.operators.Split;
 import org.processmining.plugins.heuristicsnet.miner.heuristics.miner.operators.Stats;
 
+import cn.edu.thu.log.petrinet.reduction.PetrinetReduction;
 
 @Plugin(name = "Convert Heuristics net into Petri net", 
 		parameterLabels = {"HeuristicsNet"},
@@ -39,7 +40,8 @@ public class HeuristicsNetToPetriNetConverter {
 			
 			AnnotatedHeuristicsNet ahn = (AnnotatedHeuristicsNet) hn;
 			HashMap<String, String> keys = ahn.getInvertedKeys();
-			
+			ahn.getArcUsage();
+			ahn.getActivitiesMappingStructures();
 			Petrinet net = PetrinetFactory.newPetrinet("Petrinet");
 			//Marking m = new Marking();
 			
@@ -143,14 +145,16 @@ public class HeuristicsNetToPetriNetConverter {
 			}
 					
 			//context.addConnection(new InitialMarkingConnection(net, m));
-			return net;
+			PetrinetReduction reduction=new PetrinetReduction();
+			Petrinet reducedPetrinet=reduction.run(net);
+			return reducedPetrinet;
 		}
 		else{
 			
 			XEventClass[] activities = hn.getActivitiesMappingStructures().getActivitiesMapping();
 			
 			Petrinet net = PetrinetFactory.newPetrinet("Petrinet");
-			Marking m = new Marking();
+			//Marking m = new Marking();
 			
 			Transition[] transitions = new Transition[activities.length];
 			Place[] outputPlaces = new Place[activities.length];
@@ -174,7 +178,7 @@ public class HeuristicsNetToPetriNetConverter {
 				LinkedList<Conjunction> inputs = computeConjunctions(inputActivitiesSet);
 				LinkedList<Conjunction> outputs = computeConjunctions(outputActivitiesSet);
 				
-				if(inputs.size() == 0) m.add(inputPlaces[activityIndex]);
+				//if(inputs.size() == 0) m.add(inputPlaces[activityIndex]);
 					
 				for(Conjunction ic : inputs){
 					
@@ -239,7 +243,30 @@ public class HeuristicsNetToPetriNetConverter {
 			//context.addConnection(new InitialMarkingConnection(net, m));
 			System.out.println("\nPetrinet place size is:"+net.getPlaces().size());
 			System.out.println("\nPetrinet transition size is:"+net.getTransitions().size());
-			return net;
+			System.out.println("\nBefore reduction!");
+			for(Place place:net.getPlaces()){
+				System.out.println("place:"+place.getLabel());	
+				
+			}
+			for(Transition transition:net.getTransitions()){
+				if(!transition.isInvisible())
+					System.out.println("visible transition:"+transition.getLabel());
+				else 
+					System.out.println("invisible transition");
+			}
+			PetrinetReduction reduction=new PetrinetReduction();
+			Petrinet reducedPetrinet=reduction.run(net);
+			System.out.println("\nAfter reduction!");
+			for(Place place:reducedPetrinet.getPlaces()){
+				System.out.println("place:"+place.getLabel());
+			}
+			for(Transition transition:reducedPetrinet.getTransitions()){
+				if(!transition.isInvisible())
+					System.out.println("visible transition:"+transition.getLabel());
+				else 
+					System.out.println("invisible transition");
+			}
+			return reducedPetrinet;
 		}
 	}
 

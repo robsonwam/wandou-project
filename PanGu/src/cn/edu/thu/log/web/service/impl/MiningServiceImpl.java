@@ -5,6 +5,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.deckfour.xes.model.XLog;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
+import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
 import org.processmining.models.heuristics.HeuristicsNet;
 import org.processmining.plugins.heuristicsnet.miner.heuristics.miner.settings.HeuristicsMinerSettings;
 
@@ -13,17 +14,18 @@ import cn.edu.thu.log.mining.heuristicmining.HeuristicsMiner;
 import cn.edu.thu.log.modelconvertor.HeuristicsNetToPetriNetConverter;
 import cn.edu.thu.log.petrinet.reduction.PetrinetReduction;
 import cn.edu.thu.log.web.service.MiningService;
-import cn.edu.thu.log.web.service.XESReadService;
 
 public class MiningServiceImpl implements MiningService {
 
 	@Override
-	public Petrinet doAlphaMinerMining(XESReadService reader) {
+	public Petrinet doAlphaMinerMining(String sourcePath, String name) {
+		//XESReadService reader1=new XESReadServiceImpl(sourcePath,name);
+		
 		// TODO Auto-generated method stub
 		AlphaMiner alpha = new AlphaMiner();
 		Petrinet petrinet = null;
 		try {
-			petrinet = alpha.doMining(reader);
+			petrinet = alpha.doMining(sourcePath,name);
 		} catch (CancellationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -33,6 +35,16 @@ public class MiningServiceImpl implements MiningService {
 		} catch (ExecutionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+//		XESReadService reader2=new XESReadServiceImpl(sourcePath,name);
+//		ReplayLog replaylog=new ReplayLog(reader2);
+//		Map<String,Integer> activitiesMapping=replaylog.getActivitiesMapping();
+//		System.out.println("activity mapping size:"+activitiesMapping.size());
+//		System.out.println("activities Mapping in service"+activitiesMapping);
+//		NewPetrinetWithCounts newpetrinetcount=new NewPetrinetWithCounts(petrinet, activitiesMapping);
+//		Petrinet newPetrinet=newpetrinetcount.getNewPetrinet();
+		for(Transition t:petrinet.getTransitions()){
+		System.out.println("transition name: "+t.getLabel()+" transition time: "+t.getTimes());	
 		}
 		return petrinet;
 	}
@@ -50,10 +62,11 @@ public class MiningServiceImpl implements MiningService {
 	}
 
 	@Override
-	public Petrinet doHeuristicMinerMining(XLog log,
+	public Petrinet doHeuristicMinerMining(String sourcePath, String name,
 			HeuristicsMinerSettings settings) {
 		// TODO Auto-generated method stub
-		HeuristicsMiner hm = new HeuristicsMiner(log);
+		HeuristicsMiner hm = new HeuristicsMiner(sourcePath,name);
+		
 		HeuristicsNet hnet = hm.mine();
 		HeuristicsNetToPetriNetConverter hNetToPNet = new HeuristicsNetToPetriNetConverter();
 		Petrinet petrinet = hNetToPNet.converter(hnet);

@@ -13,6 +13,7 @@ import org.processmining.models.graphbased.directed.petrinet.elements.Arc;
 import org.processmining.models.graphbased.directed.petrinet.elements.Place;
 import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
 
+
 public class PetrinetReductionRule extends MurataRule {
 	private ArrayList<Transition> deletedTransitions;
 	private ArrayList<Place> deletedPlaces;
@@ -53,8 +54,8 @@ public class PetrinetReductionRule extends MurataRule {
 			if (countInputArc(transition) == 1) {
 				/*
 				 * serial rule
-				 */				
-				if (countOutputArc(transition)==1) {
+				 */
+				if (countOutputArc(transition) == 1) {
 					System.out.println("\nBegin to remove the serial transition");
 					preset = net.getInEdges(transition);
 					edge = preset.iterator().next();
@@ -65,46 +66,90 @@ public class PetrinetReductionRule extends MurataRule {
 					edge = postset.iterator().next();
 					outputArc = (Arc) edge;
 					outputPlace = (Place) outputArc.getTarget();
-					if (!sacredNodes.contains(inputPlace) && inputPlaceHasOneOutputArc(transition)&&net.getInEdges(inputPlace) != null) {
-						/*
-						 * The input place is not sacred, and it is not the
-						 * start place.Remove it. First, update the mappings.
-						 */
-						System.out.println("Begin to remove the input place!");
-						HashSet<Transition> removeTransitions = new HashSet<Transition>();
-						for (Transition t : transitionMap.keySet()) {
-							if (transitionMap.get(t) == transition) {
-								removeTransitions.add(t);
+					if (!sacredNodes.contains(inputPlace) && net.getInEdges(inputPlace) != null) {
+						if (inputPlaceHasOneOutputArc(transition)) {
+							/*
+							 * The input place is not sacred, and it is not the
+							 * start place.Remove it. First, update the
+							 * mappings.
+							 */
+							System.out.println("Begin to remove the input place!");
+							HashSet<Transition> removeTransitions = new HashSet<Transition>();
+							for (Transition t : transitionMap.keySet()) {
+								if (transitionMap.get(t) == transition) {
+									removeTransitions.add(t);
+								}
 							}
-						}
-						for (Transition t : removeTransitions) {
-							transitionMap.remove(t);
-						}
-						for (Place p : placeMap.keySet()) {
-							if (placeMap.get(p) == inputPlace) {
-								placeMap.put(p, outputPlace);
+							for (Transition t : removeTransitions) {
+								transitionMap.remove(t);
 							}
-						}
+							for (Place p : placeMap.keySet()) {
+								if (placeMap.get(p) == inputPlace) {
+									placeMap.put(p, outputPlace);
+								}
+							}
 
-						/*
-						 * Also, transfer any input edge from the input place to
-						 * the output place.
-						 */
-						preset = net.getInEdges(inputPlace);
-						for (PetrinetEdge<? extends PetrinetNode, ? extends PetrinetNode> transferEdge : preset) {
-							if (transferEdge instanceof Arc) {
-								Arc transferArc = (Arc) transferEdge;
-								MurataUtils.addArc(net, transferArc.getSource(), outputPlace,
-										transferArc.getWeight());
+							/*
+							 * Also, transfer any input edge from the input
+							 * place to the output place.
+							 */
+							preset = net.getInEdges(inputPlace);
+							
+							for (PetrinetEdge<? extends PetrinetNode, ? extends PetrinetNode> transferEdge : preset) {
+								if (transferEdge instanceof Arc) {
+									Arc transferArc = (Arc) transferEdge;
+									MurataUtils.addArc(net, transferArc.getSource(), outputPlace,
+											transferArc.getWeight());
+								}
 							}
-						}					
-			
-						deletedPlaces.add(inputPlace);
-						deletedTransitions.add(transition);
-						System.out.println("deletedPlace size is:" + deletedPlaces.size()
-								+ "deletedTransition size is " + deletedTransitions.size());
+
+							deletedPlaces.add(inputPlace);
+							deletedTransitions.add(transition);
+							System.out.println("deletedPlace size is:" + deletedPlaces.size()
+									+ "deletedTransition size is " + deletedTransitions.size());
 //						System.out.println("Deleted Place is:"+inputPlace.getLabel());
 //						System.out.println("Deleted Transition is "+transition.getLabel());
+						} 
+						/*
+						 * the transition has one input and one ouput,and the output place has the transition as the only input
+						 */
+						else if(!sacredNodes.contains(outputPlace) && net.getOutEdges(outputPlace)!= null&&outputPlaceHasOneInputArc(transition)){
+						
+							/*
+							 * The output place is not sacred, and it is not the
+							 * end place.Remove it. First, update the
+							 * mappings.
+							 */
+							System.out.println("Begin to remove the output place!");
+							HashSet<Transition> removeTransitions = new HashSet<Transition>();
+							for (Transition t : transitionMap.keySet()) {
+								if (transitionMap.get(t) == transition) {
+									removeTransitions.add(t);
+								}
+							}
+							for (Transition t : removeTransitions) {
+								transitionMap.remove(t);
+							}
+							for (Place p : placeMap.keySet()) {
+								if (placeMap.get(p) == outputPlace) {
+									placeMap.put(p, placeMap.get(outputPlace));
+								}
+							}
+							
+							postset = net.getOutEdges(outputPlace);
+							System.out.println("outputPlace size"+postset.size());
+							for (PetrinetEdge<? extends PetrinetNode, ? extends PetrinetNode> transferEdge : postset) {
+								if (transferEdge instanceof Arc) {
+									Arc transferArc = (Arc) transferEdge;
+									MurataUtils.addArc(net, inputPlace, transferArc.getTarget(),
+											transferArc.getWeight());
+								}
+							}
+							deletedPlaces.add(outputPlace);
+							deletedTransitions.add(transition);
+							System.out.println("deletedPlace size is:" + deletedPlaces.size()
+									+ "deletedTransition size is " + deletedTransitions.size());
+						}
 					}
 				}
 				/*
@@ -145,23 +190,23 @@ public class PetrinetReductionRule extends MurataRule {
 									placeMap.put(p, outputPlace);
 								}
 							}
-						
+
 							/*
 							 * Also, transfer any input edge from the input
 							 * place to the output place.
 							 */
-							
-//							preset = net.getInEdges(inputPlace);						
-//							for (PetrinetEdge<? extends PetrinetNode, ? extends PetrinetNode> transferEdge1 : preset) {
-//								Arc transferArc1 = (Arc) transferEdge1;
-//								for (PetrinetEdge<? extends PetrinetNode, ? extends PetrinetNode> transferEdge2 : postset) {
-//									outputArc = (Arc) transferEdge2;
-//									outputPlace = (Place) outputArc.getTarget();
-//									MurataUtils
-//											.addArc(net, transferArc1.getSource(), outputPlace, transferArc1.getWeight());
-//
-//								}
-//							}
+
+							//							preset = net.getInEdges(inputPlace);						
+							//							for (PetrinetEdge<? extends PetrinetNode, ? extends PetrinetNode> transferEdge1 : preset) {
+							//								Arc transferArc1 = (Arc) transferEdge1;
+							//								for (PetrinetEdge<? extends PetrinetNode, ? extends PetrinetNode> transferEdge2 : postset) {
+							//									outputArc = (Arc) transferEdge2;
+							//									outputPlace = (Place) outputArc.getTarget();
+							//									MurataUtils
+							//											.addArc(net, transferArc1.getSource(), outputPlace, transferArc1.getWeight());
+							//
+							//								}
+							//							}
 							preset = net.getInEdges(inputPlace);
 							for (PetrinetEdge<? extends PetrinetNode, ? extends PetrinetNode> transferEdge : preset) {
 								if (transferEdge instanceof Arc) {
@@ -218,7 +263,7 @@ public class PetrinetReductionRule extends MurataRule {
 							Place inputPlace = (Place) inputArc.getSource();
 							for (Place p : placeMap.keySet()) {
 								if (placeMap.get(p) == outputPlace) {
-									placeMap.put(p, inputPlace);
+									placeMap.put(p, placeMap.get(outputPlace));
 								}
 							}
 							/*
@@ -226,14 +271,14 @@ public class PetrinetReductionRule extends MurataRule {
 							 * place to the input place, and any output edge
 							 * from the output place to the input place.
 							 */
-//							preset = net.getInEdges(outputPlace);
-//							for (PetrinetEdge<? extends PetrinetNode, ? extends PetrinetNode> transferEdge : preset) {
-//								if (transferEdge instanceof Arc) {
-//									Arc transferArc = (Arc) transferEdge;
-//									MurataUtils.addArc(net, transferArc.getSource(), inputPlace,
-//											transferArc.getWeight());
-//								}
-//							}
+							//							preset = net.getInEdges(outputPlace);
+							//							for (PetrinetEdge<? extends PetrinetNode, ? extends PetrinetNode> transferEdge : preset) {
+							//								if (transferEdge instanceof Arc) {
+							//									Arc transferArc = (Arc) transferEdge;
+							//									MurataUtils.addArc(net, transferArc.getSource(), inputPlace,
+							//											transferArc.getWeight());
+							//								}
+							//							}
 							postset = net.getOutEdges(outputPlace);
 							for (PetrinetEdge<? extends PetrinetNode, ? extends PetrinetNode> transferEdge : postset) {
 								if (transferEdge instanceof Arc) {
@@ -251,6 +296,7 @@ public class PetrinetReductionRule extends MurataRule {
 							+ deletedTransitions.size());
 
 				}
+
 			}
 
 		}
@@ -260,7 +306,7 @@ public class PetrinetReductionRule extends MurataRule {
 			System.out.println(net.getPlaces().size());
 		}
 		for (Transition dt : deletedTransitions) {
-//			System.out.println("net remove transition");
+			//			System.out.println("net remove transition");
 			net.removeTransition(dt);
 			System.out.println("Deleted Transition:" + dt.getId());
 			System.out.println(net.getTransitions().size());
@@ -289,8 +335,7 @@ public class PetrinetReductionRule extends MurataRule {
 		if (postset.size() == 1) {
 			System.out.println("input place's output edge size is none!");
 			return true;
-		}
-		else 
+		} else
 			return false;
 	}
 
@@ -305,8 +350,7 @@ public class PetrinetReductionRule extends MurataRule {
 		if (preset.size() == 1) {
 			System.out.println("output place's input edge size is one!");
 			return true;
-		}
-		else 
+		} else
 			return false;
 	}
 

@@ -12,7 +12,6 @@ import org.processmining.models.graphbased.directed.petrinet.elements.Arc;
 import org.processmining.models.graphbased.directed.petrinet.elements.Place;
 import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
 
-
 /**
  * 含有不可见变迁的串行结构
  * @author wan

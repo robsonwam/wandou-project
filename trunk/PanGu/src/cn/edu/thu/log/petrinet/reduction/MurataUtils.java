@@ -8,6 +8,7 @@ import org.processmining.models.graphbased.directed.petrinet.elements.Place;
 import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
 import org.processmining.models.semantics.petrinet.Marking;
 
+
 public class MurataUtils {
 	/**
 	 * Update the label of the given arc. Note that the arc weight is displayed
@@ -82,12 +83,12 @@ public class MurataUtils {
 	 *            The given marking.
 	 * @param place
 	 *            The given place.
-	 */
-	public static void resetPlace(Marking marking, Place place) {
-		Marking placeMarking = new Marking();
-		placeMarking.add(place, marking.occurrences(place));
-		marking.removeAll(placeMarking);
-		updateLabel(place, marking);
-	}
+//	 */
+//	public static void resetPlace(Marking marking, Place place) {
+//		Marking placeMarking = new Marking();
+//		placeMarking.add(place, marking.occurrences(place));
+//		marking.removeAll(placeMarking);
+//		updateLabel(place, marking);
+//	}
 
 }

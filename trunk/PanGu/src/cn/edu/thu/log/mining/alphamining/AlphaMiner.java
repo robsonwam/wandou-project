@@ -14,12 +14,13 @@ import java.util.concurrent.ExecutionException;
 import org.deckfour.xes.classification.XEventClass;
 import org.deckfour.xes.extension.std.XConceptExtension;
 import org.deckfour.xes.info.XLogInfo;
-import org.deckfour.xes.info.XLogInfoFactory;
 import org.deckfour.xes.model.XLog;
 import org.processmining.framework.util.Pair;
 import org.processmining.framework.util.search.MultiThreadedSearcher;
 import org.processmining.framework.util.search.NodeExpander;
+import org.processmining.models.graphbased.AttributeMap;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
+import org.processmining.models.graphbased.directed.petrinet.elements.Arc;
 import org.processmining.models.graphbased.directed.petrinet.elements.Place;
 import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
 import org.processmining.models.graphbased.directed.petrinet.impl.PetrinetFactory;
@@ -27,6 +28,7 @@ import org.processmining.models.graphbased.directed.petrinet.impl.PetrinetFactor
 import cn.edu.thu.log.logabstraction.BasicLogRelations;
 import cn.edu.thu.log.logabstraction.LogRelations;
 import cn.edu.thu.log.logabstraction.MergeXLogInfo;
+import cn.edu.thu.log.replaylog.ReplayLog;
 import cn.edu.thu.log.web.service.XESReadService;
 import cn.edu.thu.log.web.service.impl.XESReadServiceImpl;
 
@@ -36,19 +38,21 @@ public class AlphaMiner implements NodeExpander<Tuple> {
 	private InitContext init;
 	private XLog log;
 	private MergeXLogInfo mergexloginfo;
-	
+	private Map<String,Integer> activitiesMapping;
 	public AlphaMiner(){
-		init=new InitContext();		
+		init=new InitContext();	
+		activitiesMapping=new HashMap<String,Integer>();
 	}
 	
 	//**************** 3 Variants without nets **********************//	
-	public Petrinet doMining(XESReadService reader) throws CancellationException, InterruptedException,
+	public Petrinet doMining(String sourcePath, String name) throws CancellationException, InterruptedException,
 			ExecutionException {
 		System.out.println("��ʼ����doMining1");
 		//mergexloginfo=new MergeXLogInfo(log);
 		//XLogInfo info=mergexloginfo.passInfoParameter();
 		//XLogInfo info = XLogInfoFactory.createLogInfo(log);
-		return doAlphaMiningPrivate(reader);
+		
+		return doAlphaMiningPrivate(sourcePath,name);
 	}
 
 //	//@PluginVariant(variantLabel = "User-defined event classes", requiredParameterLabels = { 0, 1 })
@@ -67,7 +71,7 @@ public class AlphaMiner implements NodeExpander<Tuple> {
 
 	//****************************************************************//
 
-	private Petrinet doAlphaMiningPrivate(XESReadService reader)
+	private Petrinet doAlphaMiningPrivate(String sourcePath, String name)
 			throws CancellationException, InterruptedException, ExecutionException {
 
 		// No log relations are specified, so find a plugin that can construct them.
@@ -108,6 +112,8 @@ public class AlphaMiner implements NodeExpander<Tuple> {
 //		PluginExecutionResult pluginResult = plugin.getSecond().invoke(c2, log, summary);
 //		pluginResult.synchronize();
 //		LogRelations relations = pluginResult.<LogRelations>getResult(plugin.getFirst());
+		
+		XESReadService reader=new XESReadServiceImpl(sourcePath,name);
 		LogRelations relation=null;
 		
 		XLog loginit=reader.next();
@@ -124,6 +130,14 @@ public class AlphaMiner implements NodeExpander<Tuple> {
 		}
 		System.out.println("relation summary event number:"+relation.getSummary().getNumberOfEvents());
 		relation.makeBasicRelations(false);
+		
+		XESReadService reader2=new XESReadServiceImpl(sourcePath,name);
+		ReplayLog replaylog=new ReplayLog(reader2);
+		activitiesMapping=replaylog.getActivitiesMapping();
+		System.out.println("activity mapping size:"+activitiesMapping.size());
+		System.out.println("activities Mapping in service"+activitiesMapping);
+		
+
 		// Now we have the relations and we can continue with the mining.
 		return doAlphaMiningPrivateWithRelations(relation.getSummary(), relation);
 	}
@@ -185,8 +199,12 @@ public class AlphaMiner implements NodeExpander<Tuple> {
 //		context.getFutureResult(1).setLabel("Initial Marking of " + net.getLabel());
 
 		for (XEventClass eventClass : summary.getEventClasses().getClasses()) {
+			System.out.println("activityMaping get eventClass："+eventClass.toString());
 			Transition transition = net.addTransition(eventClass.toString());
+			transition.getAttributeMap().put(AttributeMap.TRANSITION_TIMES, activitiesMapping.get(eventClass.toString()));
+			transition.getAttributeMap().put(AttributeMap.HASVALUE, "true");
 			class2transition.put(eventClass, transition);
+			
 		}
 		//progress.inc();
 
@@ -194,14 +212,18 @@ public class AlphaMiner implements NodeExpander<Tuple> {
 		// Add places for each tuple
 		for (Tuple tuple : result) {
 			Place p = net.addPlace(tuple.toString());
+			p.getAttributeMap().put(AttributeMap.PLACE_TIMES, "0");
 			//System.out.println("添加新的Place");
 			for (XEventClass eventClass : tuple.leftPart) {
 				System.out.println("\nTransition is:"+class2transition.get(eventClass));
 				System.out.println("\nPlace is: "+p);
+				Arc tempArc=net.getArc(class2transition.get(eventClass), p);
 				net.addArc(class2transition.get(eventClass), p);
+				tempArc.getAttributeMap().put(AttributeMap.ARC_TIMES, "0");				
 			}
 			for (XEventClass eventClass : tuple.rightPart) {
 				net.addArc(p, class2transition.get(eventClass));
+				net.getArc(p, class2transition.get(eventClass)).getAttributeMap().put(AttributeMap.ARC_TIMES, "0");
 			}
 			tuple2place.put(tuple, p);
 		}
@@ -211,18 +233,22 @@ public class AlphaMiner implements NodeExpander<Tuple> {
 		System.out.println("\nadd start place！");
 		// Add initial and final place
 		Place pstart = net.addPlace("Start");
+		pstart.getAttributeMap().put(AttributeMap.PLACE_TIMES, "0");
 		for (XEventClass eventClass : relations.getStartTraceInfo().keySet()) {
 			
 			System.out.println("start event: "+eventClass);
 			System.out.println("class2transition:"+class2transition.get(eventClass));
 			net.addArc(pstart, class2transition.get(eventClass));
+			net.getArc(pstart, class2transition.get(eventClass)).getAttributeMap().put(AttributeMap.ARC_TIMES, "0");
 		}
 		//m.add(pstart);
 		System.out.println("\nadd end place！");
 		Place pend = net.addPlace("End");
+		pend.getAttributeMap().put(AttributeMap.PLACE_TIMES, "0");
 		for (XEventClass eventClass : relations.getEndTraceInfo().keySet()) {
 			System.out.println("end event: "+eventClass);
 			net.addArc(class2transition.get(eventClass), pend);
+			net.getArc(class2transition.get(eventClass), pend).getAttributeMap().put(AttributeMap.ARC_TIMES,"0");
 		}
 		//progress.inc();
 
@@ -240,7 +266,10 @@ public class AlphaMiner implements NodeExpander<Tuple> {
 			for (Tuple existing : result) {
 				if (existing.isSmallerThan(t)) {
 					net.addArc(tuple2place.get(existing), class2transition.get(oneLoop));
+					net.getArc(tuple2place.get(existing), class2transition.get(oneLoop)).getAttributeMap().put(AttributeMap.ARC_TIMES,"0");
+					
 					net.addArc(class2transition.get(oneLoop), tuple2place.get(existing));
+					net.getArc(class2transition.get(oneLoop), tuple2place.get(existing)).getAttributeMap().put(AttributeMap.ARC_TIMES,"0");
 				}
 			}
 		}
@@ -250,6 +279,15 @@ public class AlphaMiner implements NodeExpander<Tuple> {
 		//return new Object[] { net, m };
 		System.out.println("\nPetrinet place size is:"+net.getPlaces().size());
 		System.out.println("\nPetrinet transition size is:"+net.getTransitions().size());
+		for(Place place:net.getPlaces()){
+			System.out.println("place"+place.getLabel());
+		}
+		for(Transition transition:net.getTransitions()){
+			if(!transition.isInvisible())
+				System.out.println("visible transition"+transition.getLabel());
+			else 
+				System.out.println("invisible transition");
+		}
 		return net;
 	}
 

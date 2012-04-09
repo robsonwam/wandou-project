@@ -4,6 +4,8 @@ import org.deckfour.xes.model.XLog;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.plugins.heuristicsnet.miner.heuristics.miner.settings.HeuristicsMinerSettings;
 
+
+
 public interface MiningService {
 	//public Petrinet doAlphaMinerMining(XLog log);
 	
@@ -11,7 +13,7 @@ public interface MiningService {
 	
 	public Petrinet doFuzzyMinerMining(XLog log);
 	
-	public Petrinet doHeuristicMinerMining(XLog log,HeuristicsMinerSettings settings);
+	public Petrinet doHeuristicMinerMining(String sourcePath, String name,HeuristicsMinerSettings settings);
 
-	public Petrinet doAlphaMinerMining(XESReadService reader);
+	public Petrinet doAlphaMinerMining(String sourcePath, String name);
 }

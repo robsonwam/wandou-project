@@ -7,7 +7,6 @@ import java.util.HashMap;
 
 import org.deckfour.xes.classification.XEventClass;
 import org.deckfour.xes.info.XLogInfo;
-import org.deckfour.xes.info.XLogInfoFactory;
 import org.deckfour.xes.info.impl.XLogInfoImpl;
 import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
@@ -23,100 +22,131 @@ import org.processmining.plugins.heuristicsnet.miner.heuristics.miner.fitness.Co
 import org.processmining.plugins.heuristicsnet.miner.heuristics.miner.fitness.ImprovedContinuousSemantics;
 import org.processmining.plugins.heuristicsnet.miner.heuristics.miner.settings.HeuristicsMinerSettings;
 
+import cn.edu.thu.log.logabstraction.MergeXLogInfo;
+import cn.edu.thu.log.web.service.XESReadService;
+import cn.edu.thu.log.web.service.impl.XESReadServiceImpl;
+
 public class HeuristicsMiner {
 
-	protected XLog log;
+	//protected XLog log;
 	protected XLogInfo logInfo;
 	protected HeuristicsMetrics metrics;
-	//protected PluginContext context;
+	protected HeuristicsMetrics tempMetrics;
+	// protected PluginContext context;
 
-	//-------------------------------
+	// -------------------------------
 
-	public final static double CAUSALITY_FALL = 0.8; // PUT THIS ON CONSTANTS/SETTINGS???
+	public final static double CAUSALITY_FALL = 0.8; // PUT THIS ON
+														// CONSTANTS/SETTINGS???
 	// public final static boolean LT_DEBUG = false;
 
 	protected HashMap<String, Integer> keys;
 	protected ActivitiesMappingStructures activitiesMappingStructures;
 
 	protected HeuristicsMinerSettings settings;
+//	protected XESReadService reader;
 
-	//	private HeuristicsMinerGUI ui = null;
+	// private HeuristicsMinerGUI ui = null;
 
-	//-------------------------------------------------------------------------
+	// -------------------------------------------------------------------------
 
-	public HeuristicsMiner(XLog log) {
+//	public HeuristicsMiner(XLog log, XLogInfo logInfo) {
+//		System.out.println("��ʼ��HeuristicsMiner,��settiing");
+//		this.log = log;
+//
+//		this.settings = new HeuristicsMinerSettings();
+//
+//		this.logInfo = logInfo;
+//		this.metrics = new HeuristicsMetrics(logInfo);
+//	}
+
+	public HeuristicsMiner(String sourcePath, String name) {
+		XESReadService reader1=new XESReadServiceImpl(sourcePath,name);
 		System.out.println("��ʼ��HeuristicsMiner,��settiing");
-		this.log = log;
-		
-		this.settings = new HeuristicsMinerSettings();
 
-		this.logInfo = XLogInfoFactory.createLogInfo(this.log);
-		this.metrics = new HeuristicsMetrics(logInfo);
+		this.settings = new HeuristicsMinerSettings();		
+
+//		System.out.println("\nreader has next!"+reader.hasNext());
+		// this.logInfo = XLogInfoFactory.createLogInfo(this.log);
+		this.logInfo = generateXLogInfo(reader1);
+		System.out.println("\nlogInfo number of traces:"+logInfo.getNumberOfTraces());
+		initialize();
+		System.out.println("initialize new metrics!");
+		this.metrics = new HeuristicsMetrics(logInfo);		
+		tempMetrics=metrics;	
+		XESReadService reader2=new XESReadServiceImpl(sourcePath,name);
+		getHalfMetrics(reader2);		
+
 	}
 
-	public HeuristicsMiner(XLog log, HeuristicsMinerSettings settings) {
+	public HeuristicsMiner(String sourcePath, String name,HeuristicsMinerSettings settings) {
 		
-		this(log);
-		System.out.println("��ʼ��HeuristicesMiner��setting");
-		this.settings = settings;
+		this(sourcePath,name);
+		System.out.println("��ʼ��HeuristicsMiner,��settiing");
+		this.settings = settings;	
 	}
 
-	public HeuristicsNet mine() {
-		System.out.println("����HeuristicMiner");	
+//	public HeuristicsMiner(XLog log, XLogInfo logInfo,HeuristicsMinerSettings settings) {
+//
+//		this(log,logInfo);
+//		System.out.println("��ʼ��HeuristicesMiner��setting");
+//		this.settings = settings;
+//	}
 
-		long startTime = (new Date()).getTime();
-
-		//----------------------
-
-		this.keys = new HashMap<String, Integer>();
-		for (XEventClass event : logInfo.getEventClasses().getClasses()) {
-
-			this.keys.put(event.getId(), event.getIndex());
+	public HeuristicsMetrics getHalfMetrics(XESReadService reader){
+		System.out.println("Begin to update Metrics!");
+		System.out.println(reader.hasNext());
+		while(reader.hasNext()){
+			System.out.println("\nhas next");
+			XLog log=reader.next();			
+			metrics=updateMetrics(metrics,log);
 		}
+		return metrics;
+	}
+	
+	public XLogInfo generateXLogInfo(XESReadService reader) {
 
-		activitiesMappingStructures = new ActivitiesMappingStructures(logInfo.getEventClasses());
-
-		SimpleHeuristicsNet net = new SimpleHeuristicsNet(makeBasicRelations(metrics), metrics, settings);
-
-		metrics.printData();
-
-		//----------------------
-
-		System.out.println(net.toString() + "\n");
-		System.out.println(this.settings.toString());
- 
-		long finishTime = (new Date()).getTime();
-
-		System.out.println(("\nMining Time: " + (finishTime - startTime) / 1000.0));
-
-		return net;
+		System.out.println("generateLogInfo");
+		MergeXLogInfo mergeinfo=new MergeXLogInfo();
+		while(reader.hasNext()){
+			XLog log=reader.next();			
+			mergeinfo.addXLogInfo(log);		
+		}
+		return mergeinfo.passInfoParameter();
+	}
+	
+	public XLogInfo getXLogInfo(){
+		return logInfo;
 	}
 
-	private HeuristicsNet makeBasicRelations(HeuristicsMetrics metrics) {
-
-		for (XTrace trace : this.log) {
+	private HeuristicsMetrics updateMetrics(HeuristicsMetrics metrics, XLog log){
+		System.out.println("\nUpdate Metrics");
+		for (XTrace trace : log) {
 
 			ArrayList<Integer> lastEvents = new ArrayList<Integer>(trace.size());
 			Integer lastEventIndex = new Integer(-1);
 			Integer penultEventIndex = new Integer(-1);
-
 			for (XEvent event : trace) {
 
-//				XExtendedEvent extendedEvent = XExtendedEvent.wrap(event);
+				// XExtendedEvent extendedEvent = XExtendedEvent.wrap(event);
 
 				Integer eventIndex = null;
-//				String eventName = XLogInfoImpl.NAME_CLASSIFIER.getClassIdentity(event);
-//				String eventTransition = XLogInfoImpl.LIFECYCLE_TRANSITION_CLASSIFIER.getClassIdentity(event);
-				String eventKey = XLogInfoImpl.STANDARD_CLASSIFIER.getClassIdentity(event);
-				//String eventKey = eventName + "+" + eventTransition;
+				// String eventName =
+				// XLogInfoImpl.NAME_CLASSIFIER.getClassIdentity(event);
+				// String eventTransition =
+				// XLogInfoImpl.LIFECYCLE_TRANSITION_CLASSIFIER.getClassIdentity(event);
+				String eventKey = XLogInfoImpl.STANDARD_CLASSIFIER
+						.getClassIdentity(event);
+				// String eventKey = eventName + "+" + eventTransition;
 				eventIndex = keys.get(eventKey);
-
+				System.out.println("eventIndex:"+eventIndex);
 				if (!lastEvents.contains(eventIndex)) {
-
+					System.out.println("lastEvent contains eventIndex");
 					for (Integer index : lastEvents) {
 
 						// update long range matrix
-						metrics.incrementLongRangeSuccessionCount(index, eventIndex, 1);
+						metrics.incrementLongRangeSuccessionCount(index,
+								eventIndex, 1);
 					}
 				}
 
@@ -124,7 +154,8 @@ public class HeuristicsMiner {
 
 				if (lastEventIndex != -1) {
 
-					metrics.incrementDirectSuccessionCount(lastEventIndex, eventIndex, 1);
+					metrics.incrementDirectSuccessionCount(lastEventIndex,
+							eventIndex, 1);
 
 					if (lastEventIndex == eventIndex)
 						metrics.incrementL1LdependencyMeasuresAll(eventIndex, 1);
@@ -132,7 +163,8 @@ public class HeuristicsMiner {
 
 				if (penultEventIndex == eventIndex) {
 
-					metrics.incrementSuccession2Count(eventIndex, lastEventIndex, 1);
+					metrics.incrementSuccession2Count(eventIndex,
+							lastEventIndex, 1);
 				}
 
 				/*
@@ -142,23 +174,84 @@ public class HeuristicsMiner {
 				 * succession2Count.get(eventIndex, lastEventIndex) + 1); }
 				 */
 
-				//antepenultEventIndex = penultEventIndex;
+				// antepenultEventIndex = penultEventIndex;
 
 				penultEventIndex = lastEventIndex;
 				lastEventIndex = eventIndex;
 				lastEvents.add(eventIndex);
 
-				//System.out.println(penultEventIndex+"\t"+lastEventIndex);
+				// System.out.println(penultEventIndex+"\t"+lastEventIndex);
 			}
 
-			// 
+			//
 			int startEventIndex = lastEvents.get(0);
 			metrics.incrementStartCount(startEventIndex, 1);
-
-			// 
+			System.out.println("Start Count"+metrics.getStartCount(startEventIndex));
+			//
 			int endEventIndex = lastEvents.get(lastEvents.size() - 1);
 			metrics.incrementEndCount(endEventIndex, 1);
+			System.out.println("End Count"+metrics.getEndCount(endEventIndex));
 		}
+		return metrics;
+	}
+	
+	public void initialize(){
+		System.out.println("Begin to initialize!");
+		this.keys = new HashMap<String, Integer>();
+//		this.lastEvents = new ArrayList<Integer>();
+//		lastEventIndex = new Integer(-1);
+//		penultEventIndex = new Integer(-1);
+		for (XEventClass event : logInfo.getEventClasses().getClasses()) {
+
+			this.keys.put(event.getId(), event.getIndex());
+		}
+
+		activitiesMappingStructures = new ActivitiesMappingStructures(
+				logInfo.getEventClasses());
+	}
+	
+	public HeuristicsNet mine() {
+		System.out.println("\n����HeuristicMiner  begin to run！");
+
+		long startTime = (new Date()).getTime();
+
+		// ----------------------
+
+//		this.keys = new HashMap<String, Integer>();
+//		for (XEventClass event : logInfo.getEventClasses().getClasses()) {
+//
+//			this.keys.put(event.getId(), event.getIndex());
+//		}
+//
+//		activitiesMappingStructures = new ActivitiesMappingStructures(
+//				logInfo.getEventClasses());
+
+		//用updateMetrics更新得到最新的metrics后，返回完整的metrics，
+		//然后利用makeBasicRelations来生成basicRelationNet
+		HeuristicsNet basicRelationNet=makeBasicRelations(metrics);
+		SimpleHeuristicsNet net = new SimpleHeuristicsNet(
+				basicRelationNet, tempMetrics, settings);
+
+//		SimpleHeuristicsNet net = new SimpleHeuristicsNet(
+//				makeBasicRelations(metrics), metrics, settings);
+
+		metrics.printData();
+
+		// ----------------------
+
+		System.out.println(net.toString() + "\n");
+		System.out.println(this.settings.toString());
+
+		long finishTime = (new Date()).getTime();
+
+		System.out
+				.println(("\nMining Time: " + (finishTime - startTime) / 1000.0));
+
+		return net;
+	}
+
+	
+	private HeuristicsNet makeBasicRelations(HeuristicsMetrics metrics) {	
 
 		System.out.println(keys + "\n");
 
@@ -174,48 +267,62 @@ public class HeuristicsMiner {
 			double dependencyCount = metrics.getL1LdependencyMeasuresAll(i);
 			if (dependencyCount > 0) {
 
-				//double dependencyMeasure = dependencyCount / (dependencyCount + HeuristicsMinerConstants.DEPENDENCY_DIVISOR);
-				double dependencyMeasure = calculateL1LDependencyMeasure(i, metrics);
+				// double dependencyMeasure = dependencyCount / (dependencyCount
+				// + HeuristicsMinerConstants.DEPENDENCY_DIVISOR);
+				double dependencyMeasure = calculateL1LDependencyMeasure(i,
+						metrics);
 				metrics.setL1LdependencyMeasuresAll(i, dependencyMeasure);
 
 				if ((dependencyMeasure >= settings.getL1lThreshold())
-						&& (metrics.getDirectSuccessionCount(i, i) >= settings.getPositiveObservationThreshold())) {
+						&& (metrics.getDirectSuccessionCount(i, i) >= settings
+								.getPositiveObservationThreshold())) {
 
-					metrics.setDependencyMeasuresAccepted(i, i, dependencyMeasure);
+					metrics.setDependencyMeasuresAccepted(i, i,
+							dependencyMeasure);
 					metrics.setL1Lrelation(i, true);
 					metrics.addInputSet(i, i);
 					metrics.addOutputSet(i, i);
 				}
 			}
 
-//			if (i > 0) {
+			// if (i > 0) {
 
-				if (metrics.getStartCount(i) > metrics.getStartCount(metrics.getBestStart()))
-					metrics.setBestStart(i);
-				if (metrics.getEndCount(i) > metrics.getEndCount(metrics.getBestEnd()))
-					metrics.setBestEnd(i);
+			if (metrics.getStartCount(i) > metrics.getStartCount(metrics
+					.getBestStart()))
+				metrics.setBestStart(i);
+			if (metrics.getEndCount(i) > metrics.getEndCount(metrics
+					.getBestEnd()))
+				metrics.setBestEnd(i);
 
-				if (metrics.getStartCount(i) > settings.getPositiveObservationThreshold())
-					startActivities.add(i);
-				if (metrics.getEndCount(i) > settings.getPositiveObservationThreshold())
-					endActivities.add(i);
-//			}
+			if (metrics.getStartCount(i) > settings
+					.getPositiveObservationThreshold())
+				startActivities.add(i);
+			if (metrics.getEndCount(i) > settings
+					.getPositiveObservationThreshold())
+				endActivities.add(i);
+			// }
 
 		}
 
-		//		startActivities.add(bestStart);
+		// startActivities.add(bestStart);
 		net.setStartActivities(startActivities);
 
-		//		endActivities.add(bestEnd);
+		// endActivities.add(bestEnd);
 		net.setEndActivities(endActivities);
 
 		// MISSING CODE HERE
 
 		// update noiseCounters
-		metrics.setNoiseCounters(metrics.getBestStart(), 0,
-				metrics.getTracesNumber() - metrics.getStartCount(metrics.getBestStart())); //Traces???
-		metrics.setNoiseCounters(0, metrics.getBestEnd(),
-				metrics.getTracesNumber() - metrics.getEndCount(metrics.getBestEnd())); //Traces???	
+		metrics.setNoiseCounters(
+				metrics.getBestStart(),
+				0,
+				metrics.getTracesNumber()
+						- metrics.getStartCount(metrics.getBestStart())); // Traces???
+		metrics.setNoiseCounters(
+				0,
+				metrics.getBestEnd(),
+				metrics.getTracesNumber()
+						- metrics.getEndCount(metrics.getBestEnd())); // Traces???
 
 		System.out.println("Best Start: " + metrics.getBestStart());
 		System.out.println("Best End: " + metrics.getBestEnd() + "\n");
@@ -224,18 +331,23 @@ public class HeuristicsMiner {
 		for (int i = 0; i < metrics.getEventsNumber(); i++) {
 			for (int j = 0; j < metrics.getEventsNumber(); j++) {
 
-				double dependencyMeasureL2L = calculateL2LDependencyMeasure(i, j, metrics);
+				double dependencyMeasureL2L = calculateL2LDependencyMeasure(i,
+						j, metrics);
 				metrics.setL2LdependencyMeasuresAll(i, j, dependencyMeasureL2L);
 				metrics.setL2LdependencyMeasuresAll(j, i, dependencyMeasureL2L);
 
 				if (i > j) {
 
-					double successionCount = metrics.getSuccession2Count(i, j) + metrics.getSuccession2Count(j, i);
+					double successionCount = metrics.getSuccession2Count(i, j)
+							+ metrics.getSuccession2Count(j, i);
 					if ((dependencyMeasureL2L >= settings.getL2lThreshold())
-							&& (successionCount >= settings.getPositiveObservationThreshold())) {
+							&& (successionCount >= settings
+									.getPositiveObservationThreshold())) {
 
-						metrics.setDependencyMeasuresAccepted(i, j, dependencyMeasureL2L);
-						metrics.setDependencyMeasuresAccepted(j, i, dependencyMeasureL2L);
+						metrics.setDependencyMeasuresAccepted(i, j,
+								dependencyMeasureL2L);
+						metrics.setDependencyMeasuresAccepted(j, i,
+								dependencyMeasureL2L);
 						metrics.setL2Lrelation(i, j);
 						metrics.setL2Lrelation(j, i);
 						metrics.addInputSet(i, j);
@@ -247,7 +359,8 @@ public class HeuristicsMiner {
 
 				if (i != j) {
 
-					double dependencyMeasure = calculateDependencyMeasure(i, j, metrics);
+					double dependencyMeasure = calculateDependencyMeasure(i, j,
+							metrics);
 					metrics.setABdependencyMeasuresAll(i, j, dependencyMeasure);
 
 					if (dependencyMeasure > metrics.getBestOutputMeasure(i)) {
@@ -262,9 +375,11 @@ public class HeuristicsMiner {
 					}
 				}
 
-				//if (eventCount.get(i)== 0) continue;
-				double dependencyMeasureLD = calculateLongDistanceDependencyMeasure(i, j, metrics);
-				metrics.setLongRangeDependencyMeasures(i, j, dependencyMeasureLD);
+				// if (eventCount.get(i)== 0) continue;
+				double dependencyMeasureLD = calculateLongDistanceDependencyMeasure(
+						i, j, metrics);
+				metrics.setLongRangeDependencyMeasures(i, j,
+						dependencyMeasureLD);
 			}
 		}
 
@@ -275,11 +390,14 @@ public class HeuristicsMiner {
 
 				for (int j = 0; j < metrics.getEventsNumber(); j++) {
 
-					double dependencyMeasureL2L = calculateL2LDependencyMeasure(i, j, metrics);
+					double dependencyMeasureL2L = calculateL2LDependencyMeasure(
+							i, j, metrics);
 					if (dependencyMeasureL2L > metrics.getBestInputMeasure(i)) {
 
-						metrics.setDependencyMeasuresAccepted(i, j, dependencyMeasureL2L);
-						metrics.setDependencyMeasuresAccepted(j, i, dependencyMeasureL2L);
+						metrics.setDependencyMeasuresAccepted(i, j,
+								dependencyMeasureL2L);
+						metrics.setDependencyMeasuresAccepted(j, i,
+								dependencyMeasureL2L);
 						metrics.setL2Lrelation(i, j);
 						metrics.setL2Lrelation(j, i);
 						metrics.addInputSet(i, j);
@@ -291,14 +409,15 @@ public class HeuristicsMiner {
 			}
 		}
 
-		//------
+		// ------
 		// Update the dependencyMeasuresAccepted matrix,
 		// the inputSet, outputSet arrays and
 		// the noiseCounters matrix
 		//
 		// extra: if L1Lrelation[i] then process normal
-		//        if L2Lrelation[i]=j is a ABA connection then only attach the strongest
-		//        input and output connection
+		// if L2Lrelation[i]=j is a ABA connection then only attach the
+		// strongest
+		// input and output connection
 		if (settings.isUseAllConnectedHeuristics()) {
 
 			for (int i = 0; i < metrics.getEventsNumber(); i++) {
@@ -306,33 +425,43 @@ public class HeuristicsMiner {
 				int j = metrics.getL2Lrelation(i);
 				if (i != metrics.getBestStart()) {
 
-					if ((j > -1) && (metrics.getBestInputMeasure(j) > metrics.getBestInputMeasure(i))) {
-						// i is in a L2L relation with j but j has a stronger input connection
+					if ((j > -1)
+							&& (metrics.getBestInputMeasure(j) > metrics
+									.getBestInputMeasure(i))) {
+						// i is in a L2L relation with j but j has a stronger
+						// input connection
 						// do nothing
 					} else {
 
 						int bestInputEvent = metrics.getBestInputEvent(i);
 
-						metrics.setDependencyMeasuresAccepted(bestInputEvent, i, metrics.getBestInputMeasure(i));
+						metrics.setDependencyMeasuresAccepted(bestInputEvent,
+								i, metrics.getBestInputMeasure(i));
 						metrics.addInputSet(i, bestInputEvent);
 						metrics.addOutputSet(bestInputEvent, i);
-						metrics.setNoiseCounters(bestInputEvent, i, metrics.getDirectSuccessionCount(i, bestInputEvent));
+						metrics.setNoiseCounters(bestInputEvent, i, metrics
+								.getDirectSuccessionCount(i, bestInputEvent));
 					}
 				}
 				if (i != metrics.getBestEnd()) {
 
-					if ((j > -1) && (metrics.getBestOutputMeasure(j) > metrics.getBestOutputMeasure(i))) {
-						// i is in a L2L relation with j but j has a stronger input connection
+					if ((j > -1)
+							&& (metrics.getBestOutputMeasure(j) > metrics
+									.getBestOutputMeasure(i))) {
+						// i is in a L2L relation with j but j has a stronger
+						// input connection
 						// do nothing
 					} else {
 
 						int bestOutputEvent = metrics.getBestOutputEvent(i);
 
-						metrics.setDependencyMeasuresAccepted(i, bestOutputEvent, metrics.getBestOutputMeasure(i));
+						metrics.setDependencyMeasuresAccepted(i,
+								bestOutputEvent,
+								metrics.getBestOutputMeasure(i));
 						metrics.addInputSet(bestOutputEvent, i);
 						metrics.addOutputSet(i, bestOutputEvent);
-						metrics.setNoiseCounters(i, bestOutputEvent,
-								metrics.getDirectSuccessionCount(bestOutputEvent, i));
+						metrics.setNoiseCounters(i, bestOutputEvent, metrics
+								.getDirectSuccessionCount(bestOutputEvent, i));
 					}
 				}
 
@@ -346,22 +475,28 @@ public class HeuristicsMiner {
 
 				if (metrics.getDependencyMeasuresAccepted(i, j) <= 0.0001) {
 
-					double dependencyMeasure = calculateDependencyMeasure(i, j, metrics);
-					if (((metrics.getBestOutputMeasure(i) - dependencyMeasure) <= settings.getRelativeToBestThreshold())
-							&& (metrics.getDirectSuccessionCount(i, j) >= settings.getPositiveObservationThreshold())
-							&& (dependencyMeasure >= settings.getDependencyThreshold())) {
+					double dependencyMeasure = calculateDependencyMeasure(i, j,
+							metrics);
+					if (((metrics.getBestOutputMeasure(i) - dependencyMeasure) <= settings
+							.getRelativeToBestThreshold())
+							&& (metrics.getDirectSuccessionCount(i, j) >= settings
+									.getPositiveObservationThreshold())
+							&& (dependencyMeasure >= settings
+									.getDependencyThreshold())) {
 
-						metrics.setDependencyMeasuresAccepted(i, j, dependencyMeasure);
+						metrics.setDependencyMeasuresAccepted(i, j,
+								dependencyMeasure);
 						metrics.addInputSet(j, i);
 						metrics.addOutputSet(i, j);
-						metrics.setNoiseCounters(i, j, metrics.getDirectSuccessionCount(j, i));
+						metrics.setNoiseCounters(i, j,
+								metrics.getDirectSuccessionCount(j, i));
 					}
 				}
 			}
 		}
 
-		//Step 3: Given the InputSets and OutputSets build
-		//        OR-subsets;
+		// Step 3: Given the InputSets and OutputSets build
+		// OR-subsets;
 
 		// AndOrAnalysis andOrAnalysis = new AndOrAnalysis();
 		// double AverageRelevantInObservations = 0.0;
@@ -373,8 +508,10 @@ public class HeuristicsMiner {
 		// NOT IN USE !!!
 
 		for (int i = 0; i < metrics.getEventsNumber(); i++) {
-			net.setInputSet(i, buildOrInputSets(i, metrics.getInputSet(i), metrics));
-			net.setOutputSet(i, buildOrOutputSets(i, metrics.getOutputSet(i), metrics));
+			net.setInputSet(i,
+					buildOrInputSets(i, metrics.getInputSet(i), metrics));
+			net.setOutputSet(i,
+					buildOrOutputSets(i, metrics.getOutputSet(i), metrics));
 		}
 
 		// Update the HeuristicsNet with non binary dependency relations:
@@ -397,10 +534,13 @@ public class HeuristicsMiner {
 
 				for (int j = (metrics.getEventsNumber() - 1); j >= 0; j--) {
 
-					if ((i == j) || (metrics.getAlwaysVisited(j) && (j != metrics.getBestEnd())))
+					if ((i == j)
+							|| (metrics.getAlwaysVisited(j) && (j != metrics
+									.getBestEnd())))
 						continue;
 
-					double score = calculateLongDistanceDependencyMeasure(i, j, metrics);
+					double score = calculateLongDistanceDependencyMeasure(i, j,
+							metrics);
 					if (score > settings.getLongDistanceThreshold()) {
 
 						BitSet h = new BitSet();
@@ -450,35 +590,41 @@ public class HeuristicsMiner {
 		System.out.println("Noise: " + noiseTotal + "\n");
 
 		// parse the log to get extra parse information:
-		// (i)  fitness
+		// (i) fitness
 		// (ii) the number of times a connection is used
 
 		HeuristicsNet[] population = new HeuristicsNet[1];
 		population[0] = net;
 
-		//DTContinuousSemanticsFitness fitness1 = 
-		//	new DTContinuousSemanticsFitness(log);
-		//fitness1.calculate(population);
+		// DTContinuousSemanticsFitness fitness1 =
+		// new DTContinuousSemanticsFitness(log);
+		// fitness1.calculate(population);
 
 		ContinuousSemantics fitness1 = new ContinuousSemantics(logInfo);
 		fitness1.calculate(population);
 
-		//Message.add("Continuous semantics fitness = " + population[0].getFitness());
-		//Message.add("Continuous semantics fitness = " + population[0].getFitness(), Message.TEST);
+		// Message.add("Continuous semantics fitness = " +
+		// population[0].getFitness());
+		// Message.add("Continuous semantics fitness = " +
+		// population[0].getFitness(), Message.TEST);
 
-		ImprovedContinuousSemantics fitness2 = new ImprovedContinuousSemantics(logInfo);
+		ImprovedContinuousSemantics fitness2 = new ImprovedContinuousSemantics(
+				logInfo);
 		fitness2.calculate(population);
 
-		//Message.add("Improved Continuous semantics fitness = " + population[0].getFitness());
-		//Message.add("Improved Continuous semantics fitness = " + population[0].getFitness(),
-		//		Message.TEST);
+		// Message.add("Improved Continuous semantics fitness = " +
+		// population[0].getFitness());
+		// Message.add("Improved Continuous semantics fitness = " +
+		// population[0].getFitness(),
+		// Message.TEST);
 
 		net.disconnectUnusedElements();
 
 		return net;
 	}
 
-	private double calculateDependencyMeasure(int i, int j, HeuristicsMetrics metrics) {
+	private double calculateDependencyMeasure(int i, int j,
+			HeuristicsMetrics metrics) {
 
 		double measure = 0.0;
 
@@ -486,12 +632,14 @@ public class HeuristicsMiner {
 		double successionCountJI = metrics.getDirectSuccessionCount(j, i);
 
 		measure = (successionCountIJ - successionCountJI)
-				/ (successionCountIJ + successionCountJI + settings.getDependencyDivisor());
+				/ (successionCountIJ + successionCountJI + settings
+						.getDependencyDivisor());
 
 		return measure;
 	}
 
-	private double calculateLongDistanceDependencyMeasure(int i, int j, HeuristicsMetrics metrics) {
+	private double calculateLongDistanceDependencyMeasure(int i, int j,
+			HeuristicsMetrics metrics) {
 
 		double countI = metrics.getEventCount(i);
 		double countJ = metrics.getEventCount(j);
@@ -502,13 +650,14 @@ public class HeuristicsMiner {
 		double difference = Math.abs(countI - countJ);
 
 		double measure =
-		//		((2 * countSuccession) / divisor) - ((2 * difference) / divisor);
+		// ((2 * countSuccession) / divisor) - ((2 * difference) / divisor);
 		2 * (countSuccession - difference) / divisor; // equivalent
 
 		return measure;
 	}
 
-	private double calculateL1LDependencyMeasure(int i, HeuristicsMetrics metrics) {
+	private double calculateL1LDependencyMeasure(int i,
+			HeuristicsMetrics metrics) {
 
 		double count = metrics.getL1LdependencyMeasuresAll(i);
 		double measure = count / (count + settings.getDependencyDivisor());
@@ -516,7 +665,8 @@ public class HeuristicsMiner {
 		return measure;
 	}
 
-	private double calculateL2LDependencyMeasure(int i, int j, HeuristicsMetrics metrics) {
+	private double calculateL2LDependencyMeasure(int i, int j,
+			HeuristicsMetrics metrics) {
 
 		double measure = 0.0;
 
@@ -524,24 +674,28 @@ public class HeuristicsMiner {
 		double successionCountJI = metrics.getSuccession2Count(j, i);
 
 		int threshold = settings.getPositiveObservationThreshold();
-		if (!((metrics.getL1Lrelation(i) && (successionCountIJ >= threshold)) || (metrics.getL1Lrelation(j) && (successionCountJI >= threshold)))) {
+		if (!((metrics.getL1Lrelation(i) && (successionCountIJ >= threshold)) || (metrics
+				.getL1Lrelation(j) && (successionCountJI >= threshold)))) {
 
 			double successionCount = successionCountIJ + successionCountJI;
 
-			measure = successionCount / (successionCount + settings.getDependencyDivisor());
+			measure = successionCount
+					/ (successionCount + settings.getDependencyDivisor());
 		}
 
 		return measure;
 	}
 
-	public HNSet buildOrInputSets(int ownerE, HNSubSet inputSet, HeuristicsMetrics metrics) {
+	public HNSet buildOrInputSets(int ownerE, HNSubSet inputSet,
+			HeuristicsMetrics metrics) {
 		HNSet h = new HNSet();
 		int currentE;
 		// using the welcome method,
-		// distribute elements of TreeSet inputSet over the elements of HashSet h
+		// distribute elements of TreeSet inputSet over the elements of HashSet
+		// h
 		boolean minimalOneOrWelcome;
-		//setE = null;
-		//Iterator hI = h.iterator();
+		// setE = null;
+		// Iterator hI = h.iterator();
 		HNSubSet helpTreeSet;
 		for (int isetE = 0; isetE < inputSet.size(); isetE++) {
 			currentE = inputSet.get(isetE);
@@ -576,14 +730,16 @@ public class HeuristicsMiner {
 		return h;
 	}
 
-	public HNSet buildOrOutputSets(int ownerE, HNSubSet outputSet, HeuristicsMetrics metrics) {
+	public HNSet buildOrOutputSets(int ownerE, HNSubSet outputSet,
+			HeuristicsMetrics metrics) {
 		HNSet h = new HNSet();
 		int currentE;
 
 		// using the welcome method,
-		// distribute elements of TreeSet inputSet over the elements of HashSet h
+		// distribute elements of TreeSet inputSet over the elements of HashSet
+		// h
 		boolean minimalOneOrWelcome;
-		//setE = null;
+		// setE = null;
 		HNSubSet helpTreeSet;
 		for (int isetE = 0; isetE < outputSet.size(); isetE++) {
 			currentE = outputSet.get(isetE);
@@ -618,7 +774,8 @@ public class HeuristicsMiner {
 		return h;
 	}
 
-	private boolean xorInWelcome(int ownerE, int newE, HNSubSet h, HeuristicsMetrics metrics) {
+	private boolean xorInWelcome(int ownerE, int newE, HNSubSet h,
+			HeuristicsMetrics metrics) {
 		boolean welcome = true;
 		int oldE;
 		double andValue;
@@ -636,7 +793,8 @@ public class HeuristicsMiner {
 		return welcome;
 	}
 
-	private boolean xorOutWelcome(int ownerE, int newE, HNSubSet h, HeuristicsMetrics metrics) {
+	private boolean xorOutWelcome(int ownerE, int newE, HNSubSet h,
+			HeuristicsMetrics metrics) {
 		boolean welcome = true;
 		int oldE;
 		double andValue;
@@ -654,45 +812,57 @@ public class HeuristicsMiner {
 		return welcome;
 	}
 
-	private double andInMeasureF(int ownerE, int oldE, int newE, HeuristicsMetrics metrics) {
+	private double andInMeasureF(int ownerE, int oldE, int newE,
+			HeuristicsMetrics metrics) {
 		if (ownerE == newE) {
 			return 0.0;
-		} else if ((metrics.getDirectSuccessionCount(oldE, newE) < settings.getPositiveObservationThreshold())
-				|| (metrics.getDirectSuccessionCount(newE, oldE) < settings.getPositiveObservationThreshold())) {
+		} else if ((metrics.getDirectSuccessionCount(oldE, newE) < settings
+				.getPositiveObservationThreshold())
+				|| (metrics.getDirectSuccessionCount(newE, oldE) < settings
+						.getPositiveObservationThreshold())) {
 			return 0.0;
 		} else {
-			return (metrics.getDirectSuccessionCount(oldE, newE) + metrics.getDirectSuccessionCount(newE, oldE)) /
+			return (metrics.getDirectSuccessionCount(oldE, newE) + metrics
+					.getDirectSuccessionCount(newE, oldE)) /
 			// relevantInObservations;
-					(metrics.getDirectSuccessionCount(newE, ownerE) + metrics.getDirectSuccessionCount(oldE, ownerE) + 1);
+					(metrics.getDirectSuccessionCount(newE, ownerE)
+							+ metrics.getDirectSuccessionCount(oldE, ownerE) + 1);
 		}
 	}
 
-	private double andOutMeasureF(int ownerE, int oldE, int newE, HeuristicsMetrics metrics) {
+	private double andOutMeasureF(int ownerE, int oldE, int newE,
+			HeuristicsMetrics metrics) {
 		if (ownerE == newE) {
 			return 0.0;
-		} else if ((metrics.getDirectSuccessionCount(oldE, newE) < settings.getPositiveObservationThreshold())
-				|| (metrics.getDirectSuccessionCount(newE, oldE) < settings.getPositiveObservationThreshold())) {
+		} else if ((metrics.getDirectSuccessionCount(oldE, newE) < settings
+				.getPositiveObservationThreshold())
+				|| (metrics.getDirectSuccessionCount(newE, oldE) < settings
+						.getPositiveObservationThreshold())) {
 			return 0.0;
 		} else {
-			return (metrics.getDirectSuccessionCount(oldE, newE) + metrics.getDirectSuccessionCount(newE, oldE)) /
+			return (metrics.getDirectSuccessionCount(oldE, newE) + metrics
+					.getDirectSuccessionCount(newE, oldE)) /
 			// relevantOutObservations;
-					(metrics.getDirectSuccessionCount(ownerE, newE) + metrics.getDirectSuccessionCount(ownerE, oldE) + 1);
+					(metrics.getDirectSuccessionCount(ownerE, newE)
+							+ metrics.getDirectSuccessionCount(ownerE, oldE) + 1);
 		}
 	}
 
-	public boolean escapeToEndPossibleF(int x, int y, BitSet alreadyVisit, HeuristicsNet net) {
+	public boolean escapeToEndPossibleF(int x, int y, BitSet alreadyVisit,
+			HeuristicsNet net) {
 
 		HNSet outputSetX, outputSetY = new HNSet();
-		//double max, min, minh;
+		// double max, min, minh;
 		boolean escapeToEndPossible;
 		int minNum;
 
-		//          [A B]
-		// X        [C]     ---> Y
-		//          [D B F]
+		// [A B]
+		// X [C] ---> Y
+		// [D B F]
 
 		// build subset h = [A B C D E F] of all elements of outputSetX
-		// search for minNum of elements of min subset with X=B as element: [A B] , minNum = 2
+		// search for minNum of elements of min subset with X=B as element: [A
+		// B] , minNum = 2
 
 		outputSetX = net.getOutputSet(x);
 		outputSetY = net.getOutputSet(y);

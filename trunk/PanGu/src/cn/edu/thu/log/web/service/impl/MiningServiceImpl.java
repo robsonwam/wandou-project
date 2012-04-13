@@ -13,7 +13,9 @@ import cn.edu.thu.log.mining.alphamining.AlphaMiner;
 import cn.edu.thu.log.mining.heuristicmining.HeuristicsMiner;
 import cn.edu.thu.log.modelconvertor.HeuristicsNetToPetriNetConverter;
 import cn.edu.thu.log.petrinet.reduction.PetrinetReduction;
+import cn.edu.thu.log.replaylog.ReplayLog;
 import cn.edu.thu.log.web.service.MiningService;
+import cn.edu.thu.log.web.service.XESReadService;
 
 public class MiningServiceImpl implements MiningService {
 
@@ -43,9 +45,9 @@ public class MiningServiceImpl implements MiningService {
 //		System.out.println("activities Mapping in service"+activitiesMapping);
 //		NewPetrinetWithCounts newpetrinetcount=new NewPetrinetWithCounts(petrinet, activitiesMapping);
 //		Petrinet newPetrinet=newpetrinetcount.getNewPetrinet();
-		for(Transition t:petrinet.getTransitions()){
-		System.out.println("transition name: "+t.getLabel()+" transition time: "+t.getTimes());	
-		}
+//		for(Transition t:petrinet.getTransitions()){
+//		System.out.println("transition name: "+t.getLabel()+" transition time: "+t.getTimes());	
+//		}
 		return petrinet;
 	}
 
@@ -68,7 +70,8 @@ public class MiningServiceImpl implements MiningService {
 		HeuristicsMiner hm = new HeuristicsMiner(sourcePath,name);
 		
 		HeuristicsNet hnet = hm.mine();
-		HeuristicsNetToPetriNetConverter hNetToPNet = new HeuristicsNetToPetriNetConverter();
+		
+		HeuristicsNetToPetriNetConverter hNetToPNet = new HeuristicsNetToPetriNetConverter(sourcePath,name);
 		Petrinet petrinet = hNetToPNet.converter(hnet);
 //		HeuristicsNetGraph graph = new HeuristicsNetGraph(hnet, "Heuristics Net", false);
 //		
@@ -112,10 +115,13 @@ public class MiningServiceImpl implements MiningService {
 //
 //		}	
 		
-		PetrinetReduction reduction=new PetrinetReduction();
-		Petrinet reducedPetrinet=reduction.run(petrinet);
-		System.out.println("\nReducedPetrinet Place size is: "+reducedPetrinet.getPlaces().size());
-		System.out.println("\nReducedPetrinet Transition size is: "+reducedPetrinet.getTransitions().size());
-		return reducedPetrinet;
+//		PetrinetReduction reduction=new PetrinetReduction();
+//		Petrinet reducedPetrinet=reduction.run(petrinet);
+//		System.out.println("\nReducedPetrinet Place size is: "+reducedPetrinet.getPlaces().size());
+//		System.out.println("\nReducedPetrinet Transition size is: "+reducedPetrinet.getTransitions().size());
+		for(Transition t:petrinet.getTransitions()){
+			System.out.println("transition name: "+t.getLabel()+" transition time: "+t.getTimes());	
+			}			
+		return petrinet;
 	}
 }

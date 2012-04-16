@@ -12,7 +12,7 @@ import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.plugin.Progress;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.models.jgraph.ProMJGraphVisualizer;
-import org.processmining.plugins.log.ui.logdialog.LogViewUI;
+
 
 public class ReplayFitnessPanel extends JPanel {
 
@@ -24,7 +24,7 @@ public class ReplayFitnessPanel extends JPanel {
 	public ReplayFitnessPanel(PluginContext context, Petrinet net, XLog log, Progress progress, ReplayFitness fitness) {
 
 		JComponent netView = ProMJGraphVisualizer.instance().visualizeGraph(context, net);
-		JComponent logView = new LogViewUI(log);
+		//JComponent logView = new LogViewUI(log);
 		JComponent fitnessView = new JLabel("Fitness value: " + fitness.getValue());
 
 		double size[][] = { { TableLayoutConstants.FILL }, { TableLayoutConstants.FILL, 30, TableLayoutConstants.FILL } };
@@ -32,6 +32,6 @@ public class ReplayFitnessPanel extends JPanel {
 
 		add(netView, "0, 0");
 		add(fitnessView, "0, 1");
-		add(logView, "0, 2");
+		//add(logView, "0, 2");
 	}
 }
